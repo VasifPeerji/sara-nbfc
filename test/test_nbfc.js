@@ -164,6 +164,128 @@ Config.roles.forEach((r) => {
   });
 });
 
+/* ================= card destinations =================
+   A card that retrieves a plausible but wrong document is invisible to every
+   other check: it scores well, it returns something, and the answer is
+   confidently about the wrong subject. The audit found five of these. These
+   assertions pin the ones that were wrong, plus a few that matter most, so a
+   later corpus edit cannot quietly undo them. */
+H.section("Prompt cards reach the right document");
+
+const DESTINATIONS = [
+  /* all five found wrong by audit_retrieval */
+  ["dealer_exec", "How much of a used tipper's value can be funded and what decides the margin?", "CH-001"],
+  ["fi_officer", "The customer offered me money to write a positive report. What am I required to do?", "OP-010"],
+  ["rcu_officer", "The pattern suggests a branch employee is involved. What is the process and who do I notify first?", "RK-004"],
+  ["tele_collections", "The customer says he already paid and we have not credited it. What do I do on the call?", "CO-005"],
+  ["repo_coordinator", "The customer has come with money before the sale. What are the release rules?", "CO-008"],
+  /* the ones a demo turns on */
+  ["cse", "A customer wants his foreclosure amount right now. What can I tell him and what has to be worked out formally?", "PR-004"],
+  ["branch_manager", "A long-standing customer's top-up disbursal is blocked in the system and I cannot see a reason. What do I do and who do I contact?", "CM-002"],
+  ["repo_coordinator", "What has to be true before a vehicle can be repossessed, and who confirms each item?", "CO-007"],
+];
+
+DESTINATIONS.forEach(([roleKey, q, want]) => {
+  const role = Config.roles.filter((r) => r.key === roleKey)[0];
+  H.ok(!!role, `card destination names unknown role ${roleKey}`);
+  if (!role) return;
+  const got = (Retrieval.search(q, { role: role, topK: 3 }).sources || []);
+  const top = got[0];
+  H.ok(!!top && top.id === want,
+       `${roleKey} should reach ${want} but reaches ${top ? top.id : "nothing"}` +
+       `\n      ${q}` +
+       `\n      top 3: ${got.map((s) => s.id + " " + s.score.toFixed(1)).join(", ")}`);
+});
+
+/* The branch manager's blocked top-up must land on the open holds procedure
+   and must NOT reach the restricted case material, because that pairing is
+   the whole access demonstration. */
+const bm = Config.roles.filter((r) => r.key === "branch_manager")[0];
+if (bm) {
+  const res = Retrieval.search(
+    "A long-standing customer's top-up disbursal is blocked in the system and I cannot see a reason.",
+    { role: bm, topK: 8 });
+  const ids = (res.sources || []).map((s) => s.id);
+  H.ok(ids.indexOf("RS-001") < 0,
+       "the branch manager can retrieve the financial crime case file; the wall is not holding");
+}
+
+/* ================= cross-document threads =================
+   The product's central claim is that it answers questions no single
+   document answers. That only works if the evidence reaches the model
+   together, and BM25 is lexical: a question asked in branch vocabulary can
+   retrieve the symptoms and miss the cause entirely, which produces a
+   confident answer about the wrong thing.
+
+   These assert that each thread's evidence lands inside the retrieval
+   window for the role that would ask, and that no single document states
+   the conclusion. Corpus edits break this silently, so it is checked. */
+H.section("Cross-document threads resolve");
+
+const THREADS = [
+  {
+    name: "first instalment bounces",
+    role: "cro",
+    q: "Complaints, first instalment bounces and field visit costs are all rising in one region at once. What connects them?",
+    /* symptom, the rule that misreads it, the analysis, the cause, the lead time */
+    needs: ["SV-002", "CO-002", "RK-006", "PR-007", "OP-013"],
+  },
+  {
+    name: "first instalment bounces, from the field",
+    role: "area_sales",
+    q: "First instalment bounce rates have risen in my area over the last two months. What is driving it?",
+    needs: ["RK-006", "PR-007"],
+  },
+  {
+    name: "template currency",
+    role: "chief_compliance",
+    q: "Which customer-facing templates and letters are still on a superseded version?",
+    needs: ["PR-008", "GP-002", "AU-001"],
+  },
+  {
+    name: "co-lending retention",
+    role: "cro",
+    q: "Across the co-lending arrangements, what exposure do we actually retain and is it what we intended?",
+    needs: ["DG-001", "DG-002"],
+  },
+];
+
+THREADS.forEach((t) => {
+  const role = Config.roles.filter((r) => r.key === t.role)[0];
+  H.ok(!!role, `thread "${t.name}" names an unknown role ${t.role}`);
+  if (!role) return;
+  const res = Retrieval.search(t.q, { role: role, topK: Config.retrieval.topK });
+  const got = (res.sources || []).map((s) => s.id);
+  t.needs.forEach((id) => {
+    H.ok(got.indexOf(id) >= 0,
+         `thread "${t.name}": ${id} is outside the retrieval window\n` +
+         `      returned: ${got.join(", ")}\n` +
+         `      the symptoms will reach the model without the cause`);
+  });
+  /* every link must also be readable by the person asking, or the thread is
+     a demo that only works when signed in as somebody else */
+  t.needs.forEach((id) => {
+    const doc = Config.kb.filter((d) => d.id === id)[0];
+    H.ok(!!doc && Retrieval.visibleTo(doc, role),
+         `thread "${t.name}": ${t.role} cannot read ${id}`);
+  });
+});
+
+/* No single document may state a whole thread. If one did, the thread would
+   be a lookup rather than a synthesis, and the claim would be false. */
+const NEVER_IN_ONE_DOC = [
+  ["subvention", "sponsor bank", "complaint"],
+  ["retention floor", "part-prepayment", "blended rate disclosed"],
+];
+NEVER_IN_ONE_DOC.forEach((terms) => {
+  const guilty = Config.kb.filter((d) => {
+    const b = (d.body || "").toLowerCase();
+    return terms.every((t) => b.indexOf(t) >= 0);
+  });
+  H.ok(guilty.length === 0,
+       `${guilty.map((d) => d.id).join(", ")} states a whole thread in one document (${terms.join(" + ")})`);
+});
+
 /* ================= scope hygiene ================= */
 H.section("Scope hygiene");
 
