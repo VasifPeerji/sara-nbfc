@@ -116,6 +116,10 @@ H.section("Every step can be answered");
           H.ok(!!(s.rules || []).length, at + " declares rules to check");
           (s.rules || []).forEach(function(r){
             H.ok(!!r.label, at + " has a label on every rule");
+            /* An unknown test silently reports not-applicable, so the rule
+               looks like it ran and never fails. */
+            H.ok(!r.test || !!Calc.TESTS[r.test],
+                 at + ' uses test "' + r.test + '", which does not exist');
             if(typeof r.of === "string") refs.push(r.of);
             if(r.when) Object.keys(r.when).forEach(function(f){ refs.push(f); });
           });

@@ -428,6 +428,7 @@ const Calc = (function(){
     gt:       function(v, t){ return num(v) > num(t); },
     lt:       function(v, t){ return num(v) < num(t); },
     includes: function(v, t){ return Array.isArray(v) ? v.indexOf(t) !== -1 : String(v).indexOf(String(t)) !== -1; },
+    notIncludes: function(v, t){ return !TESTS.includes(v, t); },
   };
 
   function check(rules, answers, ctxLines){
