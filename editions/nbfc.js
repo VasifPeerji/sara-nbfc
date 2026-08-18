@@ -230,14 +230,14 @@ window.SARA_EDITION = {
     ops:        { label: "Operations",          icon: "settings" },
     collect:    { label: "Collections",         icon: "route" },
     legal:      { label: "Legal & enforcement", icon: "scale" },
-    service:    { label: "Service & grievance", icon: "headphones" },
+    service:    { label: "Service & grievance", icon: "users" },
     risk:       { label: "Risk & portfolio",    icon: "target" },
-    compliance: { label: "Compliance & returns", icon: "checks" },
+    compliance: { label: "Compliance & returns", icon: "checklist" },
     aml:        { label: "Identification & AML", icon: "search" },
     digital:    { label: "Digital & partners",  icon: "globe" },
     treasury:   { label: "Finance & treasury",  icon: "chart" },
     wholesale:  { label: "Wholesale credit",    icon: "building" },
-    capmkt:     { label: "Capital markets",     icon: "trend" },
+    capmkt:     { label: "Capital markets",     icon: "trendup" },
     people:     { label: "People & conduct",    icon: "users" },
     audit:      { label: "Audit & inspection",  icon: "alert" },
   },
@@ -352,7 +352,7 @@ window.SARA_EDITION = {
         { t: "Subvention scheme terms", s: "What is live now", q: "What are the terms of the current dealer subvention scheme on new commercial vehicles?", icon: "grid" },
         { t: "Documents for a fleet buyer", s: "Company-owned vehicles", q: "A transport company wants to buy three vehicles in the company name. What documents do I collect?", icon: "checklist" },
         { t: "Customer wants same-day delivery", s: "What is possible", q: "The customer wants to take delivery today. What has to be complete before the vehicle can be released?", icon: "clock" },
-        { t: "Who do I call at Anvira?", s: "Escalation route", q: "A file is stuck at the credit stage. Who at Anvira do I contact and what do they need from me?", icon: "headphones" },
+        { t: "Who do I call at Anvira?", s: "Escalation route", q: "A file is stuck at the credit stage. Who at Anvira do I contact and what do they need from me?", icon: "users" },
       ],
     },
     {
@@ -368,7 +368,7 @@ window.SARA_EDITION = {
         { t: "What are my team's conduct obligations?", s: "Sourcing conduct", q: "What conduct rules apply to my staff when they collect documents and talk to customers on Anvira's behalf?", icon: "shield" },
         { t: "Property types you will not fund", s: "Negative list", q: "Which property types are on the negative list for loan against property?", icon: "building" },
         { t: "When is a file considered logged?", s: "Login criteria", q: "What has to be present before a loan against property file counts as logged rather than pending?", icon: "checklist" },
-        { t: "Payout on a rejected file", s: "How it works", q: "How does payout work when a file is sanctioned but not disbursed, or disbursed and then foreclosed early?", icon: "dollar" },
+        { t: "Payout on a rejected file", s: "How it works", q: "How does payout work when a file is sanctioned but not disbursed, or disbursed and then foreclosed early?", icon: "rupee" },
         { t: "Customer data I collect", s: "What I must not do", q: "What are the rules on storing and sharing customer documents that my staff collect?", icon: "lock" },
       ],
     },
@@ -384,7 +384,7 @@ window.SARA_EDITION = {
       prompts: [
         { t: "A member cannot pay this week", s: "What happens to the group", q: "One member of a joint liability group cannot pay her instalment this week. What am I supposed to do?", icon: "users" },
         { t: "Household income limit", s: "Who qualifies", q: "What is the household income limit for a microfinance loan and how is household income worked out?", icon: "chart" },
-        { t: "Cash collected today", s: "Remittance rules", q: "What are the rules on how quickly I have to remit cash I collect at a centre meeting, and what receipt does the member get?", icon: "dollar" },
+        { t: "Cash collected today", s: "Remittance rules", q: "What are the rules on how quickly I have to remit cash I collect at a centre meeting, and what receipt does the member get?", icon: "rupee" },
         { t: "Member wants a second loan", s: "Indebtedness rules", q: "A member already has loans from two other lenders. Can she take one from us as well?", icon: "alert" },
         { t: "Group wants to meet somewhere else", s: "Centre meeting rules", q: "The group wants to change the centre meeting place and time. What are the rules on that?", icon: "calendar" },
       ],
@@ -399,10 +399,10 @@ window.SARA_EDITION = {
       persona: "A frontline leader deciding something now with a customer or an auditor in front of them. Give the decision first, then the two conditions it depends on, then what must be recorded. Be precise about what they may authorise themselves and what has to go up, because that boundary is where branch findings come from.",
       greeting: "Ask about branch decisions: file quality, cash and vault, gold appraisal, customer escalations, collections at the counter, and what has to be recorded before it goes up.",
       prompts: [
-        { t: "Customer disputes a bounce charge", s: "Can I waive it?", q: "A customer is at the counter disputing a bounce charge. Can I waive it at the branch, and what do I record?", icon: "headphones" },
+        { t: "Customer disputes a bounce charge", s: "Can I waive it?", q: "A customer is at the counter disputing a bounce charge. Can I waive it at the branch, and what do I record?", icon: "users" },
         { t: "Vault holding above limit", s: "What do I do today", q: "Gold pledged at the branch has taken the vault above its holding limit. What am I required to do?", icon: "lock" },
         { t: "Top-up is blocked and I do not know why", s: "Who do I ask", q: "A long-standing customer's top-up disbursal is blocked in the system and I cannot see a reason. What do I do and who do I contact?", icon: "alert" },
-        { t: "Deviation I can approve", s: "My authority", q: "Which credit deviations can I approve at branch level and which have to go to the regional credit manager?", icon: "checks" },
+        { t: "Deviation I can approve", s: "My authority", q: "Which credit deviations can I approve at branch level and which have to go to the regional credit manager?", icon: "checklist" },
         { t: "Field agent complaint", s: "Handling it properly", q: "A customer says our field collections agent visited at night and spoke to her neighbour. What am I required to do?", icon: "shield" },
       ],
     },
@@ -416,7 +416,7 @@ window.SARA_EDITION = {
       persona: "Manages through numbers and other people. Wants the pattern, not the case. Lead with what the portfolio is doing, then the likely cause, then the specific branches or channels involved. This person can see risk material, so be direct about early delinquency and sourcing quality rather than softening it.",
       greeting: "Ask about volume and mix, channel productivity, early delinquency, scheme performance and where sourcing quality is slipping.",
       prompts: [
-        { t: "First EMI bounces are up in my area", s: "Why", q: "First instalment bounce rates have risen in my area over the last two months. What is driving it?", icon: "trend" },
+        { t: "First EMI bounces are up in my area", s: "Why", q: "First instalment bounce rates have risen in my area over the last two months. What is driving it?", icon: "trendup" },
         { t: "Which channel is sourcing the worst files?", s: "Sourcing quality", q: "Which sourcing channels in my area are producing the highest early delinquency relative to volume?", icon: "chart" },
         { t: "Is the subvention scheme working?", s: "Scheme performance", q: "Is the used commercial vehicle subvention scheme actually producing profitable volume or just cheaper volume?", icon: "grid" },
         { t: "Turnaround is slipping", s: "Where is the delay", q: "My branches are complaining that sanction turnaround has slipped. Where in the process is the time going?", icon: "clock" },
@@ -439,7 +439,7 @@ window.SARA_EDITION = {
         { t: "Bureau shows a settled account", s: "Does it block the file?", q: "The bureau report shows an account settled two years ago. Does that block the file or is it a deviation?", icon: "chart" },
         { t: "Duplicate customer match", s: "What do I do", q: "Deduplication has flagged a possible match with an existing customer. What do I check before I proceed?", icon: "search" },
         { t: "Bank statement is only four months", s: "Is that enough", q: "The customer has given four months of bank statements. What period is required and can I proceed?", icon: "calendar" },
-        { t: "How do I write a query?", s: "Query standards", q: "What is the standard for raising a query back to sourcing so that it does not bounce a second time?", icon: "email" },
+        { t: "How do I write a query?", s: "Query standards", q: "What is the standard for raising a query back to sourcing so that it does not bounce a second time?", icon: "mail" },
       ],
     },
     {
@@ -469,7 +469,7 @@ window.SARA_EDITION = {
       persona: "Making a decision that will be audited. Give the policy position first, then the deviations the file carries, then who can clear each one. Never soften a decline into a maybe. Be exact about what has to be minuted, because an approval taken outside delegation has to be unwound later.",
       greeting: "Ask about credit policy, appraisal, deviations, approval authority, compensating controls and what has to go on the file.",
       prompts: [
-        { t: "Two deviations on one file", s: "Who approves", q: "This file carries both a bureau score deviation and a loan to value deviation. Who can approve that combination?", icon: "checks" },
+        { t: "Two deviations on one file", s: "Who approves", q: "This file carries both a bureau score deviation and a loan to value deviation. Who can approve that combination?", icon: "checklist" },
         { t: "Income is seasonal", s: "How do I assess", q: "The applicant's income is seasonal and swings by half between quarters. How does the policy say I assess repayment capacity?", icon: "chart" },
         { t: "Valuation looks inflated", s: "What are my options", q: "The valuation on this property looks high against the surrounding market. What are my options under policy?", icon: "building" },
         { t: "Guarantor instead of collateral", s: "Is it allowed", q: "Can a personal guarantee substitute for the shortfall in collateral cover, and what does it require?", icon: "users" },
@@ -486,7 +486,7 @@ window.SARA_EDITION = {
       persona: "Decides the cases that were too difficult for the hub, and answers to the chief credit officer for the portfolio that results. Lead with the position and the precedent. This person needs to see the pattern behind a case, so connect the file in front of them to what the portfolio is doing.",
       greeting: "Ask about escalated deviations, portfolio quality, policy interpretation, precedent and where the region's credit decisions are drifting.",
       prompts: [
-        { t: "Deviation approvals are rising", s: "Is policy too tight?", q: "Deviation approvals in my region have risen sharply this quarter. Is that a policy problem or a sourcing problem?", icon: "trend" },
+        { t: "Deviation approvals are rising", s: "Is policy too tight?", q: "Deviation approvals in my region have risen sharply this quarter. Is that a policy problem or a sourcing problem?", icon: "trendup" },
         { t: "One branch keeps escalating", s: "Pattern or capability", q: "One branch escalates far more files than its peers. What does the pattern in those files tell us?", icon: "chart" },
         { t: "Restructure a stressed borrower", s: "What is permitted", q: "A business loan borrower has asked for a restructuring. What is permitted and what does it do to classification?", icon: "route" },
         { t: "Policy says one thing, product note another", s: "Which governs", q: "The credit policy and the product note give different loan to value ceilings for the same product. Which governs?", icon: "alert" },
@@ -504,8 +504,8 @@ window.SARA_EDITION = {
       greeting: "Ask about credit policy across the book, delegation, portfolio quality, product performance and where policy is producing the wrong outcome.",
       prompts: [
         { t: "Which product is losing money on credit?", s: "Portfolio view", q: "Across the book, which products are carrying credit losses that the pricing does not cover?", icon: "chart" },
-        { t: "Is the delegation matrix working?", s: "Approval quality", q: "Are deviation approvals concentrated where the delegation matrix intended, and where are they drifting?", icon: "checks" },
-        { t: "Unsecured book is growing fastest", s: "Should it be?", q: "The unsecured book is growing faster than anything else. What does its vintage behaviour say about whether it should be?", icon: "trend" },
+        { t: "Is the delegation matrix working?", s: "Approval quality", q: "Are deviation approvals concentrated where the delegation matrix intended, and where are they drifting?", icon: "checklist" },
+        { t: "Unsecured book is growing fastest", s: "Should it be?", q: "The unsecured book is growing faster than anything else. What does its vintage behaviour say about whether it should be?", icon: "trendup" },
         { t: "Same borrower across three products", s: "Aggregate exposure", q: "How do we see aggregate exposure when a borrower holds a vehicle loan, a business loan and a gold loan across different systems?", icon: "search" },
         { t: "Policy change nobody applied", s: "Implementation gap", q: "Where has a credit policy change been issued but not actually implemented in the branches or the system?", icon: "alert" },
       ],
@@ -523,10 +523,10 @@ window.SARA_EDITION = {
       greeting: "Ask about covenants, security cover, drawdown conditions, monitoring obligations and what a facility agreement actually allows.",
       prompts: [
         { t: "Security cover has slipped", s: "What is the consequence", q: "Security cover on a promoter funding facility has fallen below the covenanted level. What happens now?", icon: "alert" },
-        { t: "Borrower wants a covenant waiver", s: "Who can give it", q: "A real estate borrower has asked for a waiver of the quarterly financial covenant. Who can approve that and what does it require?", icon: "checks" },
+        { t: "Borrower wants a covenant waiver", s: "Who can give it", q: "A real estate borrower has asked for a waiver of the quarterly financial covenant. Who can approve that and what does it require?", icon: "checklist" },
         { t: "Escrow is not being routed", s: "Project monitoring", q: "Project receivables are not flowing through the designated escrow. What are our rights and what do I do first?", icon: "route" },
         { t: "When is a covenant test due?", s: "Monitoring calendar", q: "What are the covenant testing dates and reporting obligations across my portfolio this quarter?", icon: "calendar" },
-        { t: "Drawdown conditions not met", s: "Can it still fund", q: "The borrower wants the next tranche but two conditions precedent are outstanding. What are my options?", icon: "dollar" },
+        { t: "Drawdown conditions not met", s: "Can it still fund", q: "The borrower wants the next tranche but two conditions precedent are outstanding. What are my options?", icon: "rupee" },
       ],
     },
     {
@@ -558,7 +558,7 @@ window.SARA_EDITION = {
       persona: "Lives in the numbers and is expected to explain them. Lead with what moved, then by how much, then what is actually causing it. Never present a correlation as a cause. Be explicit about which figures come from which document, because these numbers end up in the provisioning.",
       greeting: "Ask about vintage, roll rates, delinquency, concentration, expected credit loss and where a portfolio number is coming from.",
       prompts: [
-        { t: "Bucket movement changed this month", s: "What moved", q: "Roll rates from the thirty day bucket worsened this month. Which products and which regions are driving it?", icon: "trend" },
+        { t: "Bucket movement changed this month", s: "What moved", q: "Roll rates from the thirty day bucket worsened this month. Which products and which regions are driving it?", icon: "trendup" },
         { t: "Is this a credit problem?", s: "Or something else", q: "First instalment bounce rates jumped in one region for one product but the score distribution is unchanged. What else could cause that?", icon: "search" },
         { t: "Stage 2 migration", s: "Expected credit loss", q: "What is moving accounts into stage two this quarter and what does it do to the provision?", icon: "chart" },
         { t: "Concentration in the wholesale book", s: "Where is the risk", q: "Where is exposure concentrated in the wholesale book by sector, group and geography?", icon: "grid" },
@@ -578,7 +578,7 @@ window.SARA_EDITION = {
         { t: "Income documents look fabricated", s: "How do I prove it", q: "Salary slips on several files from one sourcing agent look fabricated. What evidence do I need before I can call it fraud?", icon: "search" },
         { t: "Same valuer on every inflated file", s: "Collusion", q: "The same empanelled valuer appears on every file where the valuation looks inflated. How do I take that forward?", icon: "alert" },
         { t: "Employee may be involved", s: "What is the process", q: "The pattern suggests a branch employee is involved. What is the process and who do I notify first?", icon: "users" },
-        { t: "Reporting a fraud", s: "Internal and external", q: "Once a case is established, what are the internal reporting steps and the external reporting obligations?", icon: "checks" },
+        { t: "Reporting a fraud", s: "Internal and external", q: "Once a case is established, what are the internal reporting steps and the external reporting obligations?", icon: "checklist" },
         { t: "Customer says it was not him", s: "Identity substitution", q: "A customer says he never took the loan that is in his name. How do I investigate a suspected identity substitution?", icon: "shield" },
       ],
     },
@@ -596,7 +596,7 @@ window.SARA_EDITION = {
         { t: "Are we inside risk appetite?", s: "Against the statement", q: "Which portfolios are operating outside the limits set in the risk appetite statement?", icon: "target" },
         { t: "Something is wrong in one region", s: "Connect the evidence", q: "Complaints, first instalment bounces and field visit costs are all rising in one region at once. What connects them?", icon: "search" },
         { t: "Co-lending exposure", s: "What do we actually hold", q: "Across the co-lending arrangements, what exposure do we actually retain and is it what we intended?", icon: "grid" },
-        { t: "An audit finding keeps recurring", s: "Why is it not fixed", q: "The same internal audit observation has recurred across three cycles. Why has it not been closed?", icon: "checks" },
+        { t: "An audit finding keeps recurring", s: "Why is it not fixed", q: "The same internal audit observation has recurred across three cycles. Why has it not been closed?", icon: "checklist" },
       ],
     },
 
@@ -611,10 +611,10 @@ window.SARA_EDITION = {
       persona: "The last check before money leaves. Answer with the requirement and where it is written. This person is the control, so be blunt about what must be complete before disbursal and what can never be treated as a post-disbursal item.",
       greeting: "Ask about agreements, sanction conditions, mandates, disbursal checks and what has to be complete before money goes out.",
       prompts: [
-        { t: "Can this disburse today?", s: "Pre-disbursal checks", q: "What has to be complete before a loan against property file can be disbursed?", icon: "checks" },
+        { t: "Can this disburse today?", s: "Pre-disbursal checks", q: "What has to be complete before a loan against property file can be disbursed?", icon: "checklist" },
         { t: "Mandate registration failed", s: "What are my options", q: "The electronic mandate registration failed at the sponsor bank. What are the alternatives and how long do they take?", icon: "alert" },
         { t: "Sanction condition not met", s: "Can it be a PDD", q: "One sanction condition is outstanding. Can it be carried as a post-disbursement document or does it block disbursal?", icon: "checklist" },
-        { t: "Part disbursement request", s: "How it works", q: "The customer wants the loan released in two tranches. What does the policy require for a part disbursement?", icon: "dollar" },
+        { t: "Part disbursement request", s: "How it works", q: "The customer wants the loan released in two tranches. What does the policy require for a part disbursement?", icon: "rupee" },
         { t: "Agreement signed at the wrong place", s: "Execution defects", q: "The agreement was signed but the stamping is from the wrong state. What is the consequence and what do I do?", icon: "scale" },
       ],
     },
@@ -663,7 +663,7 @@ window.SARA_EDITION = {
       greeting: "Ask about processing volumes, turnaround, reconciliation, mandate and receipt failures, registry filings and where the pipeline is breaking.",
       prompts: [
         { t: "Mandate failures at one bank", s: "Pattern", q: "Electronic mandate registrations are failing at one sponsor bank far more than the rest. What is happening?", icon: "alert" },
-        { t: "Unapplied receipts", s: "Reconciliation", q: "How many receipts are sitting unapplied and what is stopping them from matching to accounts?", icon: "dollar" },
+        { t: "Unapplied receipts", s: "Reconciliation", q: "How many receipts are sitting unapplied and what is stopping them from matching to accounts?", icon: "rupee" },
         { t: "A hold instruction with no reason", s: "What do I do", q: "We have received an instruction to place an account under a monitoring hold with no reason stated. What is the correct handling?", icon: "lock" },
         { t: "Registry filings overdue", s: "Compliance exposure", q: "Which registry filings are approaching or past their window, and what is the exposure?", icon: "clock" },
         { t: "Turnaround has slipped", s: "Where", q: "Where in the disbursal pipeline is turnaround being lost, and is it people, documents or the system?", icon: "route" },
@@ -699,7 +699,7 @@ window.SARA_EDITION = {
       greeting: "Ask what a visit may and may not involve, what you can collect and receipt, and what to do when the customer is not there or will not pay.",
       prompts: [
         { t: "Customer is not at home", s: "Can I ask around", q: "The customer is not at home. Can I ask the neighbours about him and what may I tell them?", icon: "users" },
-        { t: "He offers part payment", s: "Can I take it", q: "The customer is offering half the overdue amount in cash. Can I accept it and what receipt do I give?", icon: "dollar" },
+        { t: "He offers part payment", s: "Can I take it", q: "The customer is offering half the overdue amount in cash. Can I accept it and what receipt do I give?", icon: "rupee" },
         { t: "He says he will pay if I take the vehicle", s: "Surrender", q: "The customer says he cannot pay and wants to surrender the vehicle. What is the correct process?", icon: "truck" },
         { t: "Family says he is unwell", s: "What now", q: "The family says the customer is seriously ill in hospital. What am I supposed to do?", icon: "shield" },
         { t: "What am I not allowed to do?", s: "Conduct line", q: "What is a field collections officer specifically prohibited from doing during a visit?", icon: "alert" },
@@ -715,7 +715,7 @@ window.SARA_EDITION = {
       persona: "Arranging something that is lawful only if every precondition is met, and expensive to unwind if it is not. Lead with the preconditions, in order, and say plainly when one is missing. Never help arrange a step that the contract or the notice position does not support.",
       greeting: "Ask about repossession preconditions, notices, agent authorisation, inventory, valuation, sale and release.",
       prompts: [
-        { t: "Can this vehicle be repossessed?", s: "Preconditions", q: "What has to be true before a vehicle can be repossessed, and who confirms each item?", icon: "checks" },
+        { t: "Can this vehicle be repossessed?", s: "Preconditions", q: "What has to be true before a vehicle can be repossessed, and who confirms each item?", icon: "checklist" },
         { t: "Agreement may not have the clause", s: "Older contract", q: "This loan was executed on an older agreement template. How do I check whether it carries the repossession clause?", icon: "scale" },
         { t: "Customer has a complaint open", s: "Does it stop us", q: "The customer has an unresolved grievance on the account. Does that affect a repossession?", icon: "alert" },
         { t: "Inventory at the yard", s: "What must be recorded", q: "What has to be recorded and photographed when a repossessed vehicle arrives at the yard?", icon: "grid" },
@@ -733,8 +733,8 @@ window.SARA_EDITION = {
       greeting: "Ask about bucket movement, resolution, agency performance, settlement authority, conduct exposure and legal escalation.",
       prompts: [
         { t: "One agency recovers well but generates complaints", s: "What do I do", q: "One empanelled agency has the best resolution rate in the area and also the most conduct complaints. How do I handle that?", icon: "alert" },
-        { t: "Settlement authority", s: "What can I approve", q: "What settlement can I approve at area level and what has to go to the head of collections?", icon: "checks" },
-        { t: "Bucket is not rolling back", s: "Why", q: "The sixty to ninety day bucket is not rolling back the way it did last quarter. What has changed?", icon: "trend" },
+        { t: "Settlement authority", s: "What can I approve", q: "What settlement can I approve at area level and what has to go to the head of collections?", icon: "checklist" },
+        { t: "Bucket is not rolling back", s: "Why", q: "The sixty to ninety day bucket is not rolling back the way it did last quarter. What has changed?", icon: "trendup" },
         { t: "When do we go legal?", s: "Escalation criteria", q: "At what point does an account move from field collections to legal recovery, and who decides?", icon: "scale" },
         { t: "Agents contacting at night", s: "Conduct breach", q: "I have evidence that an agency's staff are calling customers after permitted hours. What am I required to do?", icon: "shield" },
       ],
@@ -769,8 +769,8 @@ window.SARA_EDITION = {
         { t: "Where is recovery underperforming?", s: "Across the book", q: "Which products and regions are underperforming on recovery relative to their delinquency profile?", icon: "chart" },
         { t: "Are complaints structural?", s: "Conduct pattern", q: "Are our recovery-related complaints concentrated in particular agencies, products or regions, and what does that say?", icon: "alert" },
         { t: "Cases collections should not be chasing", s: "Wrong problem", q: "Are there accounts in collections that are actually operational failures rather than genuine defaults?", icon: "search" },
-        { t: "Write-off recommendation", s: "What supports it", q: "What has to be established before an account can be recommended for write-off?", icon: "checks" },
-        { t: "Cost of recovery", s: "Is it worth it", q: "What does recovery actually cost us per rupee recovered, by channel and by bucket?", icon: "dollar" },
+        { t: "Write-off recommendation", s: "What supports it", q: "What has to be established before an account can be recommended for write-off?", icon: "checklist" },
+        { t: "Cost of recovery", s: "Is it worth it", q: "What does recovery actually cost us per rupee recovered, by channel and by bucket?", icon: "rupee" },
       ],
     },
 
@@ -785,10 +785,10 @@ window.SARA_EDITION = {
       persona: "Talking to a customer who wants an answer now. Give what may be said, plainly, and what has to be raised. Be exact about what this person may commit to, because a wrong figure quoted at the counter becomes a refund and a complaint.",
       greeting: "Ask about statements, foreclosure, no-objection certificates, charges, complaints and what you may tell a customer directly.",
       prompts: [
-        { t: "Customer wants a foreclosure figure", s: "Can I give it", q: "A customer wants his foreclosure amount right now. What can I tell him and what has to be worked out formally?", icon: "dollar" },
+        { t: "Customer wants a foreclosure figure", s: "Can I give it", q: "A customer wants his foreclosure amount right now. What can I tell him and what has to be worked out formally?", icon: "rupee" },
         { t: "Disputes a penal charge", s: "What do I say", q: "The customer is disputing a penal charge on his account. What can I explain and what do I raise?", icon: "alert" },
         { t: "No-objection certificate not received", s: "After closure", q: "The customer closed his loan a month ago and has not received the no-objection certificate. What is the timeline?", icon: "checklist" },
-        { t: "This is a complaint", s: "How do I log it", q: "When does a customer's unhappiness become a formal complaint, and what happens once it is logged?", icon: "headphones" },
+        { t: "This is a complaint", s: "How do I log it", q: "When does a customer's unhappiness become a formal complaint, and what happens once it is logged?", icon: "users" },
         { t: "Customer wants his documents back", s: "Property papers", q: "The customer has closed his loan against property and wants his original documents. What is the process and timeline?", icon: "lock" },
       ],
     },
@@ -806,7 +806,7 @@ window.SARA_EDITION = {
         { t: "Is this escalatable externally?", s: "Which forum", q: "This complaint has not been resolved to the customer's satisfaction. Where can they take it next and what does that mean for us?", icon: "route" },
         { t: "Same complaint from many customers", s: "Systemic", q: "Several customers have complained about the same charge on the same product. How do I treat that differently?", icon: "search" },
         { t: "Complaint about a recovery agent", s: "Investigation", q: "A customer alleges misconduct by a recovery agent. What does my investigation have to establish and who else is notified?", icon: "shield" },
-        { t: "Customer wants compensation", s: "What can we offer", q: "The customer is asking for compensation for the inconvenience. What can we offer and who approves it?", icon: "dollar" },
+        { t: "Customer wants compensation", s: "What can we offer", q: "The customer is asking for compensation for the inconvenience. What can we offer and who approves it?", icon: "rupee" },
       ],
     },
     {
@@ -823,7 +823,7 @@ window.SARA_EDITION = {
         { t: "An external forum has asked for a response", s: "What we file", q: "An external redress forum has sought our reply on a case. What has to go into that response?", icon: "scale" },
         { t: "Root cause keeps recurring", s: "Not fixed", q: "Which complaint root causes have recurred after being reported as fixed?", icon: "alert" },
         { t: "Charge complaints on one product", s: "Systemic issue", q: "Charge-related complaints are concentrated in one product. Is this a communication problem or a policy problem?", icon: "search" },
-        { t: "What has to be reported?", s: "Complaints reporting", q: "What complaints information has to be reported, to whom, and how often?", icon: "checks" },
+        { t: "What has to be reported?", s: "Complaints reporting", q: "What complaints information has to be reported, to whom, and how often?", icon: "checklist" },
       ],
     },
 
@@ -842,7 +842,7 @@ window.SARA_EDITION = {
         { t: "Validation failure on a return", s: "How to fix", q: "A return has failed validation at submission. How do I identify the cause and correct it?", icon: "alert" },
         { t: "Two systems disagree", s: "Which figure files", q: "The loan management system and the general ledger give different outstanding figures. Which one goes into the return?", icon: "search" },
         { t: "Large exposure reporting", s: "Threshold and cycle", q: "What has to be reported on large exposures, at what threshold, and on what cycle?", icon: "chart" },
-        { t: "We filed something wrong", s: "Correction process", q: "A figure in a filed return was wrong. What is the correction process and what has to be recorded?", icon: "checks" },
+        { t: "We filed something wrong", s: "Correction process", q: "A figure in a filed return was wrong. What is the correction process and what has to be recorded?", icon: "checklist" },
       ],
     },
     {
@@ -858,7 +858,7 @@ window.SARA_EDITION = {
         { t: "What should I test at a branch?", s: "Branch audit scope", q: "What are the highest-value controls to test in a branch audit and what evidence proves each one?", icon: "checklist" },
         { t: "Finding was closed but not fixed", s: "Repeat observation", q: "How do I establish that an observation was closed on paper without the underlying issue being fixed?", icon: "alert" },
         { t: "Gold vault controls", s: "What to check", q: "What controls do I test around gold appraisal, packet sealing and vault custody?", icon: "lock" },
-        { t: "Deviation approvals outside authority", s: "How to sample", q: "How do I test whether deviation approvals were taken within the delegation matrix?", icon: "checks" },
+        { t: "Deviation approvals outside authority", s: "How to sample", q: "How do I test whether deviation approvals were taken within the delegation matrix?", icon: "checklist" },
         { t: "A protected disclosure has come in", s: "Handling", q: "A protected disclosure has been received about a branch. What is the handling process and who may know?", icon: "shield" },
       ],
     },
@@ -872,7 +872,7 @@ window.SARA_EDITION = {
       persona: "Holds material that it is an offence to disclose, and that shapes everything. Be precise about identification standards and monitoring procedure, which are ordinary compliance material, and rigorous about case material, which is not. Never help anyone outside the designation learn that a case exists.",
       greeting: "Ask about identification standards, risk categorisation, monitoring, alert disposition, reporting and record keeping.",
       prompts: [
-        { t: "Alert disposition standard", s: "What closes an alert", q: "What has to be established and recorded before a transaction monitoring alert can be closed without escalation?", icon: "checks" },
+        { t: "Alert disposition standard", s: "What closes an alert", q: "What has to be established and recorded before a transaction monitoring alert can be closed without escalation?", icon: "checklist" },
         { t: "A branch is asking why an account is held", s: "What I may say", q: "A branch manager is asking why an account has been placed under a monitoring hold. What may I tell him?", icon: "lock" },
         { t: "Beneficial ownership", s: "Non-individual customers", q: "How is beneficial ownership established and recorded for a non-individual customer?", icon: "users" },
         { t: "Risk categorisation review", s: "How often", q: "How often does a customer's risk categorisation have to be reviewed and what triggers an off-cycle review?", icon: "calendar" },
@@ -891,7 +891,7 @@ window.SARA_EDITION = {
       prompts: [
         { t: "A new circular has come out", s: "What does it change", q: "A new circular has been issued. Which of our policies, products, processes, system parameters, customer documents and returns does it affect?", icon: "route" },
         { t: "Where are we not compliant?", s: "Honest position", q: "Where does the compliance testing programme show that we are not actually doing what our policy says?", icon: "alert" },
-        { t: "Templates that were never updated", s: "Document currency", q: "Which customer-facing templates and letters are still on a superseded version?", icon: "checks" },
+        { t: "Templates that were never updated", s: "Document currency", q: "Which customer-facing templates and letters are still on a superseded version?", icon: "checklist" },
         { t: "Digital lending partners", s: "Oversight", q: "What are our oversight obligations over lending service providers and digital lending apps, and are we meeting them?", icon: "globe" },
         { t: "Inspection is coming", s: "What will they find", q: "Based on our own testing and audit findings, what is an inspection most likely to raise?", icon: "search" },
       ],
@@ -909,7 +909,7 @@ window.SARA_EDITION = {
       greeting: "Ask about borrowings, cost of funds, maturity gaps, liquidity, pricing inputs and the asset liability position.",
       prompts: [
         { t: "Where is the maturity gap?", s: "Bucket view", q: "Where are the largest negative gaps in the maturity profile and what is covering them?", icon: "chart" },
-        { t: "Cost of funds has moved", s: "Effect on pricing", q: "Cost of funds has risen this quarter. What does that do to the floor under our product rates?", icon: "trend" },
+        { t: "Cost of funds has moved", s: "Effect on pricing", q: "Cost of funds has risen this quarter. What does that do to the floor under our product rates?", icon: "trendup" },
         { t: "Concentration in borrowings", s: "Funding risk", q: "How concentrated is the borrowing book by lender, instrument and maturity?", icon: "grid" },
         { t: "Co-lending and assignment cash flows", s: "Liquidity effect", q: "How do the co-lending and assignment arrangements affect the liquidity position?", icon: "route" },
         { t: "Liquidity buffer", s: "Are we adequate", q: "What liquidity buffer are we required to hold and where do we currently stand?", icon: "shield" },
@@ -926,10 +926,10 @@ window.SARA_EDITION = {
       greeting: "Ask about provisioning, margins, capital, funding, the borrowing programme, rating and disclosure.",
       prompts: [
         { t: "What is moving the provision?", s: "This quarter", q: "What is driving the movement in the expected credit loss provision this quarter?", icon: "chart" },
-        { t: "Margin compression", s: "Where", q: "Where is net interest margin compressing and is it pricing, mix or cost of funds?", icon: "trend" },
+        { t: "Margin compression", s: "Where", q: "Where is net interest margin compressing and is it pricing, mix or cost of funds?", icon: "trendup" },
         { t: "Capital position", s: "Headroom", q: "What is our capital position and how much growth headroom does it actually give us?", icon: "target" },
         { t: "Rating agency question", s: "What they will ask", q: "Based on the portfolio, what is the rating agency most likely to press us on at the next review?", icon: "search" },
-        { t: "Disclosure obligations", s: "Listed debt", q: "What are our continuing disclosure obligations on the listed debentures and what triggers one?", icon: "checks" },
+        { t: "Disclosure obligations", s: "Listed debt", q: "What are our continuing disclosure obligations on the listed debentures and what triggers one?", icon: "checklist" },
       ],
     },
 
@@ -947,7 +947,7 @@ window.SARA_EDITION = {
         { t: "What must the journey show?", s: "Disclosure sequence", q: "What has to be disclosed to a customer in a digital journey, and at what point in the flow?", icon: "checklist" },
         { t: "Partner wants to hold the data", s: "Is that allowed", q: "A lending service provider wants to retain customer data on its own systems. What is permitted?", icon: "lock" },
         { t: "Loss guarantee arrangement", s: "Limits", q: "What limits and conditions apply to a default loss guarantee arrangement with a partner?", icon: "shield" },
-        { t: "Where is the funnel leaking?", s: "Drop-off", q: "Where are applicants dropping out of the digital journey and what is causing it?", icon: "trend" },
+        { t: "Where is the funnel leaking?", s: "Drop-off", q: "Where are applicants dropping out of the digital journey and what is causing it?", icon: "trendup" },
         { t: "Partner is not on our register", s: "What now", q: "We are working with an application that is not on our published partner register. What are the consequences?", icon: "alert" },
       ],
     },
@@ -964,10 +964,10 @@ window.SARA_EDITION = {
       greeting: "Ask anything about the group: growth, asset quality, conduct, cost, funding, the regulatory position and what is coming.",
       prompts: [
         { t: "What should worry me most?", s: "Across the group", q: "Across the whole group, what is the single thing most likely to cost us money or standing in the next two quarters?", icon: "alert" },
-        { t: "Where did growth come from?", s: "And what it cost", q: "Where did disbursal growth come from this quarter and what did it cost us to acquire in each channel?", icon: "trend" },
+        { t: "Where did growth come from?", s: "And what it cost", q: "Where did disbursal growth come from this quarter and what did it cost us to acquire in each channel?", icon: "trendup" },
         { t: "Are we treating customers well?", s: "Honest answer", q: "What does our own complaints and conduct evidence say about how we are actually treating customers?", icon: "users" },
         { t: "A problem nobody has connected", s: "Across functions", q: "Is there a problem showing up in more than one function that nobody has connected yet?", icon: "search" },
-        { t: "What will the regulator ask?", s: "Inspection view", q: "If an inspection started next month, what would it most likely find?", icon: "checks" },
+        { t: "What will the regulator ask?", s: "Inspection view", q: "If an inspection started next month, what would it most likely find?", icon: "checklist" },
       ],
     },
   ],
@@ -1140,6 +1140,188 @@ window.SARA_EDITION = {
         "Facilities to employees and connected persons. Any facility to an employee, a director, their relatives, or an entity in which any of them holds an interest, is sanctioned one level above the authority its amount would otherwise attract, and is reported to the board committee. Any deviation on such a file is not delegable and goes to the Credit Committee.\n\n" +
         "Empanelment. Valuers, advocates, recovery agencies, verification agencies and service providers are empanelled through a documented process. No person may participate in an empanelment decision concerning a party in which they or a relative hold an interest. Empanelment is reviewed annually against performance and conduct, and an agency removed for conduct may not be re-empanelled under a different name, which requires the ownership check to be done properly rather than on the letterhead.\n\n" +
         "Gifts. Gifts and hospitality above the threshold set by the Company Secretary are recorded in the register, and nothing is accepted from a party in an active tender, an active credit decision or an active recovery negotiation.",
+    },
+
+    /* ================= CREDIT POLICY ================= */
+    {
+      id: "CR-001", title: "Master Credit Policy", cat: "credit", clearance: 2, scopes: ["credit", "policy"],
+      owner: "Chief Credit Officer", updated: "2026-04-01", rev: "12.0", system: "Policy Repository",
+      tags: ["credit policy", "appraisal", "underwriting", "eligibility", "four eyes", "capacity", "character", "collateral"],
+      body:
+        "This policy governs credit decisions in Anvira Finserv Limited. Anvira Housing Finance and Anvira Microfinance maintain their own credit policies which are aligned to this one but are not replaced by it. Where a product note and this policy differ, this policy governs and the product note is corrected.\n\n" +
+        "What credit assesses. Every proposal is assessed on repayment capacity, willingness to repay, and the security available if both fail. The order matters. A facility is not sanctioned because the security is good; security is what remains when the assessment of capacity was wrong. Loan to value is a limit on loss, not a substitute for underwriting.\n\n" +
+        "Four eyes. No person may both source and sanction. No person may sanction a facility they appraised. The credit function reports to the Chief Credit Officer and not to the business, at every level. A business head may escalate a decision; they may not overturn one.\n\n" +
+        "Repayment capacity. Assessed from documented income, adjusted for existing obligations disclosed on the bureau and observed in bank statements. The fixed obligation to income ratio ceiling is 55 per cent for salaried borrowers with monthly income above 50,000 rupees, 50 per cent below that, and 45 per cent for self-employed borrowers assessed on financial statements. The proposed instalment is included in the numerator. Obligations visible on a bank statement but absent from the bureau are included; obligations reported closed on the bureau within the last 60 days require evidence of closure.\n\n" +
+        "Willingness. The bureau record is the principal evidence. A current overdue of more than 30 days on any live facility is a decline at hub level and may only be taken as a deviation by the Regional Credit Manager with a written rationale. A written-off or settled account within the last 36 months is a deviation regardless of amount. A bureau score is one input and never the decision by itself; a thin file is not a bad file.\n\n" +
+        "Ability to verify. Anvira does not lend where it cannot verify. Where income cannot be documented in any of the ways the product note permits, the file is declined rather than approved against a higher rate or a lower loan to value. Pricing does not cure an unverifiable file.\n\n" +
+        "End use. Every facility states its end use in the sanction and, above the thresholds in the product note, evidence of end use is a post-disbursement obligation. A facility whose stated end use is not permitted by the product note is not sanctioned, and a facility drawn for a purpose other than the one sanctioned is an event of default.",
+    },
+    {
+      id: "CR-002", title: "Deviation Matrix and Exception Approval", cat: "credit", clearance: 2, scopes: ["credit", "policy", "risk"],
+      owner: "Chief Credit Officer", updated: "2026-04-01", rev: "8.3", system: "Policy Repository",
+      tags: ["deviation", "exception", "approval authority", "compensating control", "matrix", "escalation", "undelegable"],
+      body:
+        "A deviation is a sanction that departs from a stated norm in the credit policy or a product note. Deviations are permitted, recorded and monitored. A departure that is not recorded as a deviation is not a deviation; it is a policy breach, and the distinction is the whole point of this document.\n\n" +
+        "Recording. Every deviation is recorded against a code from the deviation register with the norm, the actual, the rationale, the compensating control and the approving authority. A file may not be disbursed while a deviation is recorded as pending. The approving authority is the person, not the office: the record names an individual.\n\n" +
+        "Authority by deviation. Loan to value in excess of the norm by up to five percentage points: Credit Manager. Up to ten points: Regional Credit Manager. Beyond ten points: Chief Credit Officer. Fixed obligation to income ratio in excess by up to five points: Credit Manager; beyond that, Regional Credit Manager. Bureau score below the product floor by up to 30 points: Credit Manager; beyond that, Regional Credit Manager. A current overdue above 30 days on a live facility: Regional Credit Manager only. A written-off or settled account in the last 36 months: Regional Credit Manager up to 25 lakh exposure, Chief Credit Officer above.\n\n" +
+        "Combinations escalate. Where a file carries two deviations, the approving authority is one level above the higher of the two. Where it carries three or more, the Chief Credit Officer approves regardless of the individual levels. Counting deviations as separate approvals at their individual levels is the most common way this matrix is defeated and is treated as a breach.\n\n" +
+        "Not delegable at any level. A bureau deviation together with an income assessment deviation. A loan to value deviation on a property that also carries a title or valuation deviation. Any deviation on a facility to an employee, a director, their relatives, or an entity connected to them. Any deviation on a facility to a person connected with an empanelled valuer, advocate, recovery agency or verification agency. These go to the Credit Committee.\n\n" +
+        "Compensating controls. A compensating control is something that reduces the risk the norm was protecting against. A higher rate of interest is not a compensating control; it is pricing. Acceptable compensating controls include additional collateral, a reduced tenor, a co-applicant with independent income, a larger own contribution, an escrow of receivables, and a shorter first review date. The control is recorded and its continued existence is monitored.\n\n" +
+        "Monitoring. Deviation volumes are reported monthly by product, region, branch, sourcing channel and approving authority. A branch or a channel whose deviation rate exceeds twice the product average for two consecutive months is reviewed by the Regional Credit Manager, and the review is minuted whether or not it finds anything.",
+    },
+    {
+      id: "CR-003", title: "Income Assessment Standards", cat: "credit", clearance: 2, scopes: ["credit"],
+      owner: "Chief Credit Officer", updated: "2026-02-26", rev: "6.1", system: "Policy Repository",
+      tags: ["income", "salaried", "self-employed", "banking", "ITR", "GST", "cash flow", "seasonal", "surrogate"],
+      body:
+        "Income is assessed from documents that a third party produced, and corroborated against banking. A document the applicant produced for the purpose of the application is corroboration, not evidence.\n\n" +
+        "Salaried. Latest three salary slips, six months of salary credit in the bank statement, and the latest Form 16 or two years of income tax returns where the tenor exceeds five years. Net take-home is used, not gross. Variable pay is included at 50 per cent where it has been received in each of the last four quarters and at nil otherwise. An employer not on the approved employer list requires the employer to be verified independently.\n\n" +
+        "Self-employed, documented. Two years of income tax returns with computation, two years of audited or certified financial statements where turnover requires them, twelve months of banking for every operating account, and goods and services tax returns for the same period where the applicant is registered. Income is assessed on the lower of the declared profit and the profit implied by banking turnover at the margin appropriate to the trade.\n\n" +
+        "Seasonal income. Where income arrives in two or three concentrated periods a year, annual income is assessed over a full twelve months rather than annualised from a strong quarter, and the repayment structure is matched to the pattern where the product permits it. Assessing a seasonal borrower on a peak quarter is the single most common cause of early delinquency in the business loan book and is a recorded deviation, not a judgement call.\n\n" +
+        "Cash income. Cash receipts not routed through a bank account are not counted as income. Where a trade is genuinely cash-based, the applicant is assessed on banked receipts only, and the resulting eligibility is what it is. A borrower whose banked receipts do not support the instalment is not made eligible by an assertion about cash.\n\n" +
+        "Surrogate programmes. Where the product note permits a surrogate, the surrogate substitutes for the income document, never for the assessment. Permitted surrogates are set out in each product note with their own caps and are not transferable between products.\n\n" +
+        "Banking analysis. Twelve months where available, six months minimum. Reviewed for average balance, credit summation, inward returns, existing obligation debits, and any pattern of funds arriving immediately before a balance is required. Three or more inward returns in six months is a deviation. Round-sum credits immediately before the statement period ends are reported to the risk containment unit rather than assessed.",
+    },
+    {
+      id: "CR-004", title: "Collateral, Valuation and Title", cat: "credit", clearance: 2, scopes: ["credit", "legal", "ops"],
+      owner: "Chief Credit Officer", updated: "2026-03-19", rev: "7.0", system: "Policy Repository",
+      tags: ["collateral", "valuation", "title", "search report", "LTV", "property", "negative list", "valuer", "encumbrance"],
+      body:
+        "Security is taken to limit loss, not to justify a facility. Every secured facility requires a valuation and a title investigation, and neither may be waived by any authority below the Credit Committee.\n\n" +
+        "Valuation. Two independent valuations from empanelled valuers are required where the property value exceeds one crore rupees, and the lower is used. Below that, one valuation is sufficient. A valuation is valid for six months. A valuation more than six months old at the date of disbursal is refreshed, and a refresh that produces a materially lower figure re-opens the sanction rather than being noted on the file. The same valuer may not value more than three properties for the same borrower or the same sourcing channel in a rolling quarter.\n\n" +
+        "Loan to value. Loan to value is computed on the lower of the transaction value and the assessed market value, never on the distress or realisable value and never on a guidance value where it is higher. Product ceilings are in the product notes. Any funding of stamp duty, registration or fees is included in the numerator.\n\n" +
+        "Title. A search report from an empanelled advocate covering the period required by the product note, an encumbrance certificate, the chain of title, approved plans, and evidence of the property's permitted use. A title report with a qualification is a deviation whose level depends on the qualification: a technical qualification capable of cure is a Credit Manager deviation with the cure as a post-disbursement condition; a qualification going to the root of title is not sanctionable at any level.\n\n" +
+        "Negative list. Properties on the negative list are not funded: agricultural land where conversion has not been effected, properties in unauthorised or unapproved layouts, properties under litigation, properties where the approach is not a legally recorded right of way, industrial property in a category the product note excludes, properties within the prohibited distance of a defence or railway installation, and any property where the borrower's interest is a lease with less than twice the loan tenor remaining.\n\n" +
+        "Creation and perfection. Security is created in the manner the product note requires and registered where registration is required. A charge that is created but not registered within the statutory window is a post-disbursement failure with a real consequence, not an administrative one, and is escalated to Legal on the day it is discovered rather than at the next review.",
+    },
+    {
+      id: "CR-005", title: "Credit Product Note: Loan Against Property", cat: "credit", clearance: 2, scopes: ["credit", "product"],
+      owner: "Head of Secured Lending", updated: "2026-03-30", rev: "9.2", system: "Policy Repository",
+      tags: ["LAP", "loan against property", "secured", "LTV", "tenor", "end use", "self-occupied", "commercial property"],
+      body:
+        "Loan against property is a secured facility to individuals and non-individual entities against residential or commercial property owned by the borrower or a co-applicant. Written by Anvira Finserv Limited. Loans for the purchase or construction of a residence are written by Anvira Housing Finance under its own product note and are not covered here.\n\n" +
+        "Eligibility. Individuals aged 24 to 65 at maturity, and entities with three completed years of operation. Every owner of the property is a co-applicant without exception. A property owned partly by a minor is not accepted.\n\n" +
+        "Loan to value. Self-occupied residential up to 65 per cent. Rented residential up to 60 per cent. Self-occupied commercial up to 60 per cent. Rented commercial up to 55 per cent. Industrial property up to 50 per cent and only where the product is available in that location. Special category properties, including those with a single potential buyer, up to 40 per cent.\n\n" +
+        "Ticket and tenor. Minimum 10 lakh, maximum 7.5 crore. Tenor up to 15 years for residential security and 12 years for commercial, and in every case not beyond the borrower's 65th birthday and not beyond the residual life of the property assessed by the valuer less five years.\n\n" +
+        "Rate basis. Available on a floating rate linked to the published benchmark, and on a fixed rate for the first three years reverting to floating. The rate basis is stated in the sanction letter and in the key facts statement and determines what may be charged on pre-payment, so it is never left to be inferred from the schedule.\n\n" +
+        "End use. Business expansion, working capital, purchase of commercial premises, debt consolidation, and personal purposes including education and medical treatment. Not permitted: any speculative purpose, investment in capital markets, on-lending, purchase of agricultural land, or any purpose prohibited by law. End use evidence is a post-disbursement obligation above 50 lakh and is called for within 90 days of disbursal.\n\n" +
+        "Documentation. Identification and address for every applicant, income as per the income assessment standards, property title chain, valuation, insurance of the property assigned to Anvira, and the security documents appropriate to the state. Insurance covering the property for not less than the outstanding is a continuing obligation, not a one-time document.",
+    },
+    {
+      id: "CR-006", title: "Credit Product Note: Business Loan, Unsecured", cat: "credit", clearance: 2, scopes: ["credit", "product"],
+      owner: "Head of Unsecured Lending", updated: "2026-05-14", rev: "7.1", system: "Policy Repository",
+      tags: ["business loan", "unsecured", "MSME", "vintage", "GST", "banking surrogate", "turnover"],
+      body:
+        "An unsecured term facility to proprietorships, partnerships, limited liability partnerships and private limited companies for working capital and business expansion. Written by Anvira Finserv Limited.\n\n" +
+        "Eligibility. Business vintage of three completed years evidenced by registration and by banking. Minimum annual turnover 40 lakh where assessed on financial statements, 60 lakh where assessed on a banking surrogate. Applicant aged 25 to 60 at maturity. The business and the applicant must both be resident in a location Anvira serves, and the business premises must be verifiable.\n\n" +
+        "Ticket and tenor. Minimum 3 lakh, maximum 75 lakh. Tenor 12 to 48 months. Facilities above 25 lakh require a personal guarantee from every partner, designated partner or director holding more than 20 per cent.\n\n" +
+        "Assessment routes. Financial statement route: two years of returns and statements, eligibility at up to 3.0 times average annual cash profit. Banking surrogate route: twelve months of banking across all operating accounts, eligibility at up to 20 per cent of annual credit summation net of inter-account transfers, contra entries and any single credit exceeding 15 per cent of the total. Goods and services tax route: twelve months of filed returns, eligibility at up to 15 per cent of declared annual turnover. Only one route is used and the route is recorded in the sanction.\n\n" +
+        "Bureau. Commercial and consumer bureau reports for the entity and for every guarantor. Consumer score floor 700, and a commercial report showing any account in the substandard category or worse is a decline not open to deviation below the Chief Credit Officer.\n\n" +
+        "Known weakness. The banking surrogate route is where this product's early delinquency concentrates, and the cause is almost always inter-account transfers not being netted properly at the assessment stage. Where a borrower operates more than two current accounts, netting is verified by a second person before sanction.\n\n" +
+        "Not permitted. Businesses on the excluded activity list, entities less than three years old however strong the promoter, borrowers whose only banking is with a co-operative institution not on the approved list, and any facility whose stated purpose is the repayment of another unsecured facility taken within the preceding six months.",
+    },
+    {
+      id: "CR-007", title: "Credit Product Note: Personal Loan", cat: "credit", clearance: 2, scopes: ["credit", "product"],
+      owner: "Head of Unsecured Lending", updated: "2026-05-14", rev: "8.0", system: "Policy Repository",
+      tags: ["personal loan", "unsecured", "salaried", "employer category", "FOIR", "bureau", "digital"],
+      body:
+        "An unsecured term facility to salaried individuals for personal purposes. Written by Anvira Finserv Limited and offered through branches, direct sourcing agents and the digital channel.\n\n" +
+        "Eligibility. Salaried individuals aged 23 to 58 at maturity, in continuous employment for 12 months and with the current employer for 6 months. Net monthly income at least 25,000 rupees in metropolitan locations and 20,000 elsewhere. The employer must be on the approved employer list; employers outside it require independent verification and attract a lower ceiling.\n\n" +
+        "Employer categories. Category A covers listed entities, public sector undertakings and government. Category B covers established private employers meeting the vintage and headcount thresholds. Category C covers everything else that passes verification. Eligibility multiples and rate bands differ by category and are set out in the pricing circular, not here, because they change more often than this note does.\n\n" +
+        "Ticket and tenor. Minimum 50,000 rupees, maximum 25 lakh subject to eligibility. Tenor 12 to 60 months. Fixed rate for the full tenor.\n\n" +
+        "Bureau floor. Score floor 720 for category C, 700 for category B, 680 for category A. Below the floor by up to 30 points is a Credit Manager deviation; beyond that, Regional Credit Manager. No facility is sanctioned to an applicant with a current overdue above 30 days on any live account without a Regional Credit Manager deviation and a written rationale.\n\n" +
+        "Obligation ratio. The fixed obligation to income ratio ceiling is 55 per cent, including the proposed instalment. Where the applicant holds more than three live unsecured facilities, the ceiling reduces to 50 per cent regardless of income, and where they hold more than five, the file is declined irrespective of ratio.\n\n" +
+        "Digital channel. Where the facility is sourced through a digital application, the identification, the disclosures and the consent sequence follow the digital lending policy, and the credit assessment is not relaxed on the grounds that the journey is digital. The same floors, ratios and documentation apply.",
+    },
+    {
+      id: "CR-008", title: "Credit Product Note: Commercial Vehicle Finance", cat: "credit", clearance: 2, scopes: ["credit", "product"],
+      owner: "Head of Vehicle Finance", updated: "2026-06-02", rev: "10.1", system: "Policy Repository",
+      tags: ["commercial vehicle", "CV", "used vehicle", "hypothecation", "margin", "first time buyer", "fleet", "tipper"],
+      body:
+        "Finance for new and used commercial vehicles: goods carriers, passenger carriers, tippers and construction equipment. Written by Anvira Finserv Limited and sourced principally through dealer counters and direct sourcing agents.\n\n" +
+        "Borrower segments. First time buyer, first time user, small fleet operator with two to five vehicles, and fleet operator with more than five. Each carries its own margin, tenor and documentation requirements, and the segment is recorded in the sanction because it determines the collections strategy later.\n\n" +
+        "Margin. New vehicle to a fleet operator: up to 90 per cent funding. New vehicle to a first time buyer: up to 80 per cent. Used vehicle up to five years old: up to 75 per cent of the assessed value. Used vehicle five to eight years old: up to 65 per cent. Vehicles older than eight years at the end of the proposed tenor are not funded. Tippers and construction equipment carry a five percentage point lower ceiling in every segment because their resale is narrower.\n\n" +
+        "Tenor. New vehicles up to 60 months. Used vehicles up to 48 months and in no case beyond the vehicle completing ten years from date of first registration.\n\n" +
+        "Assessment. Fleet operators are assessed on financial statements and on route viability. First time buyers are assessed on the attached load or route, the driving licence and experience, and a guarantor with independent income. A first time buyer without either an attached route or a guarantor is a decline, not a higher-margin approval.\n\n" +
+        "Security. Hypothecation of the vehicle endorsed on the registration certificate, comprehensive insurance with Anvira as loss payee, and a personal guarantee for non-individual borrowers. The endorsement of hypothecation on the registration certificate is a post-disbursement obligation with a hard timeline and is the single largest open item in the secured book.\n\n" +
+        "Known weakness. First instalment bounce rates on this product are structurally higher than on any other secured product. The dominant causes are the gap between the disbursal date convention in the applicable scheme and the mandate registration lead time, not borrower quality, and any analysis that treats them as the same thing will reach the wrong conclusion.",
+    },
+    {
+      id: "CR-009", title: "Credit Product Note: Gold Loan", cat: "credit", clearance: 1, scopes: ["credit", "product", "gold"],
+      owner: "Head of Gold Loans", updated: "2026-04-22", rev: "6.4", system: "Policy Repository",
+      tags: ["gold loan", "ornament", "purity", "LTV", "auction", "release", "tenor", "renewal", "vault"],
+      body:
+        "A facility against the pledge of gold ornaments, written by Anvira Finserv Limited at designated branches only. Ornaments only: bullion, coins other than those permitted, and primary gold are not accepted.\n\n" +
+        "Loan to value. Funding does not exceed 75 per cent of the value of the pledged ornaments at any time during the tenor, computed on the net weight of gold content and on the reference rate published daily by Treasury, being the average closing price of the preceding thirty days for the relevant purity. Making charges, stones and any non-gold component are excluded from the valuation entirely.\n\n" +
+        "Appraisal. Appraisal is carried out at the branch by a certified appraiser in the physical presence of the customer. Purity is assessed by touchstone and confirmed by a second method where the assessed purity is below 20 carat. Gross weight, stone deduction and net weight are recorded on the appraisal certificate, signed by the appraiser and the customer, and a copy is given to the customer before the packet is sealed.\n\n" +
+        "Tenor and renewal. Standard tenor 12 months. Renewal on payment of accrued interest and a fresh appraisal, and a renewal is a fresh facility rather than a continuation. Rolling over accrued interest into a renewed principal is not permitted.\n\n" +
+        "Loan to value breach during the tenor. Where the loan to value ratio exceeds the ceiling because of a fall in the reference rate, the customer is given notice to pay the shortfall or pledge additional ornaments within the period stated in the notice. A facility in breach is not renewed and is not topped up.\n\n" +
+        "Auction. Where dues remain unpaid after the notice period, ornaments are sold by public auction with prior notice to the customer stating the date and place. The auction is conducted through an approved auctioneer. Anvira does not participate in the auction of its own pledged ornaments. Any surplus over dues and reasonable costs is returned to the customer within seven working days of the sale, and any shortfall remains recoverable from the customer.\n\n" +
+        "Release on closure. On full repayment the ornaments are released to the customer within seven working days, in the same sealed packet, verified against the appraisal certificate in the customer's presence. Where release is delayed beyond that period for a reason attributable to Anvira, compensation is payable to the customer at the rate set in the pricing circular for each day of delay.",
+    },
+    {
+      id: "CR-010", title: "Credit Product Note: Loan Against Securities and Margin Funding", cat: "credit", clearance: 2, scopes: ["credit", "product", "capmkt"],
+      owner: "Head of Capital Markets Lending", updated: "2026-06-18", rev: "5.0", system: "Policy Repository",
+      tags: ["LAS", "loan against shares", "mutual fund", "margin trade funding", "cover", "margin call", "invocation", "approved list", "IPO", "ESOP"],
+      body:
+        "Facilities against listed securities and mutual fund units, including margin trade funding, employee stock option financing and public issue financing. Written by Anvira Finserv Limited from the Mumbai desk only. This is the one product where the security's value changes every trading day, and every rule below follows from that.\n\n" +
+        "Approved securities. Only securities on the approved list are accepted. The list is maintained by the Risk function, reviewed monthly and immediately on a market event, and is based on index membership, market capitalisation, delivery volumes and impact cost. Securities under a surveillance measure, in a trade-to-trade segment, or subject to a corporate action pending record date are removed from the list until the position resolves.\n\n" +
+        "Cover. Facilities against listed equity shares are maintained at a minimum cover consistent with the regulatory margin applicable to the entity, computed daily on the closing price. Facilities against debt-oriented mutual fund units carry a lower margin as set in the risk circular. Cover is computed on the portfolio, not security by security, but a single security may not exceed 40 per cent of the pledged portfolio value.\n\n" +
+        "Daily valuation and margin call. The portfolio is valued after market close every trading day. Where cover falls below the required level, a margin call is issued the same evening by email and message. The customer has until the close of the second trading day after the call to restore cover by paying down the facility or pledging additional approved securities.\n\n" +
+        "Invocation. Where cover is not restored within the cure period, the pledge is invoked and securities are sold to restore cover, beginning with the most liquid holding. Invocation is authorised by the Head of Capital Markets Lending and is not a desk decision. The customer is informed before the sale where the cure period has expired, and immediately after where market conditions required same-day action under the emergency provision.\n\n" +
+        "Employee stock option financing. Funded against the shares to be allotted on exercise, with the allotment routed to the pledged account. The facility is bridging in nature with a maximum tenor of 12 months and is not renewed. Eligibility is assessed on the employee's income independently of the value of the shares.\n\n" +
+        "Public issue financing. Funded per applicant against the application, within the ceiling per borrower per issue set in the risk circular. The facility is settled from the refund and the allotment on listing, and the desk does not carry an unallotted position beyond the settlement date.",
+    },
+    {
+      id: "CR-011", title: "Credit Product Note: Microfinance, Joint Liability Group", cat: "credit", clearance: 1, scopes: ["credit", "product", "mfi"],
+      owner: "Anvira Microfinance, Head of Credit", updated: "2026-03-11", rev: "5.3", system: "Policy Repository",
+      tags: ["microfinance", "JLG", "joint liability", "household income", "indebtedness", "centre meeting", "collateral free", "MFI"],
+      body:
+        "Collateral-free loans to women organised in joint liability groups, written by Anvira Microfinance Limited, an NBFC-MFI. This product is not written by Anvira Finserv Limited and the parent's credit policy does not govern it; this note and the microfinance credit policy do.\n\n" +
+        "Household income ceiling. Lending is confined to households whose annual income does not exceed the ceiling notified for the category of location. Household income is the income of all members of the household from all sources, assessed by a structured interview at the borrower's residence and corroborated by the group, and recorded on the household income assessment sheet. The assessment is refreshed at every fresh loan cycle rather than carried forward.\n\n" +
+        "Indebtedness. The total repayment obligation of a household to all lenders, including the proposed loan, does not exceed the prescribed share of monthly household income. Obligations are established from the credit information report of every adult member of the household, not of the applicant alone. A household already served by the maximum permitted number of lenders is not eligible however small the proposed loan.\n\n" +
+        "Group formation. Groups of five to ten women from the same locality, self-selected, not related to one another within the group, each with an independent income-generating activity. Group recognition follows a compulsory group training and a group recognition test conducted by an officer who did not form the group. A group formed and recognised by the same person is a control failure.\n\n" +
+        "Collateral and guarantee. No collateral, no security deposit and no guarantee is taken. The joint liability is moral and is not enforced as a legal guarantee against other members. No member is compelled to pay another member's instalment, and any practice of holding a centre meeting until a shortfall is made good is prohibited.\n\n" +
+        "Pricing and transparency. The interest rate, the processing fee and the insurance premium are the only charges. There is no penalty on delayed payment, no prepayment penalty, and no security deposit. The loan card given to the borrower states the amount, the rate, the total payable, the schedule and the grievance route in the local language.\n\n" +
+        "Collection conduct. Collection takes place at the designated centre meeting place at the agreed time. Recovery is not made at the borrower's residence except where the borrower has failed to attend two consecutive meetings, and never at an odd hour. No group member and no member of a borrower's family is approached to recover another member's dues.",
+    },
+    {
+      id: "CR-012", title: "Wholesale Credit Policy: Structured and Promoter Funding", cat: "wholesale", clearance: 3, scopes: ["wholesale", "credit"],
+      owner: "Chief Credit Officer", updated: "2026-05-27", rev: "4.2", system: "Policy Repository",
+      tags: ["wholesale", "structured", "promoter funding", "real estate", "covenant", "security cover", "escrow", "special situations"],
+      body:
+        "Wholesale exposures are individually negotiated facilities to corporate borrowers: structured and mezzanine finance, promoter funding against listed and unlisted holdings, real estate project finance, and special situations. Every wholesale exposure is sanctioned by the Credit Committee regardless of amount.\n\n" +
+        "What is underwritten. In wholesale, the documentation is the product. The covenant package, the security structure, the cash flow waterfall and the conditions to drawdown are underwritten with the same rigour as the borrower's financials, because they are what converts a view about a business into a recoverable exposure.\n\n" +
+        "Security cover. Promoter funding against listed holdings is maintained at a minimum cover of 2.0 times the outstanding, tested on the closing price at each month end and at any time the Risk function calls a test. Real estate project exposures are secured on the project land, the receivables and the shares of the project entity, at a minimum cover of 1.75 times computed on the security value assessed at sanction and revalued annually.\n\n" +
+        "Covenants. Every facility carries financial covenants tested at the frequency stated in the agreement, information covenants requiring periodic financial and operating data, and affirmative and negative covenants. A covenant test that is missed is treated as a breach unless the agreement expressly provides otherwise; silence is not a cure.\n\n" +
+        "Escrow and cash flow. Real estate and receivable-backed exposures are structured with the designated escrow as the only permitted route for project receipts, with the waterfall documented and the account bank instructed. Escrow leakage is an event of default in its own right and is escalated to the Credit Committee on discovery, not at the next monitoring cycle.\n\n" +
+        "Waivers. A covenant waiver is approved by the Credit Committee alone. A relationship manager, a business head and the Chief Credit Officer individually may not waive a covenant. A waiver is granted for a defined period against a defined remedy and is recorded with an expiry date; a waiver without an expiry date has not been granted.\n\n" +
+        "Monitoring. Each exposure carries a monitoring calendar naming every test, its date, the evidence required and the accountable person. The calendar is reviewed monthly by the Chief Risk Officer. A test whose evidence has not been received within 15 days of its due date is reported as an exception whether or not the underlying position is believed to be sound.",
+    },
+    {
+      id: "CR-013", title: "Credit Scorecard and Model Governance", cat: "credit", clearance: 3, scopes: ["credit", "risk"],
+      owner: "Chief Risk Officer", updated: "2026-02-06", rev: "3.1", system: "Portfolio Analytics",
+      tags: ["scorecard", "model", "validation", "override", "drift", "governance", "cut-off", "champion challenger"],
+      body:
+        "Anvira uses application scorecards for personal loans, business loans and two-wheeler finance, and behavioural scorecards for portfolio management across the retail book. A scorecard informs a decision; it does not take one. No facility is declined solely because of a score, and no facility is approved solely because of a score.\n\n" +
+        "Model inventory. Every model in use is registered with its purpose, its development sample, its performance metrics at development, its approved cut-offs, its owner and its validation date. A model not in the inventory may not be used in a decision, and a model in production without a current validation is escalated to the Risk Committee.\n\n" +
+        "Validation. Independent validation before deployment and annually thereafter, covering discrimination, calibration, stability of the population and stability of the individual characteristics. Where the population stability index exceeds 0.25 on the overall score or 0.10 on any characteristic carrying more than 15 per cent of the weight, the model is reviewed out of cycle.\n\n" +
+        "Overrides. An underwriter may override a scorecard recommendation within the deviation matrix. Every override is recorded with a reason code. Override rates are monitored by product, region and underwriter: an override rate above 15 per cent indicates either that the cut-off is wrong or that the underwriting is, and both are worth knowing. A model whose recommendations are overridden more than a quarter of the time is not in use, whatever the inventory says.\n\n" +
+        "Drift and the limits of a score. A scorecard is built on a population and a period. Where sourcing mix, geography or scheme structure changes materially, the score's meaning changes with it even though the number looks the same. The most common misreading in this business is to conclude from an unchanged score distribution that credit quality is unchanged, when the thing that moved was not credit quality at all.\n\n" +
+        "Champion and challenger. Material changes to a cut-off are deployed as a challenger on a defined share of volume for at least two full vintage cycles before adoption. A cut-off changed without a challenger requires Risk Committee approval and a written rationale.",
+    },
+    {
+      id: "CR-014", title: "Credit Approval Process and Turnaround Standards", cat: "credit", clearance: 1, scopes: ["credit", "ops"],
+      owner: "Chief Credit Officer", updated: "2026-01-29", rev: "5.5", system: "Loan Origination",
+      tags: ["turnaround", "TAT", "login", "query", "sanction", "process", "queue", "SLA", "dedupe"],
+      body:
+        "This procedure sets out how a file moves from sourcing to sanction, and the standards each stage is held to. Turnaround is measured from login, and login has a definition, because a file counted as logged before it is complete makes the turnaround number meaningless.\n\n" +
+        "Login. A file is logged when the application form is complete and signed, identification and address documents for every applicant are present and legible, income documents for the assessment route are present, the processing fee instrument is received, and the property or asset details are recorded where the product is secured. A file missing any of these is not logged and is returned the same day with the specific gap named.\n\n" +
+        "Deduplication and bureau. Run at login, before any assessment work. Deduplication is run on identifier, name and date of birth, mobile number and address across the parent and both subsidiaries. A positive match is investigated before the file proceeds, and a match on an account in default is a decline unless the Regional Credit Manager records otherwise.\n\n" +
+        "Queries. A query is raised once, in writing, listing every gap. Raising queries one at a time is the single largest avoidable component of turnaround and is monitored by underwriter. A file may not be queried a second time on a point that was visible at the first query unless new information has come in.\n\n" +
+        "Turnaround standards. Unsecured retail: decision within two working days of a complete file. Secured retail: within five working days of a complete file, exclusive of the time taken for valuation and title, each of which carries its own standard of three and five working days. Wholesale: no standard turnaround; each case carries a timetable agreed at mandate.\n\n" +
+        "Sanction. The sanction records the amount, rate, tenor, schedule, security, every deviation with its approver, every condition precedent and every post-disbursement obligation with its due date. A condition recorded without a due date is not a condition. The sanction letter and the key facts statement are issued to the customer before the agreement is executed.\n\n" +
+        "Validity. A sanction is valid for 90 days for unsecured facilities and 180 days for secured. An expired sanction is re-appraised rather than extended, with fresh bureau and fresh income where the expiry exceeds 30 days.",
     },
   ],
 };

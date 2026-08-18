@@ -117,6 +117,12 @@ const ICON_PATHS = {
   key:'<circle cx="7.5" cy="15.5" r="4"/><path d="m10.5 12.5 8-8"/><path d="m16 7 2.5 2.5"/><path d="m19 4 2 2"/>',
   route:'<circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h6a4 4 0 0 0 0-8H9a4 4 0 0 1 0-8h3"/>',
 
+  /* lending: money, law and the financed asset. Added because the domain
+     has no way to say any of the three with the generic set. */
+  rupee:'<path d="M7 5h10"/><path d="M7 9.5h10"/><path d="M14.5 5c0 3.6-2.4 4.5-5.2 4.5H7l7.5 9.5"/>',
+  scale:'<path d="M12 4v16"/><path d="M6 20h12"/><path d="M4.5 7.5h15"/><path d="M4.5 7.5 2 14h5Z"/><path d="M19.5 7.5 17 14h5Z"/>',
+  truck:'<path d="M2 6.5h11v9H2Z"/><path d="M13 9.5h4l3 3v3h-7Z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+
   ghost:'<path d="M12 2a7 7 0 0 0-7 7v11l2.5-2 2.25 2 2.25-2 2.25 2 2.25-2 2.5 2V9a7 7 0 0 0-7-7Z"/><path d="M9.5 10h.01"/><path d="M14.5 10h.01"/>',
   /* solid, so it reads as "stop" rather than another outline glyph */
   stop:{ f:true, d:'<rect x="6.5" y="6.5" width="11" height="11" rx="2.6" fill="currentColor"/>' },
