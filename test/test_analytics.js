@@ -22,7 +22,7 @@
 
 const H = require("./harness");
 
-H.loadEdition("mining");
+H.loadEdition("nbfc");
 H.loadSrc();
 
 /* localStorage and network stubs, so the module runs headless and
@@ -60,11 +60,11 @@ function reset(level, endpoint, identify) {
   Analytics.clear();
 }
 function events() {
-  const raw = store["sara_mining_usage"];
+  const raw = store["sara_nbfc_usage"];
   return raw ? JSON.parse(raw).events : [];
 }
 function outbox() {
-  const raw = store["sara_mining_usage_outbox"];
+  const raw = store["sara_nbfc_usage_outbox"];
   return raw ? JSON.parse(raw) : [];
 }
 /* a finished exchange, the shape finish() hands over */
@@ -310,7 +310,7 @@ async function endpoints() {
      and be finished: no URL has to be known at build time. */
   Object.defineProperty(global, "location", {
     configurable: true, writable: true,
-    value: { protocol: "https:", href: "https://demo.example.com/d/9f3a/sara_mining.html" },
+    value: { protocol: "https:", href: "https://demo.example.com/d/9f3a/sara_nbfc.html" },
   });
 
   const sentTo = async (endpoint) => {
@@ -330,7 +330,7 @@ async function endpoints() {
   /* A copy opened from disk has no collector beside it, and firing failed
      requests at a path that cannot exist is noise, not resilience. */
   location.protocol = "file:";
-  location.href = "file:///C:/Users/x/Desktop/sara_mining.html";
+  location.href = "file:///C:/Users/x/Desktop/sara_nbfc.html";
   reset("full", "collect.php");
   Analytics.begin();
   for (let i = 0; i < 30; i++) { exchange("q" + i, "a" + i); await Promise.resolve(); }
@@ -340,7 +340,7 @@ async function endpoints() {
   H.ok(events().length > 0, "but it still records locally, so Settings, Usage still works");
 
   location.protocol = "https:";
-  location.href = "https://demo.example.com/d/9f3a/sara_mining.html";
+  location.href = "https://demo.example.com/d/9f3a/sara_nbfc.html";
 }
 
 H.section("With no endpoint, nothing is ever dispatched");
@@ -383,7 +383,7 @@ async function delivery() {
     "it posts to the configured endpoint and nowhere else");
   H.eq(posts[0].opts.headers["Content-Type"], "text/plain;charset=UTF-8",
     "it posts as text/plain, so a simple collector needs no CORS preflight");
-  H.eq(body.edition, "mining", "the payload names the edition");
+  H.eq(body.edition, "nbfc", "the payload names the edition");
   H.eq(body.level, "full", "the payload states the level it was captured at");
   H.ok(!!body.visitor.id, "the payload carries a visitor id");
   H.ok(!!body.session.id, "the payload carries a session id");
@@ -441,7 +441,7 @@ await Promise.resolve();
            { cited: ["CER-001"] });
 
   const json = JSON.parse(Analytics.toJson());
-  H.eq(json.meta.edition, "mining", "the JSON export names the edition");
+  H.eq(json.meta.edition, "nbfc", "the JSON export names the edition");
   H.eq(json.meta.level, "full", "the JSON export states the capture level");
   H.ok(Array.isArray(json.events), "the JSON export carries the events");
 
@@ -533,13 +533,13 @@ endpoints().then(delivery).then(retries).then(async function () {
   await Promise.resolve();
   const labelled = JSON.parse(posts[0].opts.body);
   H.eq(labelled.label, "CESI", "the label rides along in the payload");
-  H.eq(labelled.edition, "mining", "so does the edition, as a fallback");
+  H.eq(labelled.edition, "nbfc", "so does the edition, as a fallback");
 
   reset("detail", "https://example.invalid/collect");
   Config.analytics.label = "";
   Analytics.begin();
   await Promise.resolve();
-  H.eq(JSON.parse(posts[0].opts.body).label, "mining",
+  H.eq(JSON.parse(posts[0].opts.body).label, "nbfc",
     "an unlabelled build still identifies itself by edition");
 
   H.report("SARA usage analytics");

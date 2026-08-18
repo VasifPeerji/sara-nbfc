@@ -12,7 +12,7 @@
    place it is. Read it. A card whose top hit is not obviously the
    document it was written for is a card to reword.
 
-       node test/audit_retrieval.js mining [--all]
+       node test/audit_retrieval.js nbfc [--all]
 
    Without --all it prints only the ones worth looking at:
      WEAK   top score below the corpus floor, so the answer will be
@@ -25,7 +25,7 @@
    ================================================================== */
 
 const H = require("./harness");
-const edition = process.argv[2] || "mining";
+const edition = process.argv[2] || "nbfc";
 const showAll = process.argv.indexOf("--all") !== -1;
 
 H.loadEdition(edition);

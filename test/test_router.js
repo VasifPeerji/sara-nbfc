@@ -14,7 +14,7 @@
 
 const H = require("./harness");
 
-H.loadEdition("mining");
+H.loadEdition(process.argv[2] || "nbfc");
 H.loadSrc();
 
 /* the app builds the retrieval index at boot; the router leans on it to
