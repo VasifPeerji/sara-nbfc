@@ -1,0 +1,128 @@
+/* ==================================================================
+   17-analytics.css
+   The Usage panel in Settings.
+   ================================================================== */
+
+.an-kpis { display: flex; gap: 8px; flex-wrap: wrap; }
+.an-kpi {
+  flex: 1 1 110px; min-width: 96px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: var(--r); background: var(--bg-2);
+}
+.an-kpi b { display: block; font-size: 22px; font-weight: 700; line-height: 1.2; }
+.an-kpi label { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+
+.an-meta { margin-top: 10px; font-size: 11.5px; color: var(--ink-3); }
+.an-meta code, .an-level code {
+  font-size: 11px; padding: 1px 5px; border-radius: 4px;
+  background: var(--bg-2); border: 1px solid var(--line);
+}
+
+.an-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 12.5px; }
+.an-row__k { flex: 0 0 160px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-row__bar {
+  flex: 1 1 auto; height: 8px; border-radius: 4px; background: var(--bg-2);
+  overflow: hidden; border: 1px solid var(--line);
+}
+.an-row__bar i { display: block; height: 100%; background: var(--accent); }
+.an-row__n { flex: 0 0 34px; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+.an-empty { font-size: 12.5px; color: var(--ink-3); padding: 4px 0; }
+
+.an-level {
+  display: flex; align-items: flex-start; gap: 7px; font-size: 12.5px;
+  color: var(--ink-2); margin-bottom: 8px; line-height: 1.5;
+}
+.an-level .i, .an-level svg { flex: 0 0 auto; width: 14px; height: 14px; margin-top: 2px; }
+.an-level b { color: var(--ink); text-transform: capitalize; }
+
+.an-note {
+  display: flex; align-items: flex-start; gap: 7px; margin-top: 8px;
+  font-size: 12px; color: var(--ink-3); line-height: 1.5;
+}
+.an-note .i, .an-note svg { flex: 0 0 auto; width: 13px; height: 13px; margin-top: 2px; }
+
+.an-warn {
+  display: flex; align-items: flex-start; gap: 8px; padding: 9px 11px; margin-bottom: 8px;
+  border-radius: var(--r); font-size: 12.5px; line-height: 1.5;
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent);
+  color: var(--ink);
+}
+.an-warn .i, .an-warn svg { flex: 0 0 auto; width: 14px; height: 14px; margin-top: 1px; }
+
+.an-acts { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+/* ---- view switch inside the Usage tab ---- */
+.an-vtabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.an-vtab {
+  padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: transparent; color: var(--ink-2); font-size: 12.5px; cursor: pointer;
+}
+.an-vtab.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+/* ---- the conversation, read back ---- */
+.an-sess { margin-bottom: 16px; }
+.an-sess__h {
+  display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-3);
+  padding-bottom: 6px; border-bottom: 1px solid var(--line); margin-bottom: 10px;
+}
+.an-sess__h .i, .an-sess__h svg { width: 13px; height: 13px; }
+.an-turn { margin-bottom: 14px; }
+.an-turn__q {
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  padding: 7px 10px; border-radius: var(--r); background: var(--bg-2);
+  border: 1px solid var(--line);
+}
+.an-turn__meta { font-size: 11px; color: var(--ink-3); margin: 5px 0 5px 2px; }
+.an-turn__a {
+  font-size: 12.5px; line-height: 1.6; color: var(--ink-2); white-space: pre-wrap;
+  padding-left: 10px; border-left: 2px solid var(--accent);
+}
+.an-w { color: var(--warn); font-weight: 600; }
+
+/* ---- the "who is looking" card ---- */
+/* While identity is outstanding the application is not merely covered,
+   it is not rendered. Removing the gate node in developer tools leaves a
+   blank page rather than a working product, and the sign-in path refuses
+   independently of anything here. */
+.an-gated body > *:not(.an-gate):not(script) { display: none !important; }
+.an-gated .an-gate { display: flex !important; visibility: visible !important; opacity: 1 !important; }
+
+.an-gate {
+  position: fixed; inset: 0; z-index: 400; display: flex;
+  align-items: center; justify-content: center; padding: 24px;
+  background: rgba(8, 10, 14, .72); backdrop-filter: blur(3px);
+}
+.an-gate__card {
+  width: 400px; max-width: 100%; background: var(--bg); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 14px; padding: 22px 22px 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+}
+.an-gate__h { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.an-gate__p { font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 0 0 14px; }
+.an-gate__l { display: block; font-size: 11.5px; color: var(--ink-3); margin-bottom: 10px; }
+.an-gate__l input {
+  display: block; width: 100%; margin-top: 4px; padding: 8px 10px;
+  border: 1px solid var(--line); border-radius: var(--r);
+  background: var(--bg-2); color: var(--ink); font: inherit; font-size: 13px;
+}
+.an-gate__l input:focus { outline: none; border-color: var(--accent); }
+.an-gate__acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.an-gate__n {
+  font-size: 10.5px; line-height: 1.55; color: var(--ink-3);
+  margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line);
+}
+
+/* ---- the identify card, without a way past it ---- */
+.an-gate__p--em {
+  color: var(--ink); font-weight: 500;
+  padding: 9px 11px; border-radius: var(--r);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+}
+.an-gate__l input::placeholder { color: var(--ink-3); opacity: .7; }
+.an-gate__err {
+  min-height: 16px; font-size: 11.5px; color: var(--err);
+  margin: -4px 0 2px;
+}
+.an-gate__acts .btn { width: 100%; justify-content: center; }

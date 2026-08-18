@@ -1,0 +1,359 @@
+<div class="mob-scrim" id="mobScrim"></div>
+
+<!-- ================= SIGN IN ================= -->
+<div class="login" id="login">
+  <section class="login-brand">
+    <div class="lb-top">
+      <div class="lb-mark" id="lbMark"></div>
+      <div>
+        <div class="lb-name" id="lbName">SARA</div>
+        <div class="lb-ver" id="lbVer"></div>
+      </div>
+    </div>
+    <div class="lb-mid">
+      <h1 class="lb-h" id="lbHead"></h1>
+      <p class="lb-p" id="lbSub"></p>
+      <div class="lb-facts" id="lbFacts"></div>
+    </div>
+    <div class="lb-foot">
+      <span class="dot"></span>
+      <span id="lbFoot"></span>
+    </div>
+  </section>
+
+  <section class="login-pane">
+    <div class="login-inner">
+      <h2 class="login-h">Sign in</h2>
+      <p class="login-sub" id="loginSub">Choose your profile to continue. Answers are scoped to what your role is cleared to see.</p>
+
+      <div class="login-search side-search">
+        <span class="i" data-icon="search"></span>
+        <input id="loginFilter" type="text" placeholder="Search people, roles or departments" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="login-roles" id="loginRoles"></div>
+
+      <div class="login-note">
+        <span class="i" data-icon="shield"></span>
+        <span id="loginNote"></span>
+      </div>
+
+      <p class="login-legal" id="loginLegal"></p>
+    </div>
+  </section>
+</div>
+
+<!-- ================= APP ================= -->
+<div class="app" id="app">
+
+  <!-- ---------- icon rail ---------- -->
+  <nav class="rail">
+    <button class="rail-btn rail-strong tip" data-tip="Toggle sidebar" id="railToggle" onclick="Sidebar.toggle()" aria-label="Toggle sidebar"><span class="i" data-icon="sidebar"></span></button>
+    <button class="rail-btn rail-strong tip" data-tip="New chat" onclick="Chat.newChat()" aria-label="New chat"><span class="i" data-icon="compose"></span></button>
+
+    <div class="rail-sep"></div>
+    <button class="rail-btn tip" data-tip="Guided tasks" id="railTasks" onclick="Journeys.openPicker()" aria-label="Guided tasks"><span class="i" data-icon="checklist"></span></button>
+    <button class="rail-btn tip" data-tip="Chats" data-view="chats" onclick="Sidebar.view('chats')" aria-label="Chats"><span class="i" data-icon="chat"></span></button>
+    <button class="rail-btn tip" data-tip="Bookmarks" data-view="bookmarks" onclick="Sidebar.view('bookmarks')" aria-label="Bookmarks"><span class="i" data-icon="bookmark"></span></button>
+    <button class="rail-btn tip" data-tip="Files" data-view="files" onclick="Sidebar.view('files')" aria-label="Files"><span class="i" data-icon="paperclip"></span></button>
+    <button class="rail-btn tip" data-tip="MCP servers" data-view="mcp" onclick="Sidebar.view('mcp')" aria-label="MCP servers"><span class="i" data-icon="layers"></span></button>
+
+    <div class="spacer"></div>
+
+    <button class="rail-btn tip" data-tip="Knowledge base" onclick="Modals.openKb()" aria-label="Knowledge base"><span class="i" data-icon="library"></span></button>
+    <button class="rail-btn tip" data-tip="Search &amp; commands  Ctrl K" onclick="Palette.open()" aria-label="Command palette"><span class="i" data-icon="search"></span></button>
+    <button class="rail-btn tip" data-tip="Settings" onclick="Settings.open()" aria-label="Settings"><span class="i" data-icon="settings"></span></button>
+    <button class="rail-me av" id="railMe" onclick="Modals.profile(event)" aria-label="Account"></button>
+  </nav>
+
+  <!-- ---------- conversation sidebar ---------- -->
+  <aside class="side" id="side" data-view="chats">
+
+    <!-- ---- chats ---- -->
+    <div class="side-view" data-view="chats">
+      <div class="side-top">
+        <div class="side-search">
+          <span class="i" data-icon="search"></span>
+          <input id="convoSearch" type="text" placeholder="Search chats" autocomplete="off" spellcheck="false" oninput="Sidebar.filter(this.value)">
+        </div>
+      </div>
+      <button class="side-new" onclick="Chat.newChat()">
+        <span class="i" data-icon="compose"></span>
+        <span>New chat</span>
+        <span class="spacer"></span>
+        <kbd>Ctrl ⇧ O</kbd>
+      </button>
+      <div class="side-scroll" id="convoList"></div>
+    </div>
+
+    <!-- ---- bookmarks ---- -->
+    <div class="side-view" data-view="bookmarks">
+      <div class="side-top">
+        <div class="side-search">
+          <span class="i" data-icon="search"></span>
+          <input id="bmSearch" type="text" placeholder="Filter bookmarks…" autocomplete="off" spellcheck="false" oninput="Library.renderBookmarks()">
+        </div>
+        <button class="side-add tip tip-b" data-tip="New bookmark" onclick="Library.newBookmark()" aria-label="New bookmark"><span class="i" data-icon="plus"></span></button>
+      </div>
+      <div class="side-scroll" id="bmList"></div>
+    </div>
+
+    <!-- ---- files ---- -->
+    <div class="side-view" data-view="files">
+      <div class="side-top">
+        <div class="side-search">
+          <span class="i" data-icon="search"></span>
+          <input id="fileSearch" type="text" placeholder="Filter files…" autocomplete="off" spellcheck="false" oninput="Library.renderFiles()">
+        </div>
+      </div>
+      <div class="side-scroll" id="fileList"></div>
+    </div>
+
+    <!-- ---- mcp ---- -->
+    <div class="side-view" data-view="mcp">
+      <div class="side-top">
+        <div class="side-search">
+          <span class="i" data-icon="search"></span>
+          <input id="mcpSearch" type="text" placeholder="Filter MCP servers by name" autocomplete="off" spellcheck="false" oninput="Library.renderMcp()">
+        </div>
+        <button class="side-add tip tip-b" data-tip="Add server" onclick="Library.newMcp()" aria-label="Add MCP server"><span class="i" data-icon="plus"></span></button>
+      </div>
+      <div class="side-scroll" id="mcpList"></div>
+    </div>
+
+    <button class="side-me" id="sideMe" onclick="Modals.profile(event)">
+      <span class="av" id="sideMeAv"></span>
+      <span class="who">
+        <span class="nm" id="sideMeName"></span>
+        <span class="rl" id="sideMeRole"></span>
+      </span>
+      <span class="i" data-icon="dots"></span>
+    </button>
+  </aside>
+
+  <!-- ---------- main thread ---------- -->
+  <main class="main">
+    <header class="topbar">
+      <button class="model-chip" onclick="Models.open()" id="modelChip">
+        <span class="glyph"><span class="i" data-icon="spark"></span></span>
+        <span id="modelChipName">OpenAI</span>
+        <span class="i caret" data-icon="chevdown"></span>
+      </button>
+
+      <span class="thread-title trunc" id="threadTitle"></span>
+
+      <span class="spacer"></span>
+
+      <button class="ib tip tip-b" data-tip="Temporary chat" onclick="Chat.toggleTemporary()" id="tempBtn" aria-label="Temporary chat"><span class="i" data-icon="ghost"></span></button>
+      <button class="ib tip tip-b" data-tip="Bookmark this chat" onclick="Library.chatMenu(event)" id="saveBtn" aria-label="Bookmark this chat"><span class="i" data-icon="bookmark"></span></button>
+      <button class="ib tip tip-b" data-tip="Export" onclick="Exporter.menu(event)" aria-label="Export"><span class="i" data-icon="share"></span></button>
+      <button class="ib tip tip-b" data-tip="Operator" data-tip-system="1" onclick="Operator.open()" id="opBtn" aria-label="Operator"><span class="i" data-icon="monitor"></span></button>
+      <button class="ib tip tip-b" data-tip="Toggle panel" onclick="Panel.toggle()" id="panelBtn" aria-label="Toggle panel"><span class="i" data-icon="panel"></span></button>
+    </header>
+
+    <div class="temp-bar" id="tempBar">
+      <span class="i" data-icon="ghost"></span>
+      <span><b>Temporary chat.</b> This conversation will not appear in your history and is not saved to this device.</span>
+      <span class="spacer"></span>
+      <button class="btn btn-sm" onclick="Chat.toggleTemporary()">Turn off</button>
+    </div>
+
+    <div class="thread" id="thread">
+      <div class="thread-inner" id="threadInner"></div>
+    </div>
+
+    <button class="to-bottom" id="toBottom" onclick="Chat.scrollToEnd(true)" aria-label="Scroll to latest"><span class="i" data-icon="arrowdown"></span></button>
+    <button class="panel-open-fab" id="panelFab" onclick="Panel.open()"><span class="i" data-icon="panel"></span> <span id="panelFabText">Show visual</span></button>
+
+    <div class="composer-wrap">
+      <div class="attach-bar" id="attachBar"></div>
+      <form class="composer" id="composer" onsubmit="return Chat.submit(event)">
+        <textarea class="composer-in" id="composerIn" rows="1" placeholder="Message SARA" autocomplete="off" spellcheck="true"
+                  oninput="Chat.autogrow(this)" onkeydown="Chat.onKey(event)"></textarea>
+        <div class="composer-bar">
+          <button type="button" class="ib tip tip-b" data-tip="Attach a file  ·  or drop one anywhere" onclick="Attachments.pick()" aria-label="Attach a file"><span class="i" data-icon="paperclip"></span></button>
+          <button type="button" class="pill tip tip-b" id="webBtn" data-tip="Web search" onclick="Web.cycle()" aria-pressed="false">
+            <span class="i" data-icon="globe"></span><span id="webBtnLabel">Web</span>
+          </button>
+          <span class="spacer"></span>
+          <button type="button" class="ib mic tip tip-b" data-tip="Voice input" onclick="Chat.voice()" id="micBtn" aria-label="Voice input"><span class="i" data-icon="mic"></span></button>
+          <button type="submit" class="composer-send" id="sendBtn" disabled aria-label="Send"><span class="i" data-icon="arrowup"></span></button>
+        </div>
+      </form>
+    </div>
+
+    <div class="drop-veil" id="dropVeil">
+      <div class="dv-card">
+        <span class="dv-ic"><span class="i" data-icon="upload"></span></span>
+        <h4>Drop a file to read it</h4>
+        <p>PDF, Word, Excel, PowerPoint, CSV or text. It is parsed here in your browser and never uploaded.</p>
+      </div>
+    </div>
+
+    <p class="footnote" id="footnote"></p>
+  </main>
+
+  <!-- ---------- artifact panel ---------- -->
+  <aside class="panel" id="panel">
+    <div class="panel-grip" id="panelGrip"></div>
+
+    <header class="panel-head">
+      <span class="mn">
+        <span class="tt" id="panelTitle">Workspace</span>
+        <span class="ss" id="panelSub"></span>
+      </span>
+      <button class="ib tip tip-b" data-tip="Copy" onclick="Panel.copy()" aria-label="Copy"><span class="i" data-icon="copy"></span></button>
+      <button class="ib tip tip-b" data-tip="Download" onclick="Panel.download()" aria-label="Download"><span class="i" data-icon="download"></span></button>
+      <button class="ib tip tip-b" data-tip="Widen" onclick="Panel.toggleWide()" id="panelWideBtn" aria-label="Widen"><span class="i" data-icon="expand"></span></button>
+      <button class="ib tip tip-b" data-tip="Close" onclick="Panel.close()" aria-label="Close"><span class="i" data-icon="close"></span></button>
+    </header>
+
+    <div class="panel-nav" id="panelNav" style="display:none">
+      <button class="ib ib-sm" onclick="Panel.step(-1)" aria-label="Previous"><span class="i" data-icon="chevleft"></span></button>
+      <span class="pos" id="panelPos"></span>
+      <button class="ib ib-sm" onclick="Panel.step(1)" aria-label="Next"><span class="i" data-icon="chevright"></span></button>
+      <span class="spacer"></span>
+      <span id="panelStamp"></span>
+    </div>
+
+    <div class="panel-body" id="panelBody"></div>
+  </aside>
+</div>
+
+<!-- ================= OVERLAYS ================= -->
+
+<div class="ov ov-top" id="ovModel" onclick="if(event.target===this)Models.close()">
+  <div class="mp">
+    <div class="mp-search-wrap">
+      <span class="i" data-icon="search"></span>
+      <input class="mp-search" id="mpSearch" type="text" placeholder="Search models…" autocomplete="off" spellcheck="false"
+             oninput="Models.search(this.value)" onkeydown="Models.searchKey(event)">
+    </div>
+    <div class="mp-body">
+      <div class="mp-col mp-left" id="mpProviders"></div>
+      <div class="mp-col mp-right" id="mpModels"></div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovKey" onclick="if(event.target===this)Modals.close('ovKey')">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <span class="mn"><h3 id="keyTitle">Set API Key</h3></span>
+      <button class="ib" onclick="Modals.close('ovKey')" aria-label="Close"><span class="i" data-icon="close"></span></button>
+    </div>
+    <div class="modal-body">
+      <div class="key-note warn" id="keyNote">Your key will never expire</div>
+      <select class="inp" id="keyExpiry" style="width:auto;margin-bottom:20px" onchange="Models.updateExpiryNote()"></select>
+
+      <div class="fld">
+        <label id="keyLabel" for="keyInput">API Key</label>
+        <input class="inp" id="keyInput" type="password" autocomplete="off" spellcheck="false" placeholder="Enter value">
+      </div>
+
+      <div class="fld" id="keyDeployWrap" style="display:none">
+        <label for="keyDeploy">Deployment name</label>
+        <input class="inp" id="keyDeploy" autocomplete="off" spellcheck="false" placeholder="my-gpt-4o-deployment">
+      </div>
+
+      <details class="key-adv">
+        <summary>Advanced</summary>
+        <div class="fld" style="margin-top:12px">
+          <label for="keyBase">Base URL</label>
+          <input class="inp" id="keyBase" autocomplete="off" spellcheck="false">
+          <div class="hint">Default: <span id="keyBaseDefault" class="mono"></span>. Change this if the provider has moved its endpoint or you route through a proxy.</div>
+        </div>
+      </details>
+
+      <div class="key-state" id="keyState"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="Models.testDialog()" id="keyTestBtn">Test</button>
+      <span class="spacer"></span>
+      <button class="btn btn-danger" onclick="Models.revokeKey()">Revoke</button>
+      <button class="btn btn-primary btn-ok" onclick="Models.submitKey()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov ov-top" id="ovCmd" onclick="if(event.target===this)Palette.close()">
+  <div class="cmd">
+    <div class="cmd-in-wrap">
+      <span class="i" data-icon="search"></span>
+      <input class="cmd-in" id="cmdIn" type="text" placeholder="Ask, search the knowledge base, or run a command" autocomplete="off" spellcheck="false"
+             oninput="Palette.filter(this.value)" onkeydown="Palette.key(event)">
+    </div>
+    <div class="cmd-list" id="cmdList"></div>
+    <div class="cmd-foot">
+      <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+      <span><kbd>↵</kbd> open</span>
+      <span><kbd>esc</kbd> close</span>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovSettings" onclick="if(event.target===this)Modals.close('ovSettings')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="mn"><h3>Settings</h3><p id="setSub"></p></span>
+      <button class="ib" onclick="Modals.close('ovSettings')" aria-label="Close"><span class="i" data-icon="close"></span></button>
+    </div>
+    <div class="tabs" id="setTabs">
+      <button class="on" onclick="Settings.tab('model')" data-tab="model">Model</button>
+      <button onclick="Settings.tab('answers')" data-tab="answers">Answers</button>
+      <button onclick="Settings.tab('search')" data-tab="search">Search</button>
+      <button onclick="Settings.tab('appearance')" data-tab="appearance">Appearance</button>
+      <button onclick="Settings.tab('usage')" data-tab="usage">Usage</button>
+      <button onclick="Settings.tab('about')" data-tab="about">About</button>
+    </div>
+    <div class="modal-body" id="setBody"></div>
+    <div class="modal-foot">
+      <span class="note" id="setNote"></span>
+      <span class="spacer"></span>
+      <button class="btn" onclick="Modals.close('ovSettings')">Close</button>
+      <button class="btn btn-primary" onclick="Settings.save()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovTasks" onclick="if(event.target===this)Modals.close('ovTasks')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="mn"><h3>What would you like to do?</h3><p id="taskSub"></p></span>
+      <button class="ib" onclick="Modals.close('ovTasks')" aria-label="Close"><span class="i" data-icon="close"></span></button>
+    </div>
+    <div class="modal-body"><div class="jn-cards jn-cards-lg" id="taskList"></div></div>
+  </div>
+</div>
+
+<div class="ov" id="ovKb" onclick="if(event.target===this)Modals.close('ovKb')">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <span class="mn"><h3>Knowledge base</h3><p id="kbSub"></p></span>
+      <button class="ib" onclick="Modals.close('ovKb')" aria-label="Close"><span class="i" data-icon="close"></span></button>
+    </div>
+    <div class="modal-body">
+      <div class="kb-stats" id="kbStats"></div>
+      <div class="kb-tools">
+        <div class="side-search">
+          <span class="i" data-icon="search"></span>
+          <input id="kbSearch" type="text" placeholder="Search documents" autocomplete="off" oninput="Modals.filterKb()">
+        </div>
+        <select class="inp" id="kbCat" style="width:auto" onchange="Modals.filterKb()"></select>
+      </div>
+      <div class="kb-list" id="kbList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ovSystems" onclick="if(event.target===this)Modals.close('ovSystems')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="mn"><h3>Connected systems</h3><p id="sysSub"></p></span>
+      <button class="ib" onclick="Modals.close('ovSystems')" aria-label="Close"><span class="i" data-icon="close"></span></button>
+    </div>
+    <div class="modal-body"><div class="sys-grid" id="sysGrid"></div></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>

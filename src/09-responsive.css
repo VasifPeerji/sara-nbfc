@@ -1,0 +1,79 @@
+/* ------------------------------------------------------------------
+   Responsive behaviour.
+   Demos happen on laptops, projectors and occasionally a tablet, so the
+   panel and sidebar degrade to overlays rather than disappearing.
+   ------------------------------------------------------------------ */
+
+@media (max-width:1440px){
+  :root{--panel-w:400px}
+}
+
+@media (max-width:1200px){
+  :root{--panel-w:376px;--side-w:244px}
+  .login-brand{padding:var(--s7) var(--s8)}
+  .login-pane{padding:var(--s7) var(--s8)}
+  .lb-h{font-size:32px}
+}
+
+/* Panel becomes an overlay.
+   It is position:fixed from here down, which takes it out of the grid flow,
+   so the grid must declare one fewer column or .main lands in the wrong one. */
+@media (max-width:1024px){
+  /* every class combination must be restated: media queries add no specificity,
+     so the 4-column .app.side-off.panel-off rule would otherwise still win */
+  .app,.app.panel-off{grid-template-columns:var(--rail-w) var(--side-w) minmax(0,1fr)}
+  .app.side-off,.app.side-off.panel-off{grid-template-columns:var(--rail-w) 0px minmax(0,1fr)}
+  .panel{
+    position:fixed;top:0;right:0;bottom:0;width:min(440px,92vw);z-index:1200;
+    box-shadow:var(--sh-lg);
+    transform:translateX(100%);
+    transition:transform var(--d-slow) var(--e);
+    border-left:1px solid var(--line-2);
+  }
+  .app:not(.panel-off) .panel{transform:none}
+  .app.panel-off .panel{transform:translateX(100%)}
+  .panel-grip{display:none}
+  .app.panel-wide{--panel-w:440px}
+  .prompts{grid-template-columns:1fr}
+}
+
+/* Sidebar becomes an overlay too, so now only the rail and main remain in flow. */
+@media (max-width:820px){
+  .app,.app.side-off,.app.panel-off,.app.side-off.panel-off{grid-template-columns:var(--rail-w) minmax(0,1fr)}
+  .side{
+    position:fixed;top:0;left:var(--rail-w);bottom:0;width:min(var(--side-w,300px),88vw);z-index:1100;
+    box-shadow:var(--sh-lg);border-right:1px solid var(--line-2);
+    transform:translateX(-108%);
+    transition:transform var(--d-slow) var(--e);
+  }
+  .app:not(.side-off) .side{transform:none}
+  .thread-inner,.composer-wrap{padding-left:var(--s4);padding-right:var(--s4)}
+  .topbar{padding:0 var(--s3)}
+  .thread-title{display:none}
+
+  .login{grid-template-columns:1fr}
+  .login-brand{display:none}
+  .login-pane{padding:var(--s6) var(--s5)}
+}
+
+@media (max-width:560px){
+  :root{--rail-w:46px;--t-3xl:23px;--t-2xl:19px}
+  .welcome{padding-top:var(--s5)}
+  .msg-user .bubble{max-width:94%}
+  .modal{max-height:92vh}
+  .ov{padding:var(--s3)}
+  .ov-top{padding-top:6vh}
+  .mx{grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
+  .footnote{font-size:10px}
+  .composer-in{font-size:16px} /* prevents iOS zoom-on-focus */
+}
+
+/* scrim shown behind mobile overlays */
+.mob-scrim{
+  position:fixed;inset:0;z-index:1050;background:var(--scrim);
+  opacity:0;visibility:hidden;transition:opacity var(--d) var(--e),visibility var(--d) var(--e);
+}
+@media (max-width:1024px){
+  body.overlay-open .mob-scrim{opacity:1;visibility:visible}
+}
+@media (min-width:1025px){ .mob-scrim{display:none} }

@@ -1,0 +1,96 @@
+/* ------------------------------------------------------------------
+   Mining diagrams.
+
+   The SVG carries no colours of its own beyond the theme tokens, so
+   everything below is type, spacing and the verdict strip. Sizes are
+   set here rather than in the SVG so the same diagram reads at panel
+   width, at full width and on paper.
+   ------------------------------------------------------------------ */
+
+.dg{
+  margin: var(--s3) 0 0;
+  padding: var(--s3) var(--s2) var(--s2);
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.dg svg{ display: block; max-width: 100%; height: auto; }
+
+/* ---- type inside the drawing ---- */
+.dg-t{
+  font-family: var(--f);
+  fill: var(--tx-2);
+  font-size: 11px;
+  dominant-baseline: auto;
+}
+.dg-ax{ fill: var(--tx-3); }
+.dg-key{ fill: var(--tx-2); font-weight: 500; }
+.dg-val{ fill: var(--tx); font-weight: 600; font-variant-numeric: tabular-nums; }
+.dg-cell{ fill: var(--tx); font-weight: 600; font-variant-numeric: tabular-nums; }
+.dg-src{ fill: var(--tx); font-weight: 500; }
+.dg-asset{ fill: var(--tx); font-weight: 650; }
+.dg-band{ fill: var(--tx-2); font-weight: 600; letter-spacing: .02em; }
+.dg-now{ fill: var(--tx); font-weight: 700; font-variant-numeric: tabular-nums; }
+.dg-dim{ fill: var(--tx-2); font-variant-numeric: tabular-nums; }
+.dg-bad{ fill: var(--crit); font-weight: 700; letter-spacing: .03em; }
+
+/* ---- the header above a diagram ---- */
+.dg-hd{
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2);
+  margin-top: var(--s3);
+}
+.dg-hd b{ font-size: var(--t-base); font-weight: 650; color: var(--tx); }
+.dg-hd span{ font-size: var(--t-sm); color: var(--tx-3); }
+
+/* ---- the strip that says what the drawing means ----
+   A diagram that does not state its own verdict makes the reader do
+   the work, and the reader is on a bench with five minutes. */
+.dg-say{
+  --dgc: var(--a);
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2);
+  margin-top: var(--s2);
+  padding: var(--s2) var(--s3);
+  background: var(--bg-2);
+  border-left: 3px solid var(--dgc);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: var(--t-sm);
+  line-height: 1.55;
+  color: var(--tx-2);
+}
+.dg-say__h{ color: var(--dgc); font-weight: 650; }
+.dg-say__c{
+  margin-left: auto;
+  font-size: var(--t-xs);
+  color: var(--tx-3);
+  white-space: nowrap;
+}
+
+.dg-err{
+  display: flex; align-items: center; gap: var(--s2);
+  margin-top: var(--s3); padding: var(--s3);
+  background: var(--crit-soft); border-radius: var(--r-sm);
+  font-size: var(--t-sm); color: var(--tx-2);
+}
+.dg-err svg{ width: 16px; height: 16px; flex: none; }
+
+/* ---- inside a chat message, a diagram is narrower ---- */
+.msg .dg{ background: var(--bg-2); }
+.msg .dg-t{ font-size: 11px; }
+
+/* ---- inside the artifact panel ---- */
+.art .dg{ margin-top: 0; border: 0; background: transparent; padding: 0; }
+.art .dg-say{ margin-inline: 0; }
+
+@media (max-width: 700px){
+  .dg{ padding: var(--s2) var(--s1); }
+  .dg-say{ flex-direction: column; gap: var(--s1); }
+  .dg-say__c{ margin-left: 0; }
+}
+
+/* Printing a section or a plan view is a normal thing to do on a mine:
+   it gets pinned up in the crib room or carried to the bench. */
+@media print{
+  .dg{ background: #fff; border-color: #ddd; break-inside: avoid; }
+  .dg-say{ background: #f6f6f6; break-inside: avoid; }
+}

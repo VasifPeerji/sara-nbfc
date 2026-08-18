@@ -1,0 +1,68 @@
+/* ==================================================================
+   16-router.css
+   Intent routing: the badge on a routed answer, the run card in the
+   transcript, and the Operator half of the "get something done" wall.
+   ================================================================== */
+
+/* ---- the routing decision, shown on the answer ---- */
+.trace.is-routed .trace-head { cursor: default; }
+.rt-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: var(--t-xs); font-weight: 600; letter-spacing: .01em;
+  padding: 2px 8px; border-radius: 999px; flex: 0 0 auto;
+  border: 1px solid var(--line); background: var(--bg-2); color: var(--fg-2);
+}
+.rt-badge svg { width: 12px; height: 12px; }
+.rt-badge[data-i="operator"]     { border-color: color-mix(in srgb, #EE4823 45%, var(--line)); color: #EE4823; }
+.rt-badge[data-i="task"]         { border-color: color-mix(in srgb, var(--a) 45%, var(--line)); color: var(--a-text); }
+.rt-badge[data-i="knowledge"]    { border-color: var(--line); color: var(--fg-2); }
+.rt-badge[data-i="productivity"] { border-color: color-mix(in srgb, #a855f7 45%, var(--line)); color: #a855f7; }
+.rt-badge[data-i="outofdomain"]  { border-color: var(--line); color: var(--fg-3); }
+
+/* ---- the run card in the transcript ---- */
+.rt-run {
+  margin-top: var(--s3);
+  border: 1px solid var(--line); border-radius: var(--r2);
+  background: var(--bg-1); overflow: hidden;
+}
+.rt-run[data-kind="operator"] { border-left: 3px solid var(--rc, #EE4823); }
+.rt-run__h {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 13px 10px;
+}
+.rt-run__ic {
+  width: 30px; height: 30px; border-radius: var(--r1); flex: 0 0 auto;
+  display: grid; place-items: center;
+  background: var(--bg-3); color: var(--fg-2);
+}
+.rt-run[data-kind="operator"] .rt-run__ic { background: color-mix(in srgb, var(--rc) 16%, transparent); color: var(--rc); }
+.rt-run__ic svg { width: 15px; height: 15px; }
+.rt-run__t { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.rt-run__t b { font-size: var(--t-sm); font-weight: 620; letter-spacing: -.01em; }
+.rt-run__t span { font-size: var(--t-xs); color: var(--fg-3); line-height: 1.5; }
+.rt-run__meta {
+  flex: 0 0 auto; font-size: var(--t-xs); color: var(--fg-4);
+  font-variant-numeric: tabular-nums; padding-top: 2px;
+}
+.rt-run__f {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 0 13px 12px 53px;
+}
+.rt-run__note { font-size: var(--t-xs); color: var(--fg-4); }
+
+@media (max-width: 560px) {
+  .rt-run__f { padding-left: 13px; }
+}
+
+/* ---- the Operator half of the welcome wall ---- */
+.wl-sec {
+  display: flex; align-items: center; gap: 7px;
+  margin: var(--s4) 0 0;
+  font-size: var(--t-xs); font-weight: 640;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--fg-3);
+}
+.wl-sec .i, .wl-sec svg { width: 13px; height: 13px; color: #EE4823; }
+
+.jn-card--op { position: relative; }
+.jn-card--op .jn-cic { background: color-mix(in srgb, var(--rc) 16%, transparent); color: var(--rc); }
+.jn-card--op:hover { border-color: var(--rc); }
+.jn-card--op .jn-cest { color: var(--fg-4); }

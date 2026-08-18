@@ -1,0 +1,68 @@
+/* ------------------------------------------------------------------
+   Print / "Save as PDF".
+   Export is done through the browser's own print pipeline so the file
+   stays dependency-free and the output is real selectable text.
+   The body gets .pr-thread or .pr-artifact before printing.
+   ------------------------------------------------------------------ */
+
+.print-head{display:none}
+
+@media print{
+  @page{margin:16mm 14mm}
+
+  html,body{height:auto;overflow:visible;background:#fff;color:#111}
+  body{font-size:11pt;line-height:1.55}
+
+  /* force a light, ink-friendly palette regardless of the live theme */
+  :root{
+    --bg:#fff;--bg-side:#fff;--bg-1:#fff;--bg-2:#f6f7f9;--bg-3:#eef0f4;--bg-inset:#f6f7f9;--code-bg:#f6f7f9;
+    --tx:#111418;--tx-2:#3d4450;--tx-3:#6b7280;
+    --line:#dfe3ea;--line-2:#d2d7e0;--line-3:#c2c8d4;
+    --sh:none;--sh-sm:none;--sh-lg:none;
+  }
+
+  .rail,.side,.topbar,.composer-wrap,.footnote,.msg-acts,.fups,.to-bottom,
+  .panel-grip,.panel-nav,.ov,.menu,.pop,.toasts,.boot,.mob-scrim,
+  .panel-open-fab,.trace-head .caret,.login{display:none !important}
+
+  .app{display:block !important;height:auto !important}
+  .thread{overflow:visible !important;padding:0 !important}
+  .thread-inner{max-width:none !important;padding:0 !important;gap:14pt !important}
+
+  .print-head{
+    display:block;margin-bottom:14pt;padding-bottom:8pt;border-bottom:1.5pt solid #111418;
+  }
+  .print-head .ph-t{font-size:15pt;font-weight:600;letter-spacing:-.01em}
+  .print-head .ph-m{font-size:9pt;color:#6b7280;margin-top:3pt}
+
+  .msg,.art,.doc,.dt-wrap,.cmp,.code-wrap,.callout,.trace,.tl-item,.ckl-item,.flow-node{
+    break-inside:avoid;page-break-inside:avoid;
+  }
+  .md h1,.md h2,.md h3,.doc-title,.art-sec-t{break-after:avoid;page-break-after:avoid}
+
+  .msg-user .bubble{
+    max-width:100% !important;border:1pt solid #d2d7e0;background:#f6f7f9 !important;
+    border-radius:6pt;font-size:11pt;
+  }
+  .msg-ai .msg-body{font-size:11pt}
+  .cite{background:#eef0f4 !important;color:#3d4450 !important;box-shadow:none}
+  .trace{border:1pt solid #dfe3ea}
+  .trace-body{display:block !important}
+  .trace-head{padding-bottom:4pt}
+
+  a{color:#111418 !important;text-decoration:none}
+  .md a::after{content:" (" attr(href) ")";font-size:8.5pt;color:#6b7280}
+
+  /* artifact-only export */
+  body.pr-artifact .thread,body.pr-artifact .main{display:none !important}
+  body.pr-artifact .panel{
+    display:block !important;position:static !important;width:auto !important;
+    border:0 !important;transform:none !important;
+  }
+  body.pr-artifact .panel-head{border-bottom:1pt solid #dfe3ea;padding:0 0 8pt;min-height:0}
+  body.pr-artifact .panel-head .ib{display:none !important}
+  body.pr-artifact .panel-body{overflow:visible !important;padding:12pt 0 0}
+
+  /* thread-only export */
+  body.pr-thread .panel{display:none !important}
+}

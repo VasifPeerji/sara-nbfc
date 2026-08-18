@@ -1,0 +1,1131 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>SARA Analytics Console</title>
+<!--
+  SARA ANALYTICS CONSOLE
+  ------------------------------------------------------------------
+  One console for every SARA instance. Point it at a collector, or drop
+  in log files from several collectors, and read them side by side or
+  one at a time.
+
+  Three things it is built around, because they are what was hard before:
+
+    1. MANY INSTANCES, ONE PLACE. Every batch a SARA sends carries the
+       instance it came from, so CESI, AGLink, Automotive, Mining and
+       anything built later all land here and are filtered apart with
+       one control. Nothing needs configuring per instance.
+
+    2. READING, NOT DECODING. Conversations are the point of collecting
+       any of this, so they get a proper reading pane: a list on the
+       left, the whole exchange on the right, keyboard navigation, and
+       search that highlights what it matched.
+
+    3. FILTERS AND SORTS THAT MATCH THE QUESTIONS PEOPLE ACTUALLY ASK.
+       Who opened it this week. Which prospect asked the most. What did
+       that person actually type. Show me only sessions with a real
+       conversation. Who got in without identifying themselves.
+
+  Self-contained. No build, no dependencies, no network except the
+  collector you point it at. Works from file:// with dropped files.
+-->
+<style>
+:root{
+  --bg:#0b0e13; --bg-1:#11151d; --bg-2:#171c26; --bg-3:#1e2531;
+  --line:#252d3a; --line-2:#2f3a4a;
+  --ink:#e8edf5; --ink-2:#a3b1c4; --ink-3:#6b7c93;
+  --accent:#4d8dfe; --accent-soft:#1b2f52;
+  --ok:#3fb87a; --warn:#e0a11b; --err:#f0605a; --info:#59a5ff;
+  --violet:#a78bfa; --pink:#f472b6; --teal:#2dd4bf; --amber:#fbbf24;
+  --r:10px; --sh:0 8px 28px rgba(0,0,0,.35);
+}
+:root[data-theme=light]{
+  --bg:#f4f6f9; --bg-1:#ffffff; --bg-2:#eef1f6; --bg-3:#e4e9f0;
+  --line:#dde3ec; --line-2:#cbd4e1;
+  --ink:#16202e; --ink-2:#4a5b70; --ink-3:#7b8ba1;
+  --accent:#2563eb; --accent-soft:#dbe7ff;
+  --sh:0 8px 28px rgba(20,30,50,.10);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+
+/* ---------- app frame ---------- */
+.app{display:flex;flex-direction:column;height:100vh;min-height:0}
+
+.top{
+  flex:0 0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 14px;background:var(--bg-1);border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.brand i{
+  width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--violet));color:#fff;
+  font-style:normal;font-size:13px;font-weight:800;
+}
+.brand small{display:block;font-size:10.5px;font-weight:500;color:var(--ink-3);letter-spacing:0}
+.sp{flex:1 1 auto}
+
+.ctl{
+  height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--line-2);
+  background:var(--bg-2);color:var(--ink);outline:none;
+}
+.ctl:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+select.ctl{padding-right:26px}
+.btn{
+  height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line-2);
+  background:var(--bg-2);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.btn:hover{background:var(--bg-3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.sm{height:26px;padding:0 9px;font-size:12px}
+.search{min-width:240px;flex:0 1 340px}
+
+/* ---------- tabs ---------- */
+.tabs{
+  flex:0 0 auto;display:flex;gap:2px;padding:0 14px;
+  background:var(--bg-1);border-bottom:1px solid var(--line);
+}
+.tab{
+  padding:9px 14px;border:0;background:transparent;color:var(--ink-3);
+  border-bottom:2px solid transparent;font-weight:600;font-size:13px;
+}
+.tab:hover{color:var(--ink-2)}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab b{
+  margin-left:6px;font-size:11px;font-weight:700;padding:1px 6px;border-radius:20px;
+  background:var(--bg-3);color:var(--ink-2);
+}
+
+/* ---------- filter bar ---------- */
+.filters{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:9px 14px;background:var(--bg);border-bottom:1px solid var(--line);
+}
+.fgroup{display:flex;align-items:center;gap:6px}
+.flabel{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{
+  height:26px;padding:0 10px;border-radius:20px;border:1px solid var(--line-2);
+  background:var(--bg-2);color:var(--ink-2);font-size:12px;font-weight:600;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.chip i{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.75}
+.chip em{font-style:normal;opacity:.6;font-size:11px}
+.seg{display:flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--bg-2);color:var(--ink-2);padding:0 10px;height:30px;font-size:12px;font-weight:600}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button[aria-pressed=true]{background:var(--accent);color:#fff}
+
+/* ---------- body ---------- */
+.main{flex:1 1 auto;min-height:0;overflow:auto;padding:14px}
+.pane{display:none}
+.pane.on{display:block}
+
+/* ---------- cards, kpis ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi label{display:block;font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.kpi b{display:block;font-size:26px;font-weight:300;line-height:1.25;letter-spacing:-.02em}
+.kpi small{font-size:11.5px;color:var(--ink-3)}
+.kpi.warn b{color:var(--warn)} .kpi.err b{color:var(--err)} .kpi.ok b{color:var(--ok)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+
+.card{background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.card>h3{
+  margin:0;padding:10px 14px;font-size:12.5px;font-weight:700;
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;
+}
+.card>h3 em{font-style:normal;font-weight:500;color:var(--ink-3);font-size:11.5px}
+.card .body{padding:14px}
+.card .body.flush{padding:0}
+
+/* ---------- bars ---------- */
+.bars{display:flex;flex-direction:column;gap:7px}
+.bar{display:grid;grid-template-columns:1fr 44px;gap:10px;align-items:center}
+.bar .t{font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .t i{display:block;height:5px;border-radius:3px;background:var(--accent);margin-top:4px;min-width:2px}
+.bar .n{text-align:right;font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+/* ---------- spark / timeline ---------- */
+.spark{display:flex;align-items:flex-end;gap:3px;height:64px}
+.spark div{flex:1 1 auto;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;position:relative}
+.spark div:hover{background:var(--violet)}
+.spark div span{
+  position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  background:var(--bg-3);border:1px solid var(--line-2);border-radius:6px;
+  padding:3px 7px;font-size:11px;white-space:nowrap;display:none;z-index:5;
+}
+.spark div:hover span{display:block}
+.axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin-top:6px}
+
+/* ---------- tables ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{
+  position:sticky;top:0;z-index:2;text-align:left;font-size:11px;font-weight:700;
+  color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;
+  padding:9px 12px;background:var(--bg-2);border-bottom:1px solid var(--line);white-space:nowrap;
+}
+.tbl th.s{cursor:pointer;user-select:none}
+.tbl th.s:hover{color:var(--ink)}
+.tbl th.s::after{content:"";opacity:.35;margin-left:5px}
+.tbl th.s[data-dir=asc]::after{content:"\2191";opacity:1;color:var(--accent)}
+.tbl th.s[data-dir=desc]::after{content:"\2193";opacity:1;color:var(--accent)}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tbody tr:hover{background:var(--bg-2)}
+.tbl tbody tr.sel{background:var(--accent-soft)}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.who{display:flex;align-items:center;gap:9px;min-width:0}
+.av{
+  width:28px;height:28px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;
+  font-size:11px;font-weight:700;color:#fff;background:var(--accent);
+}
+.who .n{min-width:0}
+.who .n b{display:block;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who .n span{display:block;font-size:11.5px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.pill{
+  display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 8px;border-radius:20px;
+  font-size:11px;font-weight:650;background:var(--bg-3);color:var(--ink-2);white-space:nowrap;
+}
+.pill.ok{background:rgba(63,184,122,.16);color:var(--ok)}
+.pill.warn{background:rgba(224,161,27,.16);color:var(--warn)}
+.pill.err{background:rgba(240,96,90,.16);color:var(--err)}
+.pill.info{background:rgba(89,165,255,.16);color:var(--info)}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* ---------- master / detail reading pane ---------- */
+.split{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:12px;height:calc(100vh - 210px);min-height:340px}
+@media(max-width:1000px){.split{grid-template-columns:1fr;height:auto}}
+.list{background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r);overflow:auto;min-height:0}
+.read{background:var(--bg-1);border:1px solid var(--line);border-radius:var(--r);overflow:auto;min-height:0}
+.row{
+  display:block;width:100%;text-align:left;border:0;background:transparent;
+  padding:10px 12px;border-bottom:1px solid var(--line);color:inherit;
+}
+.row:hover{background:var(--bg-2)}
+.row[aria-selected=true]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.row .h{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.row .h b{font-size:12.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .h time{margin-left:auto;font-size:11px;color:var(--ink-3);white-space:nowrap}
+.row p{margin:0;font-size:12.5px;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+.msg{padding:14px 16px;border-bottom:1px solid var(--line)}
+.msg .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.msg.q{background:var(--bg-2)}
+.msg .txt{white-space:pre-wrap;font-size:13.5px;line-height:1.65}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+mark{background:rgba(251,191,36,.32);color:inherit;border-radius:3px;padding:0 2px}
+
+.empty{padding:44px 20px;text-align:center;color:var(--ink-3)}
+.empty h4{margin:0 0 6px;color:var(--ink-2);font-size:14px}
+.empty p{margin:0 auto;max-width:460px;font-size:12.5px;line-height:1.6}
+
+.note{
+  border:1px solid var(--line-2);border-radius:var(--r);padding:11px 13px;
+  background:var(--bg-1);font-size:12.5px;color:var(--ink-2);margin-bottom:12px;
+}
+.note.err{border-color:rgba(240,96,90,.4);background:rgba(240,96,90,.08)}
+.note.warn{border-color:rgba(224,161,27,.4);background:rgba(224,161,27,.08)}
+.note b{color:var(--ink)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.drop{outline:2px dashed var(--accent);outline-offset:-8px}
+
+@media print{
+  .top,.tabs,.filters{display:none}
+  body{background:#fff;color:#000}
+  .main{overflow:visible;height:auto}
+  .split{display:block;height:auto}
+  .card,.kpi,.list,.read{break-inside:avoid;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="brand"><i>S</i><span>SARA Analytics<small id="srcLine">no data loaded</small></span></div>
+    <input type="search" id="q" class="ctl search" placeholder="Search questions, answers, names, organisations…">
+    <span class="sp"></span>
+    <button class="btn" id="load">Load files…</button>
+    <button class="btn" id="refresh">Refresh</button>
+    <button class="btn" id="exp">Export</button>
+    <button class="btn" id="theme" title="Light or dark">◐</button>
+    <input type="file" id="file" accept=".ndjson,.json,.log,.txt" multiple hidden>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-pane="overview" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" data-pane="people" aria-selected="false">People <b id="cPeople">0</b></button>
+    <button class="tab" role="tab" data-pane="convos" aria-selected="false">Conversations <b id="cConvos">0</b></button>
+    <button class="tab" role="tab" data-pane="sessions" aria-selected="false">Sessions <b id="cSessions">0</b></button>
+    <button class="tab" role="tab" data-pane="activity" aria-selected="false">Activity <b id="cActivity">0</b></button>
+  </nav>
+
+  <div class="filters">
+    <div class="fgroup"><span class="flabel">Instance</span><div class="chips" id="fInstance"></div></div>
+    <div class="fgroup"><span class="flabel">When</span>
+      <div class="seg" id="fRange">
+        <button data-d="1" aria-pressed="false">24h</button>
+        <button data-d="7" aria-pressed="false">7d</button>
+        <button data-d="30" aria-pressed="false">30d</button>
+        <button data-d="90" aria-pressed="false">90d</button>
+        <button data-d="0" aria-pressed="true">All</button>
+      </div>
+      <input type="date" id="fFrom" class="ctl" title="From">
+      <input type="date" id="fTo" class="ctl" title="To">
+    </div>
+    <div class="fgroup"><span class="flabel">Show</span><div class="chips" id="fFlags"></div></div>
+    <div class="fgroup"><span class="flabel">Org</span><select id="fOrg" class="ctl"><option value="">All</option></select></div>
+    <span class="sp"></span>
+    <button class="btn sm" id="clearF">Clear filters</button>
+  </div>
+
+  <main class="main">
+    <section class="pane on" id="pane-overview"></section>
+    <section class="pane" id="pane-people"></section>
+    <section class="pane" id="pane-convos"></section>
+    <section class="pane" id="pane-sessions"></section>
+    <section class="pane" id="pane-activity"></section>
+  </main>
+</div>
+
+<script>
+/* ==================================================================
+   1. loading
+   ================================================================== */
+
+/* Ships matching the key in collect.php so the three files work the
+   moment they are uploaded together. Change both, or open the viewer
+   with ?k=yourkey. */
+const DEFAULT_READ_KEY = "dz448vdctgd91acwvxxo";
+const qs = new URLSearchParams(location.search);
+const READ_KEY = qs.get("k") || DEFAULT_READ_KEY;
+
+let ROWS = [];            /* every event row, deduped, ascending by time */
+let SOURCES = [];         /* where the data came from, for the header */
+let LOAD_ERR = "";
+let PARTIAL = false;      /* some collectors answered and some did not */
+
+/** The collector writes one JSON object per line. A .json export from
+    the app itself is accepted too, so a prospect who mails theirs back
+    reads in the same place as everything else. */
+function parseLog(text, origin){
+  const rows = [];
+  String(text).split(/\r?\n/).forEach(line => {
+    line = line.trim(); if(!line) return;
+    try{
+      const o = JSON.parse(line);
+      if(o && o.event){ o._src = origin; rows.push(o); }
+      else if(o && Array.isArray(o.events)){
+        o.events.forEach(e => rows.push({
+          edition:(o.meta&&o.meta.edition)||o.edition,
+          label:(o.meta&&o.meta.label)||o.label,
+          level:(o.meta&&o.meta.level)||o.level,
+          visitor:o.visitor||{}, session:{id:e.s}, server:o.server||{},
+          event:e, _src:origin }));
+      }
+    }catch(e){ /* a partially written last line, on a live log */ }
+  });
+  return rows;
+}
+
+function dedupe(rows){
+  const seen=new Set(), out=[];
+  rows.forEach(r=>{
+    const id=r.event&&r.event.id;
+    if(id){ if(seen.has(id)) return; seen.add(id); }
+    out.push(r);
+  });
+  return out.sort((a,b)=>(a.event.at||0)-(b.event.at||0));
+}
+
+async function tryFetch(url){
+  const res = await fetch(url, {cache:"no-store"});
+  if(!res.ok) throw new Error(res.status+" "+res.statusText);
+  const t = await res.text();
+  if(/^\s*<\?php/.test(t)) throw new Error("the host is not executing PHP");
+  return t;
+}
+
+/* ------------------------------------------------------------------
+   WHERE THE DATA COMES FROM
+
+   By default the console reads the collector sitting beside it, which
+   is the single-folder deployment. One console for every SARA instance
+   needs more than that, because each instance may keep its own
+   collector in its own folder.
+
+       viewer.html?src=/sara/mining/collect.php,/sara/cesi/collect.php
+
+   `src` takes a comma separated list of collectors, relative or
+   absolute, and the console reads all of them, merges, de-duplicates
+   and lets the instance chips filter them apart. A collector that is
+   down is reported by name instead of silently reducing the numbers,
+   because a missing instance looks exactly like an idle one.
+
+   Add `&k=` once if every collector shares a read key, or put the key
+   on an individual entry as ...collect.php?k=itsownkey.
+   ------------------------------------------------------------------ */
+const SRC_LIST = (qs.get("src")||"").split(",").map(s=>s.trim()).filter(Boolean);
+
+/** Give an entry its read key unless it carries its own. */
+function withKey(u){
+  if(/[?&]k=/.test(u)) return u;
+  return u + (u.indexOf("?")>=0 ? "&" : "?") + "log=1&k=" + encodeURIComponent(READ_KEY);
+}
+
+/** Short label for the header, so several collectors stay tellable
+    apart without printing whole URLs. */
+function srcName(u){
+  const path = u.split("?")[0].replace(/\/+$/,"");
+  const bits = path.split("/").filter(Boolean);
+  return bits.length>1 ? bits[bits.length-2] : (bits[0]||u);
+}
+
+/** Several collectors, read concurrently. One being down must not stop
+    the rest, so every failure is caught and named. */
+async function loadFromList(list){
+  const out = [], bad = [];
+  const got = await Promise.all(list.map(async u => {
+    const url = withKey(u);
+    try{ return { u, rows: parseLog(await tryFetch(url), srcName(u)) }; }
+    catch(e){ bad.push(srcName(u)+" ("+e.message+")"); return null; }
+  }));
+  const ok = [];
+  got.filter(Boolean).forEach(g => { if(g.rows.length){ ok.push(srcName(g.u)); out.push(...g.rows); } });
+  SOURCES = ok;
+  if(bad.length){
+    PARTIAL = true;
+    LOAD_ERR = "Could not read " + bad.length + " of " + list.length +
+      " collectors: " + bad.join(", ") + ". The figures below exclude them.";
+  }
+  return out;
+}
+
+/** Read through the collector first, because the data directory is
+    deliberately not fetchable by filename. Fall back to raw paths, then
+    ask the collector what is wrong rather than reporting "no data". */
+async function loadRemote(){
+  if(SRC_LIST.length) return loadFromList(SRC_LIST);
+
+  const now = new Date();
+  const mm = String(now.getMonth()+1).padStart(2,"0");
+  const um = String(now.getUTCMonth()+1).padStart(2,"0");
+  const tries = [
+    "collect.php?log=1&k="+encodeURIComponent(READ_KEY),
+    "collect.js?log=1&k="+encodeURIComponent(READ_KEY),
+    "?log=1&k="+encodeURIComponent(READ_KEY),
+    "data/usage-"+now.getFullYear()+"-"+mm+".ndjson",
+    "data/usage-"+now.getUTCFullYear()+"-"+um+".ndjson",
+  ];
+  for(const u of tries){
+    try{
+      const text = await tryFetch(u);
+      const rows = parseLog(text, u);
+      if(rows.length){ SOURCES=[u]; return rows; }
+    }catch(e){ /* next */ }
+  }
+  /* nothing worked: ask the collector to explain itself */
+  try{
+    const t = await tryFetch("collect.php?check=1");
+    const j = JSON.parse(t);
+    LOAD_ERR = (j.hint||"The collector answered, but returned no events.") +
+      (j.events!==undefined ? "  It reports "+j.events+" event(s) stored." : "") +
+      (j.readEnabled===false ? "  Reading over http is disabled: set $READ_KEY in collect.php." : "");
+  }catch(e){
+    LOAD_ERR = location.protocol==="file:"
+      ? "Opened from the filesystem, so there is nothing to fetch. Use Load files… and pick the .ndjson logs."
+      : "No collector answered at this address. Check that collect.php sits in this folder and that the host runs PHP, or pass ?src=/path/collect.php for collectors elsewhere.";
+  }
+  return [];
+}
+
+async function refresh(){
+  PARTIAL = false;
+  const rows = await loadRemote();
+  /* A partial read must survive: some collectors answering is exactly
+     when a silent failure would be mistaken for a quiet week. */
+  if(rows.length && !PARTIAL){ ROWS = dedupe(rows); LOAD_ERR=""; }
+  else if(rows.length){ ROWS = dedupe(rows); }
+  build();
+}
+
+/* files, for reading several collectors at once */
+function readFiles(list){
+  const jobs = [...list].map(f => f.text().then(t => parseLog(t, f.name)));
+  Promise.all(jobs).then(all=>{
+    const rows = all.flat();
+    ROWS = dedupe(ROWS.concat(rows));
+    SOURCES = Array.from(new Set(SOURCES.concat([...list].map(f=>f.name))));
+    LOAD_ERR = ""; build();
+  });
+}
+
+/* ==================================================================
+   2. shaping
+   ================================================================== */
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const when = t => t ? new Date(t).toLocaleString() : "";
+const day = t => t ? new Date(t).toLocaleDateString(undefined,{day:"2-digit",month:"short"}) : "";
+const timeOnly = t => t ? new Date(t).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "";
+const initials = n => String(n||"?").split(/\s+/).filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const instanceOf = r => r.label || r.edition || "unnamed";
+const whoOf = r => (r.visitor||{}).who || null;
+/* The collector records its own judgement about whether a batch arrived
+   identified. Prefer it: the browser can be tampered with, the collector
+   cannot, so where the two disagree the server is the one to believe. */
+const serverNamed = r => {
+  const v = (r.server||{}).identified;
+  return typeof v === "boolean" ? v : null;
+};
+const isNamed = r => {
+  const sv = serverNamed(r);
+  if (sv !== null) return sv;
+  const w = whoOf(r); return !!(w && w.name && !w.skipped);
+};
+const tamperOf = r =>
+  [].concat((r.server||{}).tamper||[], (r.visitor||{}).tamper||[], (r.event||{}).tamper||[]);
+
+/* A stable colour per instance, so the same prospect is the same colour
+   everywhere in the console without anybody configuring it. */
+const HUES = ["#4d8dfe","#a78bfa","#2dd4bf","#fbbf24","#f472b6","#3fb87a","#f0605a","#59a5ff"];
+const hueCache = {};
+function hue(name){
+  if(hueCache[name]) return hueCache[name];
+  let h=0; for(let i=0;i<String(name).length;i++) h=(h*31+String(name).charCodeAt(i))>>>0;
+  return (hueCache[name] = HUES[h % HUES.length]);
+}
+
+function durationOf(ms){
+  if(!ms || ms<0) return "—";
+  const s=Math.round(ms/1000);
+  if(s<60) return s+"s";
+  const m=Math.floor(s/60); if(m<60) return m+"m "+(s%60)+"s";
+  return Math.floor(m/60)+"h "+(m%60)+"m";
+}
+
+/* ---------- filter state ---------- */
+const F = { instances:new Set(), days:0, from:"", to:"", flags:new Set(), org:"", q:"" };
+
+function inRange(at){
+  if(!at) return true;
+  if(F.days){ if(at < Date.now() - F.days*864e5) return false; }
+  if(F.from){ if(at < new Date(F.from+"T00:00:00").getTime()) return false; }
+  if(F.to){ if(at > new Date(F.to+"T23:59:59").getTime()) return false; }
+  return true;
+}
+
+function matchesQuery(r){
+  if(!F.q) return true;
+  const e=r.event||{}, w=whoOf(r)||{};
+  const hay = [e.q,e.a,e.ttl,e.out,e.did,e.tg,e.r,w.name,w.company,w.email,instanceOf(r)]
+    .concat(e.in ? Object.values(e.in) : [])
+    .filter(Boolean).join(" ").toLowerCase();
+  return hay.indexOf(F.q) !== -1;
+}
+
+/** Rows surviving instance, date and org. Query and flags are applied
+    per view, because "show only conversations" means something different
+    in the people table than in the reading pane. */
+function scoped(){
+  return ROWS.filter(r=>{
+    if(F.instances.size && !F.instances.has(instanceOf(r))) return false;
+    if(!inRange(r.event.at)) return false;
+    if(F.org){ const w=whoOf(r); if(!w || (w.company||"")!==F.org) return false; }
+    return true;
+  });
+}
+
+/* ---------- grouping ---------- */
+function group(rows){
+  const byV = new Map();
+  rows.forEach(r=>{
+    const v=(r.visitor||{}).id||"unknown";
+    if(!byV.has(v)) byV.set(v,{
+      id:v, visitor:r.visitor||{}, server:r.server||{}, instances:new Set(),
+      sessions:new Map(), first:null, last:null, rows:[]
+    });
+    const g=byV.get(v);
+    /* identity and IP arrive on later batches than the one that opened
+       the visit, so take them from whichever row carries them */
+    if((r.visitor||{}).who && !g.visitor.who) g.visitor=r.visitor;
+    if((r.server||{}).ip && !g.server.ip) g.server=r.server;
+    tamperOf(r).forEach(t=>{ g.tamperSet = g.tamperSet||new Set(); g.tamperSet.add(t); });
+    if(isNamed(r)) g.everNamed = true;
+    g.instances.add(instanceOf(r));
+    const at=r.event.at;
+    if(at){ if(!g.first||at<g.first) g.first=at; if(!g.last||at>g.last) g.last=at; }
+    const s=(r.session||{}).id||"session";
+    if(!g.sessions.has(s)) g.sessions.set(s,[]);
+    g.sessions.get(s).push(r);
+    g.rows.push(r);
+  });
+  return [...byV.values()].map(g=>{
+    const turns=g.rows.filter(r=>r.event.k==="turn");
+    g.turns=turns.length;
+    g.tasks=g.rows.filter(r=>r.event.k==="task"&&r.event.e==="done").length;
+    g.runs=g.rows.filter(r=>r.event.k==="operator"&&r.event.e==="done").length;
+    g.refused=g.rows.filter(r=>r.event.k==="refused").length;
+    g.docs=g.rows.filter(r=>r.event.k==="doc").length;
+    g.roles=Array.from(new Set(g.rows.filter(r=>r.event.r).map(r=>r.event.r)));
+    g.named=!!g.everNamed;
+    g.tamper=Array.from(g.tamperSet||[]);
+    g.duration=(g.first&&g.last)?g.last-g.first:0;
+    return g;
+  });
+}
+
+/* Every exchange as a flat, readable list — the thing the console is for. */
+function conversations(rows){
+  return rows.filter(r=>r.event.k==="turn").map(r=>({
+    at:r.event.at, instance:instanceOf(r), who:whoOf(r),
+    vid:(r.visitor||{}).id, sid:(r.session||{}).id,
+    q:r.event.q||"", a:r.event.a||"", intent:r.event.i||"", role:r.event.r||"",
+    model:r.event.mdl||"", ms:r.event.ms||0,
+    cited:r.event.cite||[], withheld:r.event.blkd||[],
+    sources:r.event.src||0, blocked:r.event.blk||0, row:r
+  }));
+}
+
+function stats(rows){
+  const of=k=>rows.filter(r=>r.event.k===k);
+  const turns=of("turn");
+  const vids=new Set(rows.map(r=>(r.visitor||{}).id));
+  const named=new Set(rows.filter(isNamed).map(r=>r.visitor.id));
+  return {
+    visitors:vids.size, identified:named.size, unidentified:vids.size-named.size,
+    sessions:new Set(rows.map(r=>(r.session||{}).id)).size,
+    exchanges:turns.length, messages:turns.length*2,
+    withheld:turns.reduce((s,r)=>s+(r.event.blk||0),0),
+    tasks:of("task").filter(r=>r.event.e==="done").length,
+    runs:of("operator").filter(r=>r.event.e==="done").length,
+    refusals:of("refused").length,
+    instances:new Set(rows.map(instanceOf)).size,
+    events:rows.length,
+  };
+}
+
+function tally(rows,fn,limit){
+  const o={};
+  rows.forEach(r=>{ const v=fn(r); (Array.isArray(v)?v:[v]).forEach(x=>{ if(x) o[x]=(o[x]||0)+1; }); });
+  return Object.entries(o).map(([k,n])=>({k,n})).sort((a,b)=>b.n-a.n).slice(0,limit||10);
+}
+
+/* ==================================================================
+   3. rendering
+   ================================================================== */
+const el = id => document.getElementById(id);
+let TAB = "overview";
+let SEL = { convo:0, person:null, session:null };
+let SORT = { people:{k:"last",dir:"desc"}, convos:{k:"at",dir:"desc"}, sessions:{k:"started",dir:"desc"} };
+
+function hl(text){
+  const t = esc(text);
+  if(!F.q) return t;
+  try{
+    return t.replace(new RegExp("("+F.q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>");
+  }catch(e){ return t; }
+}
+
+function bars(list,total){
+  if(!list.length) return '<div class="empty"><p>Nothing recorded yet.</p></div>';
+  const max=Math.max(...list.map(x=>x.n))||1;
+  return '<div class="bars">'+list.map(x=>
+    '<div class="bar"><div class="t">'+esc(x.k)+'<i style="width:'+Math.max(2,(x.n/max)*100)+'%"></i></div>'+
+    '<div class="n">'+x.n+'</div></div>').join("")+'</div>';
+}
+
+function sparkline(rows){
+  if(!rows.length) return "";
+  const times=rows.map(r=>r.event.at).filter(Boolean);
+  if(!times.length) return "";
+  const lo=Math.min(...times), hi=Math.max(...times);
+  const span=Math.max(hi-lo,1), buckets=Math.min(40,Math.max(6,Math.ceil(span/864e5)));
+  const size=span/buckets, counts=new Array(buckets).fill(0);
+  times.forEach(t=>{ counts[Math.min(buckets-1,Math.floor((t-lo)/size))]++; });
+  const max=Math.max(...counts)||1;
+  return '<div class="spark">'+counts.map((n,i)=>
+    '<div style="height:'+Math.max(3,(n/max)*100)+'%"><span>'+n+' event'+(n===1?"":"s")+' &middot; '+
+    day(lo+i*size)+'</span></div>').join("")+'</div>'+
+    '<div class="axis"><span>'+day(lo)+'</span><span>'+day(hi)+'</span></div>';
+}
+
+/* ---------- overview ---------- */
+function renderOverview(rows){
+  const s=stats(rows), people=group(rows);
+  const flagged=people.filter(p=>p.tamper.length).length;
+
+  const kpi=(l,v,sub,cls)=>'<div class="kpi '+(cls||"")+'"><label>'+l+'</label><b>'+v+'</b>'+
+    (sub?'<small>'+sub+'</small>':'')+'</div>';
+
+  el("pane-overview").innerHTML =
+    (LOAD_ERR?'<div class="note err"><b>Nothing loaded.</b> '+esc(LOAD_ERR)+'</div>':"")+
+    '<div class="kpis">'+
+      kpi("Instances", s.instances, "reporting in") +
+      kpi("People", s.visitors, s.identified+" identified") +
+      kpi("Unidentified", s.unidentified, s.unidentified?"opened without a name":"everybody named",
+          s.unidentified?"warn":"ok") +
+      kpi("Sessions", s.sessions) +
+      kpi("Exchanges", s.exchanges, s.messages+" messages") +
+      kpi("Guided tasks", s.tasks, "completed") +
+      kpi("Operator runs", s.runs, "completed") +
+      kpi("Documents withheld", s.withheld, s.refusals+" refusals", s.withheld?"info":"") +
+      (flagged?kpi("Gate bypassed", flagged, "see People", "err"):"") +
+    '</div>'+
+
+    '<div class="card"><h3>Activity over time <em>every recorded event</em></h3><div class="body">'+
+      (sparkline(rows)||'<div class="empty"><p>No timestamps to plot.</p></div>')+'</div></div>'+
+
+    '<div class="grid3">'+
+      '<div class="card"><h3>By instance</h3><div class="body">'+
+        bars(tally(rows,instanceOf,12))+'</div></div>'+
+      '<div class="card"><h3>By organisation</h3><div class="body">'+
+        bars(tally(rows,r=>{const w=whoOf(r);return w&&w.company;},12))+'</div></div>'+
+      '<div class="card"><h3>Roles signed in as</h3><div class="body">'+
+        bars(tally(rows.filter(r=>r.event.k==="signin"),r=>r.event.r,12))+'</div></div>'+
+      '<div class="card"><h3>Where questions routed</h3><div class="body">'+
+        bars(tally(rows.filter(r=>r.event.k==="turn"),r=>r.event.i,12))+'</div></div>'+
+      '<div class="card"><h3>Documents cited most</h3><div class="body">'+
+        bars(tally(rows.filter(r=>r.event.k==="turn"),r=>r.event.cite,14))+'</div></div>'+
+      '<div class="card"><h3>Documents withheld most</h3><div class="body">'+
+        bars(tally(rows.filter(r=>r.event.k==="turn"),r=>r.event.blkd,14))+'</div></div>'+
+      '<div class="card"><h3>Guided tasks run</h3><div class="body">'+
+        bars(tally(rows.filter(r=>r.event.k==="task"),r=>r.event.did,12))+'</div></div>'+
+      '<div class="card"><h3>Operator runs</h3><div class="body">'+
+        bars(tally(rows.filter(r=>r.event.k==="operator"),r=>r.event.did,12))+'</div></div>'+
+      '<div class="card"><h3>Fields the Operator had to ask for <em>what the request missed</em></h3><div class="body">'+
+        bars(tally(rows.filter(r=>r.event.k==="operator"&&r.event.e==="ask"),r=>r.event.f,12))+'</div></div>'+
+    '</div>';
+}
+
+/* ---------- people ---------- */
+const PEOPLE_COLS = [
+  {k:"name",  t:"Person"},
+  {k:"instance", t:"Instance"},
+  {k:"first", t:"First seen"},
+  {k:"last",  t:"Last seen"},
+  {k:"duration", t:"Time in", num:true},
+  {k:"sessions", t:"Sessions", num:true},
+  {k:"turns", t:"Exchanges", num:true},
+  {k:"tasks", t:"Tasks", num:true},
+  {k:"runs", t:"Runs", num:true},
+  {k:"refused", t:"Refusals", num:true},
+  {k:"flags", t:"Flags"},
+];
+
+function peopleValue(p,k){
+  const w=p.visitor.who||{};
+  switch(k){
+    case "name": return (w.name||"").toLowerCase()||"zzz";
+    case "instance": return Array.from(p.instances).join(", ");
+    case "first": return p.first||0;
+    case "last": return p.last||0;
+    case "duration": return p.duration;
+    case "sessions": return p.sessions.size;
+    case "flags": return (p.tamper.length?2:0)+(p.named?0:1);
+    default: return p[k]||0;
+  }
+}
+
+function renderPeople(rows){
+  let people=group(rows);
+  if(F.flags.has("named")) people=people.filter(p=>p.named);
+  if(F.flags.has("unnamed")) people=people.filter(p=>!p.named);
+  if(F.flags.has("convo")) people=people.filter(p=>p.turns>0);
+  if(F.flags.has("tamper")) people=people.filter(p=>p.tamper.length);
+  if(F.q) people=people.filter(p=>p.rows.some(matchesQuery)||
+    JSON.stringify(p.visitor.who||{}).toLowerCase().indexOf(F.q)!==-1);
+
+  const s=SORT.people;
+  people.sort((a,b)=>{
+    const x=peopleValue(a,s.k), y=peopleValue(b,s.k);
+    const c = typeof x==="number" && typeof y==="number" ? x-y : String(x).localeCompare(String(y));
+    return s.dir==="asc" ? c : -c;
+  });
+  el("cPeople").textContent=people.length;
+
+  if(!people.length){ el("pane-people").innerHTML=emptyState("No people match these filters."); return; }
+
+  const head='<tr>'+PEOPLE_COLS.map(c=>
+    '<th class="s'+(c.num?' num':'')+'" data-sort="'+c.k+'"'+
+    (s.k===c.k?' data-dir="'+s.dir+'"':'')+'>'+c.t+'</th>').join("")+'</tr>';
+
+  const body=people.map(p=>{
+    const w=p.visitor.who||{}, inst=Array.from(p.instances);
+    return '<tr data-person="'+esc(p.id)+'">'+
+      '<td><div class="who"><div class="av" style="background:'+hue(w.company||p.id)+'">'+
+        esc(initials(w.name||"?"))+'</div><div class="n">'+
+        '<b>'+(w.name?hl(w.name):'<span style="color:var(--ink-3)">Not identified</span>')+'</b>'+
+        '<span>'+hl([w.company,w.email].filter(Boolean).join(" · ")||p.id)+'</span>'+
+      '</div></div></td>'+
+      '<td>'+inst.map(i=>'<span class="pill"><i style="background:'+hue(i)+'"></i>'+esc(i)+'</span>').join(" ")+'</td>'+
+      '<td>'+when(p.first)+'</td><td>'+when(p.last)+'</td>'+
+      '<td class="num">'+durationOf(p.duration)+'</td>'+
+      '<td class="num">'+p.sessions.size+'</td><td class="num">'+p.turns+'</td>'+
+      '<td class="num">'+p.tasks+'</td><td class="num">'+p.runs+'</td>'+
+      '<td class="num">'+p.refused+'</td>'+
+      '<td>'+(p.named?'':'<span class="pill warn">unnamed</span> ')+
+        (p.tamper.length?'<span class="pill err" title="'+esc(p.tamper.join(", "))+'">bypassed gate</span>':'')+
+      '</td></tr>';
+  }).join("");
+
+  el("pane-people").innerHTML =
+    '<div class="card"><h3>People <em>'+people.length+' of '+group(rows).length+
+      ' &middot; click a row to read their sessions</em></h3>'+
+      '<div class="body flush" style="overflow:auto"><table class="tbl"><thead>'+head+
+      '</thead><tbody>'+body+'</tbody></table></div></div>'+
+    '<div id="personDetail"></div>';
+
+  el("pane-people").querySelectorAll("th.s").forEach(th=>{
+    th.onclick=()=>{ const k=th.dataset.sort;
+      SORT.people = {k, dir: (s.k===k && s.dir==="desc") ? "asc" : "desc"}; build(); };
+  });
+  el("pane-people").querySelectorAll("tr[data-person]").forEach(tr=>{
+    tr.onclick=()=>{ SEL.person = tr.dataset.person===SEL.person ? null : tr.dataset.person; build(); };
+    if(tr.dataset.person===SEL.person) tr.classList.add("sel");
+  });
+
+  if(SEL.person){
+    const p=people.find(x=>x.id===SEL.person);
+    if(p) el("personDetail").innerHTML=personDetail(p);
+  }
+}
+
+function personDetail(p){
+  const w=p.visitor.who||{}, sv=p.server||{};
+  const sessions=[...p.sessions.entries()].sort((a,b)=>
+    (b[1][0].event.at||0)-(a[1][0].event.at||0));
+  return '<div class="card"><h3>'+esc(w.name||"Not identified")+
+      ' <em>'+esc([w.company,w.email].filter(Boolean).join(" · "))+'</em></h3><div class="body">'+
+    '<div class="meta">'+
+      pill("Visitor", p.id)+pill("Sessions", p.sessions.size)+
+      (sv.ip?pill("IP", sv.ip):"")+(sv.country?pill("Country", sv.country):"")+
+      (sv.origin?pill("Origin", sv.origin):"")+
+      (p.roles.length?pill("Roles", p.roles.join(", ")):"")+
+      (p.tamper.length?'<span class="pill err">gate: '+esc(p.tamper.join(", "))+'</span>':"")+
+    '</div>'+
+    sessions.map(([sid,rs])=>{
+      const turns=rs.filter(r=>r.event.k==="turn");
+      return '<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">'+
+        '<div class="meta">'+pill("Session", when(rs[0].event.at))+
+        pill("Events", rs.length)+pill("Exchanges", turns.length)+'</div>'+
+        turns.map(r=>convoBlock({
+          at:r.event.at,q:r.event.q||"",a:r.event.a||"",intent:r.event.i,role:r.event.r,
+          cited:r.event.cite||[],withheld:r.event.blkd||[],ms:r.event.ms,model:r.event.mdl,
+          instance:instanceOf(r)
+        },true)).join("")+
+        runBlocks(rs);
+    }).join("")+
+    '</div></div>';
+}
+
+function pill(k,v){ return '<span class="pill">'+esc(k)+': '+esc(v)+'</span>'; }
+
+function runBlocks(rs){
+  return rs.filter(r=>(r.event.k==="task"||r.event.k==="operator")&&r.event.e==="done").map(r=>{
+    const e=r.event;
+    return '<div class="card" style="margin-top:10px"><h3>'+
+      (e.k==="task"?"Guided task":"Operator run")+' <em>'+esc(e.ttl||e.did||"")+'</em></h3><div class="body">'+
+      (e.in?'<div class="msg q"><div class="lbl">What was put in</div><div class="txt">'+
+        Object.entries(e.in).map(([k,v])=>esc(k)+": "+esc(v)).join("\n")+'</div></div>':"")+
+      (e.out?'<div class="msg"><div class="lbl">What came out</div><div class="txt">'+hl(e.out)+'</div></div>':"")+
+      '</div></div>';
+  }).join("");
+}
+
+/* ---------- conversations: the reading pane ---------- */
+function renderConvos(rows){
+  let list=conversations(rows);
+  if(F.flags.has("withheld")) list=list.filter(c=>c.withheld.length);
+  if(F.q) list=list.filter(c=>matchesQuery(c.row));
+  const s=SORT.convos;
+  list.sort((a,b)=>{
+    const x=s.k==="at"?a.at:String(a[s.k]||"").toLowerCase();
+    const y=s.k==="at"?b.at:String(b[s.k]||"").toLowerCase();
+    const c = typeof x==="number" ? x-y : String(x).localeCompare(String(y));
+    return s.dir==="asc"?c:-c;
+  });
+  el("cConvos").textContent=list.length;
+
+  if(!list.length){ el("pane-convos").innerHTML=emptyState("No conversations match these filters."); return; }
+  if(SEL.convo>=list.length) SEL.convo=0;
+
+  const rowsHtml=list.map((c,i)=>{
+    const w=c.who||{};
+    return '<button class="row" data-i="'+i+'" aria-selected="'+(i===SEL.convo)+'">'+
+      '<div class="h"><span class="pill" style="background:'+hue(c.instance)+'22;color:'+hue(c.instance)+'">'+
+        esc(c.instance)+'</span><b>'+esc(w.name||"Not identified")+'</b>'+
+        '<time>'+day(c.at)+' '+timeOnly(c.at)+'</time></div>'+
+      '<p>'+hl(c.q.slice(0,160))+'</p></button>';
+  }).join("");
+
+  el("pane-convos").innerHTML =
+    '<div class="filters" style="padding:0 0 10px;border:0;background:transparent">'+
+      '<span class="flabel">Sort</span>'+
+      '<div class="seg" id="convoSort">'+
+        '<button data-k="at" aria-pressed="'+(s.k==="at")+'">Date '+(s.k==="at"?(s.dir==="desc"?"↓":"↑"):"")+'</button>'+
+        '<button data-k="instance" aria-pressed="'+(s.k==="instance")+'">Instance</button>'+
+        '<button data-k="intent" aria-pressed="'+(s.k==="intent")+'">Intent</button>'+
+        '<button data-k="role" aria-pressed="'+(s.k==="role")+'">Role</button>'+
+      '</div>'+
+      '<span class="sp"></span><span class="flabel">'+list.length+' exchanges &middot; j / k or arrows to move</span>'+
+    '</div>'+
+    '<div class="split"><div class="list" id="convoList">'+rowsHtml+'</div>'+
+    '<div class="read" id="convoRead">'+convoBlock(list[SEL.convo])+'</div></div>';
+
+  el("pane-convos").querySelectorAll("#convoSort button").forEach(b=>{
+    b.onclick=()=>{ const k=b.dataset.k;
+      SORT.convos={k,dir:(s.k===k&&s.dir==="desc")?"asc":"desc"}; build(); };
+  });
+  el("pane-convos").querySelectorAll(".row").forEach(b=>{
+    b.onclick=()=>{ SEL.convo=+b.dataset.i;
+      el("convoRead").innerHTML=convoBlock(list[SEL.convo]);
+      el("convoList").querySelectorAll(".row").forEach(x=>x.setAttribute("aria-selected", x===b));
+      el("convoRead").scrollTop=0; };
+  });
+  const sel=el("convoList").querySelector('.row[aria-selected=true]');
+  if(sel) sel.scrollIntoView({block:"nearest"});
+  window.__convos=list;
+}
+
+function convoBlock(c,compact){
+  if(!c) return '<div class="empty"><h4>Nothing selected</h4></div>';
+  const w=c.who||{};
+  return '<div'+(compact?' class="card" style="margin-top:10px"':'')+'>'+
+    (compact?'':'<div class="msg" style="background:var(--bg-2)"><div class="lbl">'+
+      '<span class="pill" style="background:'+hue(c.instance)+'22;color:'+hue(c.instance)+'">'+esc(c.instance)+'</span>'+
+      esc(w.name||"Not identified")+(w.company?" · "+esc(w.company):"")+
+      '<span class="sp"></span>'+when(c.at)+'</div></div>')+
+    '<div class="msg q"><div class="lbl">Question'+(c.role?' &middot; asked as '+esc(c.role):'')+'</div>'+
+      '<div class="txt">'+hl(c.q)+'</div></div>'+
+    '<div class="msg"><div class="lbl">SARA answered</div><div class="txt">'+hl(c.a)+'</div>'+
+      '<div class="meta">'+
+        (c.intent?'<span class="pill info">'+esc(c.intent)+'</span>':'')+
+        (c.model?'<span class="pill">'+esc(c.model)+'</span>':'')+
+        (c.ms?'<span class="pill">'+c.ms+' ms</span>':'')+
+        (c.cited&&c.cited.length?'<span class="pill ok">cited '+c.cited.map(esc).join(", ")+'</span>':'')+
+        (c.withheld&&c.withheld.length?'<span class="pill warn">withheld '+c.withheld.map(esc).join(", ")+'</span>':'')+
+      '</div></div></div>';
+}
+
+/* ---------- sessions ---------- */
+function renderSessions(rows){
+  const map=new Map();
+  rows.forEach(r=>{
+    const id=(r.session||{}).id||"?";
+    if(!map.has(id)) map.set(id,{id,rows:[],who:null,instance:instanceOf(r),vid:(r.visitor||{}).id});
+    const s=map.get(id); s.rows.push(r);
+    if(!s.who && whoOf(r)) s.who=whoOf(r);
+  });
+  let list=[...map.values()].map(s=>{
+    const at=s.rows.map(r=>r.event.at).filter(Boolean);
+    s.started=Math.min(...at); s.ended=Math.max(...at);
+    s.turns=s.rows.filter(r=>r.event.k==="turn").length;
+    s.tasks=s.rows.filter(r=>r.event.k==="task"&&r.event.e==="done").length;
+    s.runs=s.rows.filter(r=>r.event.k==="operator"&&r.event.e==="done").length;
+    s.roles=Array.from(new Set(s.rows.filter(r=>r.event.r).map(r=>r.event.r)));
+    return s;
+  });
+  if(F.flags.has("convo")) list=list.filter(s=>s.turns>0);
+  if(F.q) list=list.filter(s=>s.rows.some(matchesQuery));
+  const so=SORT.sessions;
+  list.sort((a,b)=>{ const x=a[so.k]||0,y=b[so.k]||0;
+    const c=typeof x==="number"?x-y:String(x).localeCompare(String(y)); return so.dir==="asc"?c:-c; });
+  el("cSessions").textContent=list.length;
+
+  if(!list.length){ el("pane-sessions").innerHTML=emptyState("No sessions match these filters."); return; }
+
+  const cols=[["started","Started"],["instance","Instance"],["who","Person"],
+              ["dur","Length"],["turns","Exchanges"],["tasks","Tasks"],["runs","Runs"],["roles","Roles"]];
+  el("pane-sessions").innerHTML='<div class="card"><h3>Sessions</h3><div class="body flush" style="overflow:auto">'+
+    '<table class="tbl"><thead><tr>'+cols.map(([k,t])=>
+      '<th class="s" data-sort="'+k+'"'+(so.k===k?' data-dir="'+so.dir+'"':'')+'>'+t+'</th>').join("")+
+    '</tr></thead><tbody>'+list.map(s=>
+      '<tr><td>'+when(s.started)+'</td>'+
+      '<td><span class="pill"><i style="background:'+hue(s.instance)+'"></i>'+esc(s.instance)+'</span></td>'+
+      '<td>'+esc((s.who&&s.who.name)||"Not identified")+
+        (s.who&&s.who.company?' <span style="color:var(--ink-3)">· '+esc(s.who.company)+'</span>':'')+'</td>'+
+      '<td>'+durationOf(s.ended-s.started)+'</td>'+
+      '<td class="num">'+s.turns+'</td><td class="num">'+s.tasks+'</td><td class="num">'+s.runs+'</td>'+
+      '<td>'+s.roles.map(r=>'<span class="pill">'+esc(r)+'</span>').join(" ")+'</td></tr>').join("")+
+    '</tbody></table></div></div>';
+
+  el("pane-sessions").querySelectorAll("th.s").forEach(th=>{
+    th.onclick=()=>{ const k=th.dataset.sort;
+      SORT.sessions={k,dir:(so.k===k&&so.dir==="desc")?"asc":"desc"}; build(); };
+  });
+}
+
+/* ---------- activity: the raw stream ---------- */
+const KIND_LABEL={visit:"Opened",identify:"Identified",signin:"Signed in",turn:"Asked",
+                  task:"Guided task",operator:"Operator",refused:"Refused",doc:"Opened document"};
+function renderActivity(rows){
+  let list=rows.slice();
+  if(F.q) list=list.filter(matchesQuery);
+  list.sort((a,b)=>(b.event.at||0)-(a.event.at||0));
+  el("cActivity").textContent=list.length;
+  if(!list.length){ el("pane-activity").innerHTML=emptyState("No events match these filters."); return; }
+
+  el("pane-activity").innerHTML='<div class="card"><h3>Every event <em>newest first</em></h3>'+
+    '<div class="body flush" style="overflow:auto"><table class="tbl"><thead><tr>'+
+    '<th>When</th><th>Instance</th><th>Person</th><th>Event</th><th>Detail</th></tr></thead><tbody>'+
+    list.slice(0,600).map(r=>{
+      const e=r.event, w=whoOf(r)||{};
+      const detail=[e.did&&("id "+e.did), e.e, e.r, e.i, e.tg, e.f&&("asked for "+e.f),
+        e.why&&("reason "+e.why), e.q&&('"'+e.q.slice(0,90)+'"')].filter(Boolean).join(" · ");
+      return '<tr><td>'+when(e.at)+'</td>'+
+        '<td><span class="pill"><i style="background:'+hue(instanceOf(r))+'"></i>'+esc(instanceOf(r))+'</span></td>'+
+        '<td>'+esc(w.name||"—")+'</td>'+
+        '<td><span class="pill">'+esc(KIND_LABEL[e.k]||e.k)+'</span></td>'+
+        '<td>'+hl(detail)+'</td></tr>';
+    }).join("")+'</tbody></table></div>'+
+    (list.length>600?'<div class="body" style="color:var(--ink-3);font-size:12px">Showing the newest 600 of '+
+      list.length+'. Narrow the filters to see the rest.</div>':'')+'</div>';
+}
+
+function emptyState(msg){
+  return '<div class="card"><div class="empty"><h4>'+esc(msg)+'</h4>'+
+    '<p>Try clearing the filters, widening the date range, or loading more log files.</p></div></div>';
+}
+
+/* ==================================================================
+   4. chrome
+   ================================================================== */
+function renderFilters(){
+  const names=Array.from(new Set(ROWS.map(instanceOf))).sort();
+  el("fInstance").innerHTML = names.length
+    ? names.map(n=>{
+        const n2=ROWS.filter(r=>instanceOf(r)===n).length;
+        return '<button class="chip" data-i="'+esc(n)+'" aria-pressed="'+F.instances.has(n)+'">'+
+          '<i style="background:'+hue(n)+'"></i>'+esc(n)+' <em>'+n2+'</em></button>';
+      }).join("")
+    : '<span style="color:var(--ink-3);font-size:12px">none loaded</span>';
+  el("fInstance").querySelectorAll(".chip").forEach(b=>{
+    b.onclick=()=>{ const n=b.dataset.i;
+      F.instances.has(n)?F.instances.delete(n):F.instances.add(n); build(); };
+  });
+
+  const flags=[["named","Identified"],["unnamed","Unidentified"],["convo","Had a conversation"],
+               ["withheld","Something withheld"],["tamper","Bypassed the gate"]];
+  el("fFlags").innerHTML=flags.map(([k,t])=>
+    '<button class="chip" data-f="'+k+'" aria-pressed="'+F.flags.has(k)+'">'+t+'</button>').join("");
+  el("fFlags").querySelectorAll(".chip").forEach(b=>{
+    b.onclick=()=>{ const k=b.dataset.f;
+      if(k==="named") F.flags.delete("unnamed");
+      if(k==="unnamed") F.flags.delete("named");
+      F.flags.has(k)?F.flags.delete(k):F.flags.add(k); build(); };
+  });
+
+  const orgs=Array.from(new Set(ROWS.map(r=>{const w=whoOf(r);return w&&w.company;}).filter(Boolean))).sort();
+  el("fOrg").innerHTML='<option value="">All organisations</option>'+
+    orgs.map(o=>'<option'+(F.org===o?" selected":"")+'>'+esc(o)+'</option>').join("");
+
+  el("fRange").querySelectorAll("button").forEach(b=>
+    b.setAttribute("aria-pressed", String(+b.dataset.d===F.days)));
+
+  el("srcLine").textContent = ROWS.length
+    ? ROWS.length+" events · "+names.length+" instance"+(names.length===1?"":"s")+
+      (SOURCES.length?" · "+SOURCES.slice(0,2).join(", ")+(SOURCES.length>2?" +"+(SOURCES.length-2):""):"")
+    : "no data loaded";
+}
+
+function build(){
+  renderFilters();
+  const rows=scoped();
+  renderOverview(rows);
+  renderPeople(rows);
+  renderConvos(rows);
+  renderSessions(rows);
+  renderActivity(rows);
+}
+
+/* tabs */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick=()=>{
+    TAB=t.dataset.pane;
+    document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",String(x===t)));
+    document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("on",p.id==="pane-"+TAB));
+  };
+});
+
+/* controls */
+let qTimer=null;
+el("q").oninput=e=>{ clearTimeout(qTimer);
+  qTimer=setTimeout(()=>{ F.q=e.target.value.trim().toLowerCase(); SEL.convo=0; build(); },180); };
+el("fRange").querySelectorAll("button").forEach(b=>
+  b.onclick=()=>{ F.days=+b.dataset.d; F.from=""; F.to=""; el("fFrom").value=""; el("fTo").value=""; build(); });
+el("fFrom").onchange=e=>{ F.from=e.target.value; F.days=0; build(); };
+el("fTo").onchange=e=>{ F.to=e.target.value; F.days=0; build(); };
+el("fOrg").onchange=e=>{ F.org=e.target.value; build(); };
+el("clearF").onclick=()=>{
+  F.instances.clear(); F.flags.clear(); F.days=0; F.from=""; F.to=""; F.org=""; F.q="";
+  el("q").value=""; el("fFrom").value=""; el("fTo").value=""; SEL.person=null; SEL.convo=0; build();
+};
+el("refresh").onclick=refresh;
+el("load").onclick=()=>el("file").click();
+el("file").onchange=e=>readFiles(e.target.files);
+el("theme").onclick=()=>{
+  const now=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",now);
+  try{ localStorage.setItem("saraViewerTheme",now); }catch(err){}
+};
+try{ const t=localStorage.getItem("saraViewerTheme"); if(t) document.documentElement.setAttribute("data-theme",t); }catch(e){}
+
+/* export what is currently on screen, not the whole log */
+el("exp").onclick=()=>{
+  const rows=scoped();
+  const convos=conversations(rows);
+  const lines=[["instance","when","person","organisation","email","role","intent","question","answer","cited","withheld"]]
+    .concat(convos.map(c=>{
+      const w=c.who||{};
+      return [c.instance,new Date(c.at).toISOString(),w.name||"",w.company||"",w.email||"",
+              c.role||"",c.intent||"",c.q,c.a,(c.cited||[]).join(" "),(c.withheld||[]).join(" ")];
+    }));
+  const csv=lines.map(r=>r.map(v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download="sara-analytics-"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();
+};
+
+/* drag several logs in at once */
+document.addEventListener("dragover",e=>{ e.preventDefault(); document.body.classList.add("drop"); });
+document.addEventListener("dragleave",e=>{ if(e.relatedTarget===null) document.body.classList.remove("drop"); });
+document.addEventListener("drop",e=>{
+  e.preventDefault(); document.body.classList.remove("drop");
+  if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length) readFiles(e.dataTransfer.files);
+});
+
+/* keyboard: move through the reading pane without the mouse */
+document.addEventListener("keydown",e=>{
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||""))) return;
+  if(e.key==="/"){ e.preventDefault(); el("q").focus(); return; }
+  if(TAB!=="convos"||!window.__convos) return;
+  const n=window.__convos.length; if(!n) return;
+  if(e.key==="j"||e.key==="ArrowDown"){ e.preventDefault(); SEL.convo=Math.min(n-1,SEL.convo+1); }
+  else if(e.key==="k"||e.key==="ArrowUp"){ e.preventDefault(); SEL.convo=Math.max(0,SEL.convo-1); }
+  else return;
+  renderConvos(scoped());
+});
+
+refresh();
+</script>
+</body>
+</html>

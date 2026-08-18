@@ -1,0 +1,264 @@
+/* ------------------------------------------------------------------
+   Application shell: icon rail | conversation sidebar | thread | artifact panel
+   ------------------------------------------------------------------ */
+
+/* Pinned to the viewport rather than sized with 100dvh: dvh resolves to the
+   large viewport on mobile (clipping the composer behind the URL bar) and is
+   unreliable under device emulation. inset:0 is exact everywhere. */
+.app{
+  position:fixed;inset:0;
+  display:grid;
+  grid-template-columns:var(--rail-w) var(--side-w) minmax(0,1fr) var(--panel-w);
+  /* minmax(0,1fr) not 1fr: an auto row lets tall content grow past the
+     container, which would push the composer off screen instead of
+     scrolling the thread */
+  grid-template-rows:minmax(0,1fr);
+  background:var(--bg);
+  transition:grid-template-columns var(--d-slow) var(--e);
+}
+.app > *{min-height:0}
+.app.side-off{grid-template-columns:var(--rail-w) 0px minmax(0,1fr) var(--panel-w)}
+.app.panel-off{grid-template-columns:var(--rail-w) var(--side-w) minmax(0,1fr) 0px}
+.app.side-off.panel-off{grid-template-columns:var(--rail-w) 0px minmax(0,1fr) 0px}
+body.logged-out .app{display:none}
+
+/* ================= icon rail ================= */
+/* Geometry mirrors the Sara platform rail: 36px targets, 20px glyphs, 8px gap. */
+.rail{
+  display:flex;flex-direction:column;align-items:center;gap:var(--s2);
+  padding:var(--s2) 0;
+  background:var(--bg-rail);
+  border-right:1px solid var(--line);
+  z-index:20;
+}
+.rail-sep{
+  width:calc(100% - 16px);height:1px;flex:none;
+  background:var(--line-2);margin:2px 0;
+}
+.rail-btn{
+  position:relative;
+  width:36px;height:36px;border-radius:var(--r-sm);
+  display:grid;place-items:center;color:var(--tx-3);
+  transition:background var(--d-fast) var(--e),color var(--d-fast) var(--e);
+}
+.rail-btn:hover{background:var(--bg-2);color:var(--tx)}
+.rail-btn.on{background:var(--a-soft);color:var(--a-text)}
+.rail-btn .i{width:20px;height:20px}
+/* The platform glyphs are drawn at weight 2; match the house icons below the
+   divider to them so the rail reads as one set. Paths carrying their own
+   stroke-width (the MCP mark) keep it, since a presentation attribute on the
+   element beats a value inherited from the parent. */
+.rail-btn .i svg[stroke]{stroke-width:2}
+/* the toggle and new-chat sit above the divider and read as primary actions */
+.rail-strong{color:var(--tx)}
+.rail-btn .dot{
+  position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;
+  background:var(--a);box-shadow:0 0 0 2px var(--bg-rail);
+}
+.rail-me{margin-top:auto;cursor:pointer;border:1px solid transparent;border-radius:50%;transition:border-color var(--d-fast) var(--e)}
+.rail-me:hover{border-color:var(--line-3)}
+
+/* tooltip used across the shell */
+.tip{position:relative}
+.tip::after{
+  content:attr(data-tip);
+  position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%) scale(.95);
+  padding:5px 9px;border-radius:var(--r-xs);
+  background:var(--bg-3);border:1px solid var(--line-2);color:var(--tx);
+  font-size:var(--t-xs);font-weight:500;white-space:nowrap;
+  opacity:0;pointer-events:none;z-index:400;
+  box-shadow:var(--sh);
+  transition:opacity var(--d-fast) var(--e),transform var(--d-fast) var(--e);
+}
+.tip:hover::after{opacity:1;transform:translateY(-50%) scale(1)}
+.tip-b::after{left:50%;top:calc(100% + 8px);transform:translate(-50%,0) scale(.95)}
+.tip-b:hover::after{transform:translate(-50%,0) scale(1)}
+
+/* ================= main column ================= */
+.main{
+  display:flex;flex-direction:column;min-width:0;min-height:0;
+  background:var(--bg);
+  position:relative;
+  overflow:hidden;
+}
+
+/* ---- top bar ---- */
+.topbar{
+  display:flex;align-items:center;gap:var(--s2);
+  height:52px;padding:0 var(--s4);
+  border-bottom:1px solid var(--line);
+  background:var(--bg);
+  z-index:10;flex:none;
+}
+.model-chip{
+  display:inline-flex;align-items:center;gap:var(--s2);
+  height:32px;padding:0 var(--s2) 0 6px;border-radius:var(--r-full);
+  background:var(--bg-2);border:1px solid var(--line-2);
+  font-size:var(--t-md);font-weight:500;
+  transition:background var(--d-fast) var(--e),border-color var(--d-fast) var(--e);
+}
+.model-chip:hover{background:var(--bg-3);border-color:var(--line-3)}
+.model-chip .glyph{
+  width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none;
+  background:var(--a);color:#fff;
+}
+.model-chip .glyph .i{width:13px;height:13px}
+/* once a provider is chosen the glyph becomes its monogram tile */
+.model-chip .glyph.mono-glyph{font-size:9px;font-weight:700;letter-spacing:.02em;color:#fff}
+.model-chip #modelChipName{font-family:var(--f-mono);font-size:var(--t-sm);max-width:22ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.model-chip.nokey{border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.model-chip.nokey::after{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--warn);flex:none;margin-left:2px;
+}
+.model-chip .caret{width:12px;height:12px;color:var(--tx-3)}
+
+.thread-title{
+  font-size:var(--t-md);font-weight:500;color:var(--tx-2);
+  max-width:34ch;
+}
+.topbar .spacer{flex:1}
+
+/* ---- thread scroller ---- */
+.thread{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  scroll-behavior:smooth;
+  padding:var(--s6) 0 var(--s5);
+}
+.thread-inner{
+  max-width:var(--chat-max);
+  margin:0 auto;
+  padding:0 var(--s6);
+  display:flex;flex-direction:column;gap:var(--chat-gap);
+}
+
+/* ---- composer ---- */
+.composer-wrap{
+  flex:none;padding:0 var(--s6) var(--s2);
+  background:linear-gradient(to top,var(--bg) 62%,transparent);
+}
+.composer{
+  max-width:var(--chat-max);margin:0 auto;
+  background:var(--bg-1);
+  border:1px solid var(--line-2);
+  border-radius:26px;
+  box-shadow:var(--sh);
+  transition:border-color var(--d) var(--e),box-shadow var(--d) var(--e);
+  overflow:hidden;
+}
+.composer:focus-within{
+  border-color:color-mix(in srgb,var(--a) 60%,transparent);
+  box-shadow:0 0 0 3px var(--a-soft),var(--sh);
+}
+.composer.busy{border-color:var(--line-2)}
+
+.composer-in{
+  width:100%;min-height:28px;max-height:220px;
+  padding:15px var(--s5) 2px;
+  background:none;border:0;resize:none;outline:none;
+  font-size:var(--t-lg);line-height:1.6;color:var(--tx);
+}
+.composer-in::placeholder{color:var(--tx-3)}
+
+.composer-bar{
+  display:flex;align-items:center;gap:2px;
+  padding:6px 10px 10px;
+}
+.composer-bar .spacer{flex:1}
+
+/* round targets to sit with the pill, and a hair larger than the chrome
+   buttons elsewhere because this is the primary surface */
+.composer-bar .ib{
+  position:relative;
+  width:34px;height:34px;border-radius:var(--r-full);
+  color:var(--tx-3);
+}
+.composer-bar .ib:hover{background:var(--bg-2);color:var(--tx)}
+.composer-bar .ib .i{width:18px;height:18px}
+
+/* recording state: tinted, with a ring that pulses out */
+.composer-bar .ib.mic.on{background:var(--crit-soft);color:var(--crit)}
+.composer-bar .ib.mic.on::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  border:1.5px solid var(--crit);
+  animation:micPulse 1.5s var(--e) infinite;
+}
+@keyframes micPulse{
+  0%{transform:scale(1);opacity:.7}
+  100%{transform:scale(1.55);opacity:0}
+}
+
+.composer-send{
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;flex:none;margin-left:2px;
+  background:var(--a);color:var(--a-contrast);
+  box-shadow:0 2px 10px var(--a-soft);
+  transition:transform var(--d-fast) var(--e),background var(--d-fast) var(--e),
+             box-shadow var(--d-fast) var(--e),filter var(--d-fast) var(--e);
+}
+.composer-send .i{width:17px;height:17px}
+.composer-send:disabled{background:var(--bg-3);color:var(--tx-3);opacity:1;box-shadow:none}
+.composer-send:not(:disabled):hover{transform:scale(1.07);filter:brightness(1.07)}
+.composer-send:not(:disabled):active{transform:scale(.95)}
+/* stop reads as its own action, not a disabled send */
+.composer-send.stop{background:var(--tx);color:var(--bg);box-shadow:none}
+.composer-send.stop .i{width:13px;height:13px}
+.composer-send.stop:hover{transform:scale(1.07);filter:none;opacity:.88}
+
+.composer-hintbar{
+  display:flex;align-items:center;gap:var(--s2);
+  padding:0 var(--s3) var(--s2);
+  font-size:var(--t-xs);color:var(--tx-3);
+}
+
+.footnote{
+  flex:none;
+  text-align:center;padding:0 var(--s6) var(--s3);
+  font-size:var(--t-xs);color:var(--tx-3);line-height:1.5;
+}
+.footnote a{color:var(--tx-3);text-decoration:underline;text-underline-offset:2px}
+.footnote a:hover{color:var(--tx-2)}
+.footnote .sep{margin:0 8px;opacity:.4}
+
+/* ---- scroll-to-bottom pill ---- */
+.to-bottom{
+  position:absolute;left:50%;bottom:150px;transform:translateX(-50%) scale(.9);
+  width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;
+  background:var(--bg-2);border:1px solid var(--line-2);color:var(--tx-2);
+  box-shadow:var(--sh);opacity:0;pointer-events:none;z-index:6;
+  transition:opacity var(--d) var(--e),transform var(--d) var(--e);
+}
+.to-bottom.show{opacity:1;pointer-events:auto;transform:translateX(-50%) scale(1)}
+.to-bottom:hover{background:var(--bg-3);color:var(--tx)}
+
+/* ---- floating panel re-open ---- */
+.panel-open-fab{
+  position:absolute;right:var(--s4);top:60px;z-index:8;
+  display:none;align-items:center;gap:6px;height:30px;padding:0 10px;
+  border-radius:var(--r-full);background:var(--bg-2);border:1px solid var(--line-2);
+  color:var(--tx-2);font-size:var(--t-xs);font-weight:500;box-shadow:var(--sh);
+}
+.app.panel-off .panel-open-fab.has-artifact{display:inline-flex}
+.panel-open-fab:hover{background:var(--bg-3);color:var(--tx)}
+
+/* ================= toasts ================= */
+.toasts{
+  position:fixed;bottom:var(--s5);left:50%;transform:translateX(-50%);
+  z-index:8000;display:flex;flex-direction:column;gap:var(--s2);align-items:center;
+  pointer-events:none;
+}
+.toast{
+  display:flex;align-items:center;gap:var(--s3);
+  padding:10px var(--s4);border-radius:var(--r-full);
+  background:var(--bg-3);border:1px solid var(--line-2);
+  box-shadow:var(--sh-lg);font-size:var(--t-md);
+  animation:pop var(--d) var(--e) both;pointer-events:auto;max-width:min(560px,92vw);
+}
+.toast .i{width:15px;height:15px}
+.toast.ok .i{color:var(--ok)} .toast.warn .i{color:var(--warn)}
+.toast.err .i{color:var(--crit)} .toast.info .i{color:var(--a-text)}
+.toast.leaving{animation:fadeIn var(--d) var(--e) reverse both}
+
+/* provider mark inside the model chip */
+.model-chip .glyph.brand-glyph{background:transparent}
+.model-chip .glyph.brand-glyph svg{width:16px;height:16px;display:block}

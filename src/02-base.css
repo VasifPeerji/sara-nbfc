@@ -1,0 +1,232 @@
+/* ------------------------------------------------------------------
+   Reset, primitives and shared controls.
+   ------------------------------------------------------------------ */
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--f);
+  font-size:var(--t-base);
+  line-height:1.55;
+  color:var(--tx);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+::selection{background:var(--sel)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer;color:inherit}
+button:disabled{cursor:not-allowed;opacity:.45}
+a{color:var(--a-text);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4,h5,h6,p,figure{margin:0}
+ul,ol{margin:0;padding:0}
+img,svg{display:block;max-width:100%}
+hr{border:0;border-top:1px solid var(--line);margin:var(--s5) 0}
+
+:focus-visible{outline:2px solid var(--a);outline-offset:2px;border-radius:var(--r-xs)}
+:focus:not(:focus-visible){outline:none}
+
+/* ---------------- scrollbars ---------------- */
+*{scrollbar-width:thin;scrollbar-color:var(--line-3) transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:var(--r-full);border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:var(--line-3);background-clip:content-box;border:3px solid transparent}
+
+/* ---------------- icon primitive ---------------- */
+.i{display:inline-flex;align-items:center;justify-content:center;flex:none;width:16px;height:16px}
+/* No stroke-width here: a CSS declaration would beat each icon's own
+   presentation attribute and flatten every glyph to one weight, including the
+   platform SVGs that are drawn at 2 and the MCP mark drawn at 16. */
+.i svg{width:100%;height:100%}
+
+/* ---------------- buttons ---------------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
+  height:34px;padding:0 var(--s3);
+  border-radius:var(--r-sm);border:1px solid var(--line-2);
+  background:var(--bg-2);color:var(--tx);
+  font-size:var(--t-md);font-weight:500;white-space:nowrap;
+  transition:background var(--d-fast) var(--e),border-color var(--d-fast) var(--e),transform var(--d-fast) var(--e);
+}
+.btn:hover{background:var(--bg-3);border-color:var(--line-3)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--a);border-color:transparent;color:var(--a-contrast)}
+.btn-primary:hover{background:var(--a);filter:brightness(1.1)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--tx-2)}
+.btn-ghost:hover{background:var(--bg-2);color:var(--tx)}
+.btn-danger{color:var(--crit);border-color:var(--line-2)}
+.btn-danger:hover{background:var(--crit-soft);border-color:var(--crit)}
+.btn-sm{height:28px;padding:0 var(--s2);font-size:var(--t-sm)}
+.btn-block{width:100%}
+
+/* icon-only button */
+.ib{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:var(--r-sm);
+  color:var(--tx-2);flex:none;
+  transition:background var(--d-fast) var(--e),color var(--d-fast) var(--e);
+}
+.ib:hover{background:var(--bg-2);color:var(--tx)}
+.ib.on{background:var(--a-soft);color:var(--a-text)}
+.ib-sm{width:26px;height:26px}
+.ib-sm .i{width:14px;height:14px}
+
+/* ---------------- form controls ---------------- */
+.fld{display:flex;flex-direction:column;gap:6px;margin-bottom:var(--s4)}
+.fld label{font-size:var(--t-sm);font-weight:500;color:var(--tx-2)}
+.fld .hint{font-size:var(--t-xs);color:var(--tx-3);line-height:1.5}
+.inp,select.inp,textarea.inp{
+  width:100%;height:36px;padding:0 var(--s3);
+  background:var(--bg-2);border:1px solid var(--line-2);border-radius:var(--r-sm);
+  color:var(--tx);font-size:var(--t-md);
+  transition:border-color var(--d-fast) var(--e),background var(--d-fast) var(--e);
+}
+textarea.inp{height:auto;padding:var(--s2) var(--s3);resize:vertical;line-height:1.6}
+.inp:hover{border-color:var(--line-3)}
+.inp:focus{outline:none;border-color:var(--a);background:var(--bg-1)}
+.inp::placeholder{color:var(--tx-3)}
+select.inp{appearance:none;cursor:pointer;padding-right:28px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--tx-3) 50%),linear-gradient(135deg,var(--tx-3) 50%,transparent 50%);
+  background-position:calc(100% - 15px) 15px,calc(100% - 10px) 15px;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+
+/* switch */
+.sw{position:relative;display:inline-flex;align-items:center;width:36px;height:20px;flex:none;cursor:pointer}
+.sw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.sw i{position:absolute;inset:0;background:var(--bg-3);border:1px solid var(--line-2);border-radius:var(--r-full);transition:background var(--d) var(--e),border-color var(--d) var(--e)}
+.sw i::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--tx-3);transition:transform var(--d) var(--e),background var(--d) var(--e)}
+.sw input:checked + i{background:var(--a);border-color:transparent}
+.sw input:checked + i::after{transform:translateX(16px);background:#fff}
+.sw-row{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s4);padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.sw-row:last-child{border-bottom:0}
+.sw-row .lbl{font-size:var(--t-md);font-weight:500}
+.sw-row .sub{font-size:var(--t-xs);color:var(--tx-3);margin-top:2px;line-height:1.5}
+
+/* segmented control */
+.seg{display:inline-flex;gap:2px;padding:2px;background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-sm)}
+.seg button{padding:5px 11px;border-radius:var(--r-xs);font-size:var(--t-sm);font-weight:500;color:var(--tx-3);transition:background var(--d-fast) var(--e),color var(--d-fast) var(--e)}
+.seg button:hover{color:var(--tx)}
+.seg button.on{background:var(--bg-3);color:var(--tx)}
+
+/* ---------------- chips / tags ---------------- */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  height:22px;padding:0 8px;border-radius:var(--r-full);
+  background:var(--bg-2);border:1px solid var(--line);
+  font-size:var(--t-xs);font-weight:500;color:var(--tx-2);white-space:nowrap;
+}
+.chip .i{width:12px;height:12px}
+.chip-ok{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+.chip-warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.chip-crit{background:var(--crit-soft);border-color:transparent;color:var(--crit)}
+.chip-info{background:var(--info-soft);border-color:transparent;color:var(--info)}
+.chip-a{background:var(--a-soft);border-color:transparent;color:var(--a-text)}
+
+/* ---------------- avatar ---------------- */
+.av{
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  width:28px;height:28px;border-radius:50%;
+  font-size:var(--t-xs);font-weight:600;letter-spacing:.02em;
+  background:var(--a-soft);color:var(--a-text);
+  user-select:none;
+}
+.av-lg{width:36px;height:36px;font-size:var(--t-md)}
+.av-sm{width:22px;height:22px;font-size:10px}
+
+/* Stacked text blocks.
+   Rows across the product are built from spans (title over subtitle) so that
+   the whole row can be a single <button>. These make the inner spans stack
+   and truncate properly instead of running together on one line. */
+.mn,.who,.src-main,.ckl-main,.file-mn,.mcp-mn{display:flex;flex-direction:column;min-width:0}
+.mn > *,.who > *,.src-main > *,.ckl-main > *,.file-mn > *,.mcp-mn > *{display:block}
+
+/* ---------------- misc primitives ---------------- */
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.tnum{font-variant-numeric:tabular-nums}
+.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.divider{height:1px;background:var(--line);margin:var(--s3) 0}
+.spacer{flex:1}
+
+.eyebrow{
+  font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--tx-3);
+}
+
+/* ---------------- boot screen ---------------- */
+/* On screen for a couple of seconds, so it gets a proper entrance rather than
+   a flash. --boot-ms is set from the edition and drives the progress bar, so
+   the bar finishes exactly as the splash clears instead of looping. */
+.boot{
+  position:fixed;inset:0;z-index:9000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s5);
+  background:
+    radial-gradient(620px 420px at 50% 38%, var(--a-soft), transparent 70%),
+    var(--bg);
+  transition:opacity 420ms var(--e),visibility 420ms var(--e);
+}
+body:not(.booting) .boot{opacity:0;visibility:hidden;pointer-events:none}
+.boot-mark{
+  width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(140deg,var(--a),color-mix(in srgb,var(--a) 55%, #000));
+  box-shadow:0 12px 44px var(--a-soft);
+  animation:bootPulse 2.2s var(--e) infinite;
+}
+.boot-name{
+  font-size:var(--t-xl);font-weight:600;letter-spacing:.22em;color:var(--tx);
+  animation:bootRise 620ms var(--e) both;animation-delay:120ms;
+}
+.boot-bar{
+  width:148px;height:3px;border-radius:3px;background:var(--line-2);overflow:hidden;
+  animation:bootRise 620ms var(--e) both;animation-delay:220ms;
+}
+.boot-bar i{
+  display:block;width:100%;height:100%;background:var(--a);border-radius:3px;
+  transform-origin:left center;
+  animation:bootFill var(--boot-ms,2400ms) cubic-bezier(.35,.9,.25,1) both;
+}
+@keyframes bootPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.94);opacity:.82}}
+@keyframes bootRise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes bootFill{from{transform:scaleX(.04)}to{transform:scaleX(1)}}
+
+/* ---------------- shared animations ---------------- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
+
+.fade-up{animation:fadeUp var(--d-slow) var(--e) both}
+.fade-in{animation:fadeIn var(--d) var(--e) both}
+
+.skel{
+  background:linear-gradient(90deg,var(--bg-2) 0%,var(--bg-3) 42%,var(--bg-2) 84%);
+  background-size:320px 100%;
+  animation:shimmer 1.25s linear infinite;
+  border-radius:var(--r-xs);
+}
+
+/* Product logo supplied as an asset. Containers that carry a gradient for the
+   drawn fallback drop it entirely, and stop clipping: the asset defines its own
+   shape, so forcing a square radius onto a circular mark would shave its edges. */
+.brand-img{
+  width:var(--logo-inset,100%);height:var(--logo-inset,100%);
+  object-fit:contain;display:block;margin:auto;user-select:none;
+}
+/* for a monochrome dark logo that would otherwise vanish on the dark theme */
+:root.logo-invert-dark[data-theme="dark"] .brand-img{filter:invert(1) brightness(1.6)}
+.welcome-orb.has-logo,.msg-mark.has-logo,.convo-ic.has-logo,.lb-mark.has-logo,.boot-mark.has-logo{
+  background:none;box-shadow:none;padding:0;border-radius:0;overflow:visible;
+}
+/* the boot mark keeps breathing, since it is on screen for a couple of seconds */
+.boot-mark.has-logo{animation:bootBreathe 2.2s var(--e) infinite}
+@keyframes bootBreathe{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(.94);opacity:.82}
+}

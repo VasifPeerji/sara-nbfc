@@ -1,0 +1,192 @@
+/* ==================================================================
+   Guided tasks.
+
+   The card lives in the conversation and fills itself in as the person
+   answers, so the work they have done stays visible above the thing they
+   are being asked next. Nothing here takes over the screen: someone can
+   stop mid-task, type a question, and come back.
+   ================================================================== */
+
+/* ---------------- entry cards ---------------- */
+.jn-cards{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));margin-top:var(--s3)}
+.jn-cards-lg{grid-template-columns:minmax(0,1fr);gap:8px;margin-top:0}
+
+.jn-card{
+  display:flex;align-items:flex-start;gap:var(--s3);
+  padding:var(--s4);text-align:left;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--bg-1);
+  transition:border-color var(--d-fast) var(--e),background var(--d-fast) var(--e),transform var(--d-fast) var(--e);
+}
+.jn-card:hover{border-color:var(--a);background:var(--bg-2);transform:translateY(-1px)}
+.jn-cic{
+  flex:none;display:grid;place-items:center;width:34px;height:34px;
+  border-radius:var(--r);background:var(--a-soft);color:var(--a-text);
+}
+.jn-cic .i{width:17px;height:17px}
+.jn-cm{flex:1;min-width:0}
+.jn-ct{display:block;font-size:var(--t-md);font-weight:600;line-height:1.4}
+.jn-cs{display:block;font-size:var(--t-xs);color:var(--tx-3);line-height:1.5;margin-top:2px}
+.jn-cintro{display:block;font-size:var(--t-xs);color:var(--tx-3);line-height:1.55;margin-top:6px}
+.jn-cest{
+  flex:none;font-size:10px;font-weight:600;color:var(--tx-3);
+  padding:3px 8px;border-radius:var(--r-full);background:var(--bg-3);white-space:nowrap;
+}
+
+.welcome-sec{
+  display:flex;align-items:center;gap:7px;
+  margin:var(--s6) 0 0;
+  font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tx-3);
+}
+.welcome-sec .i{width:13px;height:13px;color:var(--a-text)}
+.welcome-sec .lnk{margin-left:auto;text-transform:none;letter-spacing:0;font-size:var(--t-xs);font-weight:500}
+
+/* ---------------- the task card ---------------- */
+.jn{
+  border:1px solid var(--line-2);border-radius:var(--r-lg);
+  background:var(--bg-1);overflow:hidden;margin-bottom:var(--s3);
+  animation:pop var(--d) var(--e) both;
+}
+.jn-head{display:flex;align-items:center;gap:var(--s3);padding:var(--s4) var(--s4) var(--s3)}
+.jn-ic{
+  flex:none;display:grid;place-items:center;width:32px;height:32px;
+  border-radius:var(--r);background:var(--a-soft);color:var(--a-text);
+}
+.jn-ic .i{width:16px;height:16px}
+.jn-hm{flex:1;min-width:0}
+.jn-ht{display:block;font-size:var(--t-md);font-weight:600;line-height:1.35}
+.jn-hs{display:block;font-size:var(--t-xs);color:var(--tx-3);margin-top:1px}
+.jn-x{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:var(--r-xs);color:var(--tx-3)}
+.jn-x:hover{background:var(--bg-3);color:var(--tx)}
+.jn-x .i{width:13px;height:13px}
+
+.jn-bar{height:3px;background:var(--bg-3)}
+.jn-bar i{display:block;height:100%;background:var(--a);transition:width .45s var(--e)}
+
+.jn-body{padding:var(--s4)}
+
+/* answered steps stay visible, and stay editable */
+.jn-done{
+  display:flex;align-items:flex-start;gap:var(--s3);width:100%;
+  padding:8px var(--s3);margin-bottom:5px;text-align:left;
+  border-radius:var(--r-sm);background:var(--bg-2);
+  transition:background var(--d-fast) var(--e);
+}
+.jn-done:hover{background:var(--bg-3)}
+.jn-done.static{cursor:default}
+.jn-done.static:hover{background:var(--bg-2)}
+.jn-dtick{
+  flex:none;display:grid;place-items:center;width:18px;height:18px;margin-top:1px;
+  border-radius:var(--r-full);background:var(--ok);color:#fff;
+}
+.jn-dtick .i{width:11px;height:11px}
+.jn-dm{flex:1;min-width:0}
+.jn-dq{display:block;font-size:var(--t-xs);color:var(--tx-3);line-height:1.4}
+.jn-da{display:block;font-size:var(--t-sm);font-weight:500;line-height:1.45;margin-top:1px}
+.jn-dedit{flex:none;color:var(--tx-3);opacity:0;transition:opacity var(--d-fast) var(--e)}
+.jn-done:hover .jn-dedit{opacity:1}
+.jn-dedit .i{width:13px;height:13px}
+
+/* the current step */
+.jn-step{padding-top:var(--s3)}
+.jn-q{font-size:var(--t-lg);font-weight:550;line-height:1.45}
+.jn-opt-tag{
+  margin-left:8px;padding:2px 7px;border-radius:var(--r-full);vertical-align:2px;
+  background:var(--bg-3);color:var(--tx-3);
+  font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+}
+.jn-help{font-size:var(--t-sm);color:var(--tx-3);line-height:1.6;margin-top:6px}
+
+/* the grounded quote: the reason this is not a form */
+.jn-cite{
+  margin-top:var(--s3);border:1px solid var(--line);border-radius:var(--r);
+  background:var(--bg-2);overflow:hidden;
+}
+.jn-cite-h{
+  display:flex;align-items:center;gap:6px;
+  padding:7px var(--s3);border-bottom:1px solid var(--line);
+  font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--tx-3);
+}
+.jn-cite-h .i{width:12px;height:12px;color:var(--a-text)}
+.jn-cite-open{
+  margin-left:auto;text-transform:none;letter-spacing:0;font-size:var(--t-xs);font-weight:500;
+  color:var(--a-text);
+}
+.jn-cite-open:hover{text-decoration:underline}
+.jn-cite-t{padding:var(--s3);font-size:var(--t-sm);line-height:1.65;color:var(--tx-2)}
+
+/* inputs */
+.jn-opts{display:flex;flex-direction:column;gap:6px;margin-top:var(--s4)}
+.jn-opt{
+  display:flex;align-items:flex-start;gap:var(--s3);width:100%;
+  padding:10px var(--s3);text-align:left;
+  border:1px solid var(--line-2);border-radius:var(--r);
+  background:var(--bg-2);
+  transition:border-color var(--d-fast) var(--e),background var(--d-fast) var(--e);
+}
+.jn-opt:hover{border-color:var(--a);background:var(--bg-3)}
+.jn-opt.on{border-color:var(--a);background:var(--a-soft)}
+.jn-tick{flex:none;display:grid;place-items:center;width:18px;height:18px;margin-top:1px;color:var(--tx-3)}
+.jn-opt.on .jn-tick{color:var(--a-text)}
+.jn-tick .i{width:15px;height:15px}
+.jn-om{flex:1;min-width:0}
+.jn-ot{display:block;font-size:var(--t-md);font-weight:500;line-height:1.4}
+.jn-od{display:block;font-size:var(--t-xs);color:var(--tx-3);line-height:1.5;margin-top:2px}
+.jn-next{margin-top:var(--s2);align-self:flex-start}
+
+.jn-input{display:flex;gap:8px;align-items:flex-start;margin-top:var(--s4);flex-wrap:wrap}
+.jn-in{flex:1;min-width:200px}
+textarea.jn-in{resize:vertical;min-height:70px;font-family:inherit}
+.jn-skip{color:var(--tx-3)}
+.jn-confirm{display:flex;gap:8px;margin-top:var(--s4)}
+
+/* completion */
+.jn-finish{
+  display:flex;align-items:flex-start;gap:var(--s3);
+  padding:var(--s4);margin-top:var(--s2);
+  border-radius:var(--r);
+  background:color-mix(in srgb,var(--ok) 10%,transparent);
+  border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);
+}
+.jn-fic{
+  flex:none;display:grid;place-items:center;width:26px;height:26px;
+  border-radius:var(--r-full);background:var(--ok);color:#fff;
+}
+.jn-fic .i{width:14px;height:14px}
+.jn-ft{display:block;font-size:var(--t-md);font-weight:600}
+.jn-fd{display:block;font-size:var(--t-sm);color:var(--tx-2);line-height:1.6;margin-top:2px}
+.jn-acts{display:flex;gap:8px;margin-top:var(--s3);flex-wrap:wrap}
+.jn-acts .btn{gap:6px}
+.jn-acts .btn .i{width:14px;height:14px}
+
+.jn-left{
+  display:flex;align-items:center;gap:var(--s3);padding:var(--s4);
+  font-size:var(--t-sm);color:var(--tx-3);
+}
+.jn-left .i{width:15px;height:15px;flex:none}
+.jn-past{opacity:.92}
+
+@media (max-width:640px){
+  .jn-cards{grid-template-columns:minmax(0,1fr)}
+  .jn-input{flex-direction:column}
+  .jn-in{width:100%}
+  .jn-input .btn{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  .jn{animation:none}
+  .jn-bar i{transition:none}
+}
+
+/* ---------------------------------------------------------------
+   Answers that came from the request rather than from the person
+   working through the task. Marked, not hidden: a prefilled answer
+   that cannot be seen is a prefilled answer nobody checks, and it is
+   still one click away from being changed.
+--------------------------------------------------------------- */
+.jn-done.is-auto{border-color:color-mix(in srgb,var(--a) 32%,var(--line));background:color-mix(in srgb,var(--a) 5%,transparent)}
+.jn-done.is-auto .jn-dtick{background:color-mix(in srgb,var(--a) 16%,transparent);color:var(--a-text)}
+.jn-dauto{
+  margin-left:6px;padding:1px 6px;border-radius:999px;
+  font-size:var(--t-2xs,10px);font-weight:600;letter-spacing:.02em;
+  background:color-mix(in srgb,var(--a) 16%,transparent);color:var(--a-text)
+}

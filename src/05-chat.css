@@ -1,0 +1,415 @@
+/* ------------------------------------------------------------------
+   Thread: welcome, messages, retrieval trace, markdown, citations
+   ------------------------------------------------------------------ */
+
+/* ================= welcome ================= */
+.welcome{display:flex;flex-direction:column;align-items:center;padding:var(--s7) 0 var(--s5);animation:fadeUp 420ms var(--e) both}
+.welcome-orb{
+  width:56px;height:56px;border-radius:16px;margin-bottom:var(--s5);
+  display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--a),color-mix(in srgb,var(--a) 45%, #000));
+  box-shadow:0 10px 40px var(--a-soft);
+}
+.welcome-orb svg{width:28px;height:28px}
+.welcome-h{font-size:var(--t-3xl);font-weight:600;letter-spacing:-.02em;text-align:center;line-height:1.25}
+.welcome-h em{font-style:normal;color:var(--a-text)}
+.welcome-sub{margin-top:var(--s2);font-size:var(--t-lg);color:var(--tx-2);text-align:center;max-width:52ch;line-height:1.55}
+
+.welcome-scope{
+  display:flex;flex-wrap:wrap;gap:6px;justify-content:center;
+  margin-top:var(--s5);max-width:640px;
+}
+
+.prompts{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);
+  width:100%;margin-top:var(--s6);
+}
+.prompt{
+  display:flex;align-items:flex-start;gap:var(--s3);
+  padding:var(--s3) var(--s4);text-align:left;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--bg-1);
+  transition:background var(--d-fast) var(--e),border-color var(--d-fast) var(--e),transform var(--d-fast) var(--e);
+}
+.prompt:hover{background:var(--bg-2);border-color:var(--line-2);transform:translateY(-1px)}
+.prompt .ic{
+  width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center;
+  background:var(--a-soft);color:var(--a-text);
+}
+.prompt .ic .i{width:15px;height:15px}
+.prompt .tt{font-size:var(--t-md);font-weight:500;line-height:1.45}
+.prompt .ss{font-size:var(--t-xs);color:var(--tx-3);margin-top:2px;line-height:1.45}
+
+/* ================= messages ================= */
+.msg{display:flex;flex-direction:column;animation:fadeUp var(--d-slow) var(--e) both}
+
+/* user */
+.msg-user{align-items:flex-end}
+.msg-user .bubble{
+  max-width:82%;padding:10px var(--s4);
+  border-radius:var(--r-xl) var(--r-xl) var(--r-sm) var(--r-xl);
+  background:var(--bg-2);border:1px solid var(--line);
+  font-size:var(--t-lg);line-height:1.6;white-space:pre-wrap;word-break:break-word;
+}
+.msg-user .edit-row{display:flex;gap:2px;margin-top:6px;opacity:0;transition:opacity var(--d-fast) var(--e)}
+.msg-user:hover .edit-row{opacity:1}
+
+/* assistant */
+.msg-ai{align-items:stretch}
+.msg-head{display:flex;align-items:center;gap:var(--s2);margin-bottom:var(--s3)}
+.msg-mark{
+  width:26px;height:26px;border-radius:8px;flex:none;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--a),color-mix(in srgb,var(--a) 45%, #000));
+}
+.msg-mark svg{width:14px;height:14px}
+.msg-name{font-size:var(--t-md);font-weight:600}
+.msg-time{font-size:var(--t-xs);color:var(--tx-3)}
+
+.msg-body{font-size:var(--t-lg);line-height:1.72;word-break:break-word}
+
+/* Streaming caret.
+   Scoped to .msg-body and given its own class: ".caret" is also the chevron
+   on the model chip and the trace header, and a bare .caret::after rule put a
+   blinking bar on both of them.
+   Attached to the last child rather than the body so it sits at the end of the
+   text instead of dropping onto a line of its own. */
+.msg-body.streaming > :last-child::after{
+  content:"";display:inline-block;width:6px;height:1em;
+  margin-left:3px;vertical-align:-2px;border-radius:1px;
+  background:var(--a);animation:blink 1s steps(2,start) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+
+/* ================= retrieval trace ================= */
+.trace{
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--bg-1);margin-bottom:var(--s3);overflow:hidden;
+}
+.trace-head{
+  display:flex;align-items:center;gap:var(--s2);width:100%;
+  padding:9px var(--s3);font-size:var(--t-sm);color:var(--tx-2);text-align:left;
+  transition:background var(--d-fast) var(--e);
+}
+.trace-head:hover{background:var(--bg-2)}
+.trace-head .i{width:14px;height:14px;flex:none;color:var(--tx-3)}
+.trace-head .spin{animation:spin 1.1s linear infinite;color:var(--a-text)}
+.trace-head .lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trace-head .caret{width:13px;height:13px;transition:transform var(--d) var(--e)}
+.trace.open .trace-head .caret{transform:rotate(180deg)}
+.trace-body{display:none;padding:0 var(--s3) var(--s3);border-top:1px solid var(--line)}
+.trace.open .trace-body{display:block;animation:fadeIn var(--d) var(--e) both}
+
+.trace-step{display:flex;align-items:center;gap:var(--s2);padding:7px 0;font-size:var(--t-sm);color:var(--tx-2)}
+.trace-step .i{width:13px;height:13px;color:var(--ok);flex:none}
+.trace-step .n{margin-left:auto;font-size:var(--t-xs);color:var(--tx-3)}
+
+.src-list{display:flex;flex-direction:column;gap:5px;margin-top:var(--s2)}
+.src{
+  display:flex;align-items:center;gap:var(--s2);
+  padding:7px var(--s2);border-radius:var(--r-sm);
+  border:1px solid var(--line);background:var(--bg-2);
+  text-align:left;width:100%;
+  transition:border-color var(--d-fast) var(--e),background var(--d-fast) var(--e);
+}
+.src:hover{border-color:var(--a);background:var(--bg-3)}
+.src-n{
+  width:20px;height:20px;border-radius:5px;flex:none;display:grid;place-items:center;
+  background:var(--a-soft);color:var(--a-text);
+  font-size:10px;font-weight:700;
+}
+.src-main{flex:1;min-width:0}
+.src-t{font-size:var(--t-sm);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src-m{font-size:var(--t-xs);color:var(--tx-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src-score{font-size:10px;color:var(--tx-3);font-variant-numeric:tabular-nums;flex:none}
+
+/* ================= citations ================= */
+.cite{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:17px;height:17px;padding:0 4px;margin:0 1px;
+  border-radius:5px;vertical-align:1px;
+  background:var(--a-soft);color:var(--a-text);
+  font-size:10px;font-weight:700;line-height:1;
+  cursor:pointer;border:1px solid transparent;
+  transition:background var(--d-fast) var(--e),border-color var(--d-fast) var(--e);
+}
+.cite:hover{background:var(--a);color:#fff;border-color:var(--a)}
+
+/* ================= markdown ================= */
+.md > *:first-child{margin-top:0}
+.md > *:last-child{margin-bottom:0}
+.md p{margin:0 0 .85em}
+.md strong{font-weight:650;color:var(--tx)}
+.md em{font-style:italic}
+.md h1,.md h2,.md h3,.md h4{font-weight:600;line-height:1.35;letter-spacing:-.01em;margin:1.5em 0 .55em}
+.md h1{font-size:var(--t-2xl)}
+.md h2{font-size:var(--t-xl)}
+.md h3{font-size:var(--t-lg)}
+.md h4{font-size:var(--t-base);color:var(--tx-2)}
+.md ul,.md ol{margin:0 0 .9em;padding-left:1.35em}
+.md li{margin:.28em 0;padding-left:.15em}
+.md li::marker{color:var(--tx-3)}
+.md ul ul,.md ol ol,.md ul ol,.md ol ul{margin:.28em 0}
+.md blockquote{
+  margin:0 0 .9em;padding:2px 0 2px var(--s4);
+  border-left:2px solid var(--a);color:var(--tx-2);
+}
+.md hr{margin:1.4em 0}
+.md a{text-decoration:underline;text-underline-offset:2px}
+
+.md code{
+  font-family:var(--f-mono);font-size:.88em;
+  padding:.14em .38em;border-radius:var(--r-xs);
+  background:var(--bg-2);border:1px solid var(--line);
+}
+.md pre{
+  margin:0 0 .9em;padding:var(--s3) var(--s4);
+  background:var(--code-bg);border:1px solid var(--line);border-radius:var(--r);
+  overflow-x:auto;
+}
+.md pre code{background:none;border:0;padding:0;font-size:var(--t-md);line-height:1.65}
+
+.md table{
+  width:100%;border-collapse:separate;border-spacing:0;
+  margin:0 0 1em;font-size:var(--t-md);
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+}
+.md thead th{
+  background:var(--bg-2);text-align:left;font-weight:600;color:var(--tx-2);
+  padding:9px var(--s3);border-bottom:1px solid var(--line);white-space:nowrap;
+  font-size:var(--t-sm);
+}
+.md tbody td{padding:9px var(--s3);border-bottom:1px solid var(--line);vertical-align:top}
+.md tbody tr:last-child td{border-bottom:0}
+.md tbody tr:hover{background:var(--bg-1)}
+.md td.num,.md th.num{text-align:right;font-variant-numeric:tabular-nums}
+.md .tbl-wrap{overflow-x:auto;margin:0 0 1em}
+.md .tbl-wrap table{margin:0}
+
+/* status words picked out inside prose */
+.md .v-ok{color:var(--ok);font-weight:600}
+.md .v-warn{color:var(--warn);font-weight:600}
+.md .v-crit{color:var(--crit);font-weight:600}
+
+/* ================= callouts ================= */
+.callout{
+  display:flex;gap:var(--s3);
+  padding:var(--s3) var(--s4);margin:0 0 1em;
+  border-radius:var(--r);border:1px solid var(--line-2);
+  background:var(--bg-1);font-size:var(--t-md);line-height:1.6;
+}
+.callout .i{width:16px;height:16px;flex:none;margin-top:2px}
+.callout-warn{border-color:color-mix(in srgb,var(--warn) 40%,transparent);background:var(--warn-soft)}
+.callout-warn .i{color:var(--warn)}
+.callout-crit{border-color:color-mix(in srgb,var(--crit) 40%,transparent);background:var(--crit-soft)}
+.callout-crit .i{color:var(--crit)}
+.callout-info{border-color:color-mix(in srgb,var(--info) 35%,transparent);background:var(--info-soft)}
+.callout-info .i{color:var(--info)}
+.callout-ok{border-color:color-mix(in srgb,var(--ok) 35%,transparent);background:var(--ok-soft)}
+.callout-ok .i{color:var(--ok)}
+.callout b{display:block;margin-bottom:2px}
+
+/* ================= access denied ================= */
+.denied{
+  border:1px solid color-mix(in srgb,var(--warn) 34%,transparent);
+  background:var(--warn-soft);border-radius:var(--r-lg);
+  padding:var(--s4);
+}
+.denied-h{display:flex;align-items:center;gap:var(--s2);font-weight:600;margin-bottom:6px}
+.denied-h .i{width:16px;height:16px;color:var(--warn)}
+.denied p{font-size:var(--t-md);color:var(--tx-2);line-height:1.6;margin:0 0 var(--s3)}
+.denied-route{
+  display:flex;align-items:center;gap:var(--s2);
+  padding:var(--s2) var(--s3);border-radius:var(--r-sm);
+  background:var(--bg-1);border:1px solid var(--line);font-size:var(--t-sm);
+}
+.denied-route .i{width:14px;height:14px;color:var(--tx-3)}
+
+/* ================= message actions ================= */
+.msg-acts{
+  display:flex;align-items:center;gap:2px;margin-top:var(--s3);
+  opacity:0;transition:opacity var(--d) var(--e);
+}
+.msg-ai:hover .msg-acts,.msg-acts.pinned{opacity:1}
+.msg-acts .ib.rated-up{color:var(--ok)}
+.msg-acts .ib.rated-down{color:var(--crit)}
+
+/* ================= follow-ups ================= */
+.fups{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--s4)}
+.fup{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 11px;border-radius:var(--r-full);
+  border:1px solid var(--line-2);background:var(--bg-1);
+  font-size:var(--t-sm);color:var(--tx-2);text-align:left;
+  transition:background var(--d-fast) var(--e),border-color var(--d-fast) var(--e),color var(--d-fast) var(--e);
+}
+.fup:hover{background:var(--bg-2);border-color:var(--a);color:var(--tx)}
+.fup .i{width:12px;height:12px;color:var(--tx-3)}
+.fup:hover .i{color:var(--a-text)}
+
+/* ================= artifact ref card in thread ================= */
+.art-ref{
+  display:flex;align-items:center;gap:var(--s3);width:100%;
+  margin-top:var(--s4);padding:var(--s3);
+  border:1px solid var(--line-2);border-radius:var(--r-lg);
+  background:var(--bg-1);text-align:left;
+  transition:border-color var(--d-fast) var(--e),background var(--d-fast) var(--e),transform var(--d-fast) var(--e);
+}
+.art-ref:hover{border-color:var(--a);background:var(--bg-2);transform:translateY(-1px)}
+.art-ref .ic{
+  width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;
+  background:var(--a-soft);color:var(--a-text);
+}
+.art-ref .ic .i{width:17px;height:17px}
+.art-ref .mn{flex:1;min-width:0}
+.art-ref .tt{font-size:var(--t-md);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.art-ref .ss{font-size:var(--t-xs);color:var(--tx-3);margin-top:1px}
+.art-ref .go{width:15px;height:15px;color:var(--tx-3);flex:none}
+.art-ref.building{pointer-events:none}
+.art-ref.building .ic{background:var(--bg-2);color:var(--tx-3)}
+
+/* ================= error state ================= */
+.msg-err{
+  display:flex;align-items:flex-start;gap:var(--s3);
+  padding:var(--s3) var(--s4);border-radius:var(--r-lg);
+  border:1px solid color-mix(in srgb,var(--crit) 34%,transparent);
+  background:var(--crit-soft);font-size:var(--t-md);
+}
+.msg-err .i{width:16px;height:16px;color:var(--crit);flex:none;margin-top:2px}
+.msg-err .mn{flex:1;min-width:0}
+.msg-err b{display:block;margin-bottom:2px}
+.msg-err .dtl{color:var(--tx-2);font-size:var(--t-sm);line-height:1.55;word-break:break-word}
+.msg-err .acts{display:flex;gap:var(--s2);margin-top:var(--s3)}
+
+/* thinking placeholder */
+.thinking{display:flex;align-items:center;gap:var(--s2);color:var(--tx-3);font-size:var(--t-md)}
+.thinking .dots{display:inline-flex;gap:3px}
+.thinking .dots i{width:5px;height:5px;border-radius:50%;background:var(--tx-3);animation:bounce 1.15s var(--e) infinite}
+.thinking .dots i:nth-child(2){animation-delay:.13s}
+.thinking .dots i:nth-child(3){animation-delay:.26s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
+
+/* ================= second retrieval channel =================
+   Web results and attached files are cited alongside company documents, so
+   every surface here exists to answer one question at a glance: is this
+   ours, is it theirs, or is it the open internet. */
+
+/* nested sources inside the trace, one level in */
+.trace-step.trace-sub{padding:5px 0 5px var(--s5);font-size:var(--t-xs);color:var(--tx-3)}
+.trace-step.trace-sub .i{width:11px;height:11px}
+
+.src-sec{
+  display:flex;align-items:center;gap:6px;
+  margin:var(--s4) 0 var(--s2);
+  font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--tx-3);
+}
+.src-sec .i{width:12px;height:12px;color:var(--a-text)}
+
+/* a file the person attached reads as theirs, not as company material */
+.src.src-att .src-n{background:var(--warn-soft,var(--bg-3));color:var(--warn)}
+
+/* web result row: a div, because it carries its own link */
+.wsrc{
+  display:flex;align-items:center;gap:var(--s2);
+  padding:7px var(--s2);border-radius:var(--r-sm);
+  border:1px solid var(--line);background:var(--bg-2);
+  text-align:left;width:100%;cursor:pointer;
+  transition:border-color var(--d-fast) var(--e),background var(--d-fast) var(--e);
+}
+.wsrc:hover{border-color:var(--a);background:var(--bg-3)}
+.wsrc-n{
+  display:inline-flex;align-items:center;gap:3px;flex:none;
+  height:20px;padding:0 6px;border-radius:5px;
+  background:var(--bg-3);color:var(--tx-2);
+  border:1px solid var(--line-2);
+  font-size:10px;font-weight:700;
+}
+.wsrc-n .i{width:10px;height:10px}
+.wsrc-main{flex:1;min-width:0}
+.wsrc-t{font-size:var(--t-sm);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.wsrc-m{font-size:var(--t-xs);color:var(--tx-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.wsrc-go{
+  flex:none;display:grid;place-items:center;width:26px;height:26px;
+  border-radius:var(--r-xs);color:var(--tx-3);
+}
+.wsrc-go:hover{background:var(--bg-1);color:var(--a-text)}
+.wsrc-go .i{width:13px;height:13px}
+
+/* a web citation must never be mistaken for a company one, so it carries a
+   globe and sits in neutral chrome rather than the accent */
+.cite.cite-web{
+  gap:2px;padding:0 5px;
+  background:var(--bg-3);color:var(--tx-2);
+  border-color:var(--line-2);
+}
+.cite.cite-web svg{width:9px;height:9px}
+.cite.cite-web:hover{background:var(--tx-2);color:var(--bg);border-color:var(--tx-2)}
+
+/* ---- web search pill ---- */
+.composer-bar .pill{
+  display:inline-flex;align-items:center;gap:6px;
+  height:34px;padding:0 12px;margin-left:2px;
+  border-radius:var(--r-full);border:1px solid var(--line-2);
+  background:none;color:var(--tx-3);
+  font-size:var(--t-sm);font-weight:500;
+  transition:background var(--d-fast) var(--e),color var(--d-fast) var(--e),border-color var(--d-fast) var(--e);
+}
+.composer-bar .pill .i{width:15px;height:15px}
+.composer-bar .pill:hover{background:var(--bg-2);color:var(--tx)}
+.composer-bar .pill.on{background:var(--a-soft);color:var(--a-text);border-color:var(--a-line)}
+.composer-bar .pill.auto{color:var(--a-text);border-color:var(--a-line);border-style:dashed}
+
+/* ---- attachment chips ---- */
+.attach-bar{
+  display:none;flex-wrap:wrap;gap:6px;
+  max-width:var(--chat-max);margin:0 auto var(--s2);
+}
+.attach-bar.on{display:flex}
+.att{
+  display:flex;align-items:center;gap:8px;
+  max-width:290px;padding:6px 8px 6px 6px;
+  border:1px solid var(--line-2);border-radius:var(--r);
+  background:var(--bg-1);
+}
+.att-ic{
+  flex:none;display:grid;place-items:center;width:26px;height:26px;
+  border-radius:var(--r-xs);background:var(--bg-3);color:var(--tx-2);
+}
+.att-ic .i{width:14px;height:14px}
+.att-mn{min-width:0}
+.att-nm{display:block;font-size:var(--t-sm);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.att-ss{display:block;font-size:var(--t-xs);color:var(--tx-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.att-x{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:var(--r-xs);color:var(--tx-3)}
+.att-x:hover{background:var(--bg-3);color:var(--tx)}
+.att-x .i{width:12px;height:12px}
+.att-ready .att-ic{background:var(--a-soft);color:var(--a-text)}
+.att-error{border-color:color-mix(in srgb,var(--crit) 45%,transparent)}
+.att-error .att-ic{background:var(--crit-soft);color:var(--crit)}
+.att-error .att-ss{color:var(--crit)}
+.att-reading .att-ic .i,.att-parsing .att-ic .i{animation:spin 1.1s linear infinite}
+.att-clear{
+  align-self:center;padding:0 8px;height:32px;
+  font-size:var(--t-xs);color:var(--tx-3);border-radius:var(--r-xs);
+}
+.att-clear:hover{color:var(--tx);background:var(--bg-2)}
+
+/* ---- drop target ---- */
+.drop-veil{
+  position:fixed;inset:0;z-index:80;
+  display:none;place-items:center;
+  background:color-mix(in srgb,var(--bg) 72%,transparent);
+  backdrop-filter:blur(3px);
+}
+.drop-veil.on{display:grid;animation:fadeIn var(--d-fast) var(--e) both}
+.dv-card{
+  text-align:center;padding:var(--s7) var(--s8);
+  border:2px dashed var(--a-line);border-radius:var(--r-xl,20px);
+  background:var(--bg-1);box-shadow:var(--sh-lg,var(--sh));
+  max-width:420px;
+}
+.dv-ic{
+  display:grid;place-items:center;width:54px;height:54px;margin:0 auto var(--s4);
+  border-radius:var(--r-full);background:var(--a-soft);color:var(--a-text);
+}
+.dv-ic .i{width:26px;height:26px}
+.dv-card h4{font-size:var(--t-xl);font-weight:600;margin:0 0 6px}
+.dv-card p{font-size:var(--t-sm);color:var(--tx-3);line-height:1.6;margin:0}

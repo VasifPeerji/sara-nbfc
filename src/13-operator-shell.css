@@ -1,0 +1,438 @@
+/* ==================================================================
+   13-operator-shell.css
+   The operator machine: a Windows 11 desktop running Google Chrome.
+   ------------------------------------------------------------------
+   Loads after 11-operator-real.css and supersedes its shell rules.
+
+   The important idea: the page inside Chrome is authored at a real
+   1280 x 800 desktop and scaled down with a transform. Product UIs
+   therefore keep genuine proportions, sidebar widths and font sizes
+   instead of being redrawn tiny, which is what made the old version
+   read as a sketch.
+   ================================================================== */
+
+.op-real-browser {
+  height: 100%; min-height: 0; display: flex; flex-direction: column;
+  background: var(--surface); color: var(--text);
+  font-family: var(--font);
+}
+
+/* ------------------------------ screen ----------------------------- */
+.opw {
+  position: relative; flex: 0 0 auto; width: 100%;
+  display: flex; flex-direction: column;
+  padding: 13px 13px 0;
+  overflow: hidden;
+  background: #0a3a63;
+}
+.opw__wall {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 44%, #2a7ad4 0%, #1f5fae 34%, #123f7e 62%, #071d3d 100%),
+    #071d3d;
+}
+/* the Windows 11 "bloom" */
+.opw__wall::before {
+  content: ""; position: absolute; left: 50%; top: 46%;
+  width: 78%; aspect-ratio: 1; transform: translate(-50%, -50%);
+  background:
+    conic-gradient(from 210deg at 50% 50%,
+      rgba(120, 200, 255, .00) 0deg, rgba(140, 214, 255, .55) 42deg,
+      rgba(90, 160, 240, .18) 96deg, rgba(60, 120, 220, .00) 150deg,
+      rgba(120, 200, 255, .00) 210deg, rgba(160, 220, 255, .42) 268deg,
+      rgba(80, 150, 235, .14) 320deg, rgba(120, 200, 255, .00) 360deg);
+  filter: blur(14px);
+  border-radius: 50%;
+  opacity: .9;
+}
+.opw__wall::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(75% 60% at 50% 46%, transparent 40%, rgba(3, 14, 32, .55) 100%);
+}
+
+/* desktop icons, top-left */
+.opw__icons {
+  position: absolute; left: 1.4%; top: 2.2%; z-index: 1;
+  display: flex; flex-direction: column; gap: 2.2%;
+  width: 8.5%;
+}
+.opw__icon { display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; }
+.opw__icon svg { width: 46%; max-width: 30px; height: auto; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .5)); }
+.opw__icon span {
+  font-size: 7.5px; line-height: 1.15; color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .85);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+/* --------------------------- chrome window -------------------------- */
+.opw__win {
+  position: relative; z-index: 1; flex: 0 0 auto;
+  display: flex; flex-direction: column; min-height: 0;
+  border-radius: 9px; overflow: hidden;
+  background: #fff;
+  box-shadow: 0 18px 46px rgba(2, 10, 24, .55), 0 0 0 1px rgba(0, 0, 0, .35);
+}
+
+/* tab strip */
+.opc__tabs {
+  flex: 0 0 auto; height: 39px;
+  display: flex; align-items: flex-end; gap: 0;
+  padding: 8px 0 0 8px;
+  background: #d6dce4;
+  position: relative;
+}
+.opc__tab {
+  position: relative;
+  height: 31px; flex: 0 1 190px; min-width: 78px; max-width: 210px;
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 9px 0 11px; margin-right: 1px;
+  border-radius: 9px 9px 0 0;
+  background: transparent; color: #34404e;
+  font: 500 11px/1 "Segoe UI", system-ui, sans-serif;
+  text-align: left; min-width: 0;
+}
+.opc__tab:hover { background: rgba(255, 255, 255, .48); }
+.opc__tab[aria-selected="true"] { background: #fff; color: #1c242e; }
+/* the concave feet that make a Chrome tab a Chrome tab */
+.opc__tab[aria-selected="true"]::before,
+.opc__tab[aria-selected="true"]::after {
+  content: ""; position: absolute; bottom: 0; width: 9px; height: 9px; background: #fff;
+}
+.opc__tab[aria-selected="true"]::before {
+  left: -9px;
+  -webkit-mask: radial-gradient(circle 9px at 0 0, transparent 9px, #000 9.5px);
+          mask: radial-gradient(circle 9px at 0 0, transparent 9px, #000 9.5px);
+}
+.opc__tab[aria-selected="true"]::after {
+  right: -9px;
+  -webkit-mask: radial-gradient(circle 9px at 100% 0, transparent 9px, #000 9.5px);
+          mask: radial-gradient(circle 9px at 100% 0, transparent 9px, #000 9.5px);
+}
+/* the title is the only flexible child: naming it keeps this rule from
+   stretching the favicon, the spinner and the close button as well */
+.opc__tab > .opc__tabname { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opc__fav { width: 16px; height: 16px; flex: 0 0 16px; display: grid; place-items: center; }
+.opc__fav svg { width: 16px; height: 16px; display: block; }
+.opc__spin {
+  width: 14px; height: 14px; min-width: 14px; max-width: 14px; flex: 0 0 14px;
+  box-sizing: border-box; border-radius: 50%;
+  border: 1.7px solid rgba(26, 115, 232, .22); border-top-color: #1a73e8;
+  animation: opcSpin .82s linear infinite;
+}
+@keyframes opcSpin { to { transform: rotate(360deg); } }
+.opc__x {
+  width: 16px; height: 16px; flex: 0 0 16px; border-radius: 50%;
+  display: grid; place-items: center; color: #5b6673; opacity: .8;
+}
+.opc__tab:hover .opc__x { background: rgba(0, 0, 0, .09); }
+.opc__x svg { width: 9px; height: 9px; stroke-width: 2.2; }
+.opc__newtab {
+  width: 28px; height: 28px; margin: 0 0 1px 4px; border-radius: 50%;
+  display: grid; place-items: center; color: #4a5563; flex: 0 0 28px;
+}
+.opc__newtab:hover { background: rgba(255, 255, 255, .55); }
+.opc__newtab svg { width: 13px; height: 13px; stroke-width: 2.1; }
+
+/* Windows caption buttons, on the tab strip row */
+.opc__caption { margin-left: auto; align-self: stretch; display: flex; }
+.opc__caption button {
+  width: 42px; display: grid; place-items: center; color: #2b333d;
+}
+.opc__caption button:hover { background: rgba(0, 0, 0, .07); }
+.opc__caption button:last-child:hover { background: #c42b1c; color: #fff; }
+.opc__caption svg { width: 10px; height: 10px; stroke-width: 1.4; }
+
+/* toolbar */
+.opc__bar {
+  flex: 0 0 auto; height: 40px;
+  display: flex; align-items: center; gap: 3px;
+  padding: 0 8px; background: #fff;
+}
+.opc__nav {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  color: #4b545f; flex: 0 0 28px;
+}
+.opc__nav:hover { background: #eef0f3; }
+.opc__nav[disabled] { color: #b9c0c8; }
+.opc__nav svg { width: 15px; height: 15px; stroke-width: 1.9; }
+
+.opc__omni {
+  flex: 1; min-width: 0; height: 30px; margin: 0 5px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 6px 0 11px; border-radius: 16px;
+  background: #eef1f4; color: #202b36;
+  font: 12px/1 "Segoe UI", system-ui, sans-serif;
+  position: relative;
+}
+.opc__omni.is-focus { background: #fff; box-shadow: 0 0 0 2px #1a73e8, 0 1px 6px rgba(26, 115, 232, .28); }
+.opc__omni > svg:first-child { width: 13px; height: 13px; flex: 0 0 13px; color: #5f6874; }
+.opc__omni b { font-weight: 400; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opc__omni b i { font-style: normal; color: #6a7480; }
+.opc__caret {
+  display: inline-block; width: 1.5px; height: 15px; margin-left: 1px;
+  background: #1c2530; vertical-align: -3px; animation: opcCaret 1.06s steps(1) infinite;
+}
+@keyframes opcCaret { 50% { opacity: 0; } }
+.opc__omni .opc__omniacts { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+.opc__omni .opc__omniacts span {
+  width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: #4b545f;
+}
+.opc__omni .opc__omniacts svg { width: 13px; height: 13px; }
+
+.opc__ext { display: flex; align-items: center; gap: 2px; }
+.opc__ext span { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: #4b545f; }
+.opc__ext svg { width: 14px; height: 14px; }
+.opc__avatar {
+  width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  background: #b6603a; color: #fff; font: 700 10px/1 "Segoe UI", sans-serif; flex: 0 0 24px;
+}
+
+/* bookmarks bar */
+.opc__marks {
+  flex: 0 0 auto; height: 28px; display: flex; align-items: center; gap: 2px;
+  padding: 0 8px 3px; background: #fff; border-bottom: 1px solid #dfe3e8;
+  font: 11px/1 "Segoe UI", system-ui, sans-serif; color: #3c4854;
+}
+.opc__mark { display: flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 4px; }
+.opc__mark:hover { background: #eef0f3; }
+.opc__mark svg, .opc__mark .opc__dot { width: 13px; height: 13px; flex: 0 0 13px; border-radius: 3px; }
+
+/* the page: authored at 1280x800, scaled to fit */
+.op-real-viewport, .opc__page {
+  flex: 0 0 auto; position: relative; overflow: hidden; background: #fff;
+}
+.opc__scale {
+  position: absolute; left: 0; top: 0;
+  width: 1280px; height: 720px;
+  transform-origin: top left;
+  transform: scale(var(--op-scale, .5));
+  background: #fff;
+}
+/* page-load bar */
+.opc__loadbar { position: absolute; left: 0; top: 0; height: 3px; z-index: 40; background: #1a73e8;
+  box-shadow: 0 0 8px rgba(26, 115, 232, .6); transition: width .3s ease; }
+
+/* omnibox suggestion dropdown */
+.opc__drop {
+  position: absolute; left: 44px; right: 96px; top: 0; z-index: 45;
+  background: #fff; border-radius: 0 0 10px 10px;
+  box-shadow: 0 8px 22px rgba(10, 20, 35, .26), 0 0 0 1px rgba(0, 0, 0, .07);
+  overflow: hidden; font: 12px/1 "Segoe UI", system-ui, sans-serif;
+}
+.opc__drop div { display: flex; align-items: center; gap: 10px; padding: 8px 12px; color: #26313c; }
+.opc__drop div.is-sel { background: #e8f0fe; }
+.opc__drop div svg { width: 14px; height: 14px; flex: 0 0 14px; color: #5f6874; }
+.opc__drop b { font-weight: 600; }
+.opc__drop small { margin-left: auto; color: #7b8593; font-size: 10.5px; }
+
+/* ----------------------------- taskbar ----------------------------- */
+.opw__taskbar {
+  position: relative; z-index: 2; flex: 0 0 auto; height: 38px; margin: 11px -13px 0;
+  display: flex; align-items: center; padding: 0 12px;
+  background: rgba(238, 245, 252, .82);
+  backdrop-filter: blur(22px) saturate(150%);
+  border-top: 1px solid rgba(255, 255, 255, .55);
+  z-index: 2;
+}
+.opw__tbmid {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 5px;
+}
+/* Windows 11 taskbar search: a pill with the word and a rounded thumbnail */
+.opw__tbsearch {
+  height: 26px; display: flex; align-items: center; gap: 6px;
+  padding: 0 3px 0 9px; margin-right: 2px; border-radius: 13px;
+  background: rgba(255, 255, 255, .74);
+  box-shadow: inset 0 0 0 1px rgba(16, 32, 52, .1), 0 1px 1px rgba(16, 32, 52, .06);
+  color: #35404d; font: 10px/1 "Segoe UI", system-ui, sans-serif;
+}
+.opw__tbsearch svg { width: 12px; height: 12px; stroke-width: 2; color: #303c49; }
+.opw__tbsearch i { font-style: normal; }
+.opw__tbsearch em {
+  width: 30px; height: 20px; border-radius: 10px; display: block;
+  background-size: cover; background-position: center;
+  box-shadow: inset 0 0 0 1px rgba(16, 32, 52, .12);
+}
+.opw__tbsep { width: 1px; height: 17px; margin: 0 3px; background: rgba(20, 34, 52, .16); }
+.opw__tbapp {
+  width: 26px; height: 26px; border-radius: 5px; display: grid; place-items: center; position: relative;
+}
+.opw__tbapp:hover { background: rgba(0, 0, 0, .06); }
+.opw__tbapp svg { width: 19px; height: 19px; }
+.opw__tbapp.is-active { background: rgba(255, 255, 255, .68); }
+.opw__tbapp.is-active::after {
+  content: ""; position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%);
+  width: 13px; height: 2.5px; border-radius: 2px; background: #0a68c9;
+}
+.opw__tbapp.is-open::after {
+  content: ""; position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 2.5px; border-radius: 2px; background: #6b7683;
+}
+.opw__tray {
+  margin-left: auto; display: flex; align-items: center; gap: 8px;
+  color: #1d2733; font: 9px/1.25 "Segoe UI", system-ui, sans-serif;
+}
+.opw__tray svg { width: 12px; height: 12px; }
+.opw__clock { text-align: right; }
+.opw__clock time { display: block; font-size: 9.5px; }
+.opw__clock small { display: block; font-size: 8.5px; }
+
+/* ------------------------------ pointer ----------------------------
+   Lives in the panel, not in the repainted page, and is drawn at a fixed
+   screen size: a real mouse pointer neither disappears when a page
+   redraws nor scales with the page. Coordinates are panel-relative and
+   applied as a transform, so movement is one smooth interpolation.
+------------------------------------------------------------------ */
+.cmd-operator { position: relative; }
+.opptr {
+  position: absolute; left: 0; top: 0; width: 0; height: 0;
+  z-index: 60; pointer-events: none;
+  transition: transform var(--op-move-ms, .45s) cubic-bezier(.25, .82, .25, 1);
+  will-change: transform;
+}
+.opptr[data-on="0"] { opacity: 0; visibility: hidden; }
+.opptr__cur { position: absolute; width: 16px; height: 22px; }
+.opptr__cur svg { width: 100%; height: 100%; display: block;
+  filter: drop-shadow(0 1px 2.5px rgba(0, 0, 0, .5)); }
+.opptr[data-cursor="arrow"] .opptr__cur { left: -3px; top: -2px; }
+.opptr[data-cursor="hand"] .opptr__cur { left: -6px; top: -3px; }
+.opptr[data-cursor="beam"] .opptr__cur { left: -8px; top: -11px; }
+.opptr.is-click .opptr__cur { animation: opPress .3s ease-out; }
+@keyframes opPress { 0% { transform: scale(1); } 45% { transform: scale(.85); } 100% { transform: scale(1); } }
+
+.opptr__ring {
+  position: absolute; left: -15px; top: -15px; width: 30px; height: 30px;
+  border: 2px solid rgba(26, 115, 232, .92); border-radius: 50%; opacity: 0;
+}
+.opptr.is-click .opptr__ring { animation: opRing .56s ease-out; }
+@keyframes opRing { 0% { transform: scale(.32); opacity: .95; } 100% { transform: scale(1.55); opacity: 0; } }
+
+.opptr__say {
+  position: absolute; left: 15px; top: 11px; max-width: 220px;
+  padding: 5px 9px; border-radius: 6px;
+  background: rgba(22, 27, 33, .95); color: #fff;
+  font: 600 10.5px/1.3 "Segoe UI", system-ui, sans-serif;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .38);
+}
+.opptr__say[data-side="left"] { left: auto; right: 11px; }
+.opptr__say[data-up="1"] { top: auto; bottom: 13px; }
+
+/* the control being acted on */
+.opc__scale [data-op-target="true"] {
+  outline: 2px solid rgba(26, 115, 232, .95);
+  outline-offset: 2px;
+  border-radius: 4px;
+  transition: outline-color .2s ease;
+}
+
+/* ------------------------- status + timeline ----------------------- */
+.op-real-status {
+  height: 32px; flex: 0 0 32px; display: flex; align-items: center; gap: 8px;
+  padding: 0 12px; background: var(--surface); border-top: 1px solid var(--border);
+}
+.op-real-status b { font-size: var(--fs-sm); white-space: nowrap; }
+.op-real-progress { height: 3px; flex: 0 0 3px; background: var(--surface-3); }
+
+@media (max-width: 1400px) {
+  .opw__icons { display: none; }
+}
+
+/* ==================================================================
+   Google new tab page, authored at 1280 x 800
+   ================================================================== */
+.opg { width: 1280px; height: 720px; background: #fff; position: relative;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif; color: #202124; }
+.opg__top { position: absolute; right: 26px; top: 20px; display: flex; align-items: center; gap: 22px;
+  font-size: 14px; color: #202124; }
+.opg__top span { text-decoration: underline; text-underline-offset: 3px; }
+.opg__top .opg__apps { width: 26px; height: 26px; display: grid; place-items: center; opacity: .7; }
+.opg__top .opg__apps svg { width: 18px; height: 18px; transform: rotate(90deg); }
+.opg__top b { width: 32px; height: 32px; border-radius: 50%; background: #b6603a; color: #fff;
+  display: grid; place-items: center; font-size: 13px; font-weight: 600; }
+.opg__mid { position: absolute; left: 50%; top: 178px; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; }
+.opg__logo { font-size: 88px; font-weight: 500; letter-spacing: -3px; line-height: 1;
+  font-family: "Product Sans", "Segoe UI", Arial, sans-serif; }
+.opg__search { margin-top: 34px; width: 584px; height: 48px; border-radius: 26px;
+  border: 1px solid #dfe1e5; box-shadow: 0 1px 6px rgba(32, 33, 36, .12);
+  display: flex; align-items: center; gap: 14px; padding: 0 18px; }
+.opg__search > svg { width: 20px; height: 20px; color: #9aa0a6; flex: 0 0 20px; }
+.opg__search span { flex: 1; font-size: 16px; color: #5f6368; }
+.opg__search i { width: 24px; height: 24px; display: grid; place-items: center; }
+.opg__search i svg { width: 22px; height: 22px; }
+.opg__tiles { margin-top: 44px; display: flex; gap: 8px; }
+.opg__tiles span { width: 112px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 14px 0 10px; border-radius: 10px; }
+.opg__tiles span:hover { background: #f1f3f4; }
+.opg__tiles i { width: 48px; height: 48px; border-radius: 50%; background: #f1f3f4;
+  display: grid; place-items: center; }
+.opg__tiles i svg { width: 26px; height: 26px; }
+.opg__tiles .opg__add svg { width: 20px; height: 20px; color: #5f6368; stroke-width: 2; }
+.opg__tiles b { font-size: 13px; font-weight: 400; color: #3c4043; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opg__loading { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px; font-size: 15px; color: #5f6368; }
+.opg__loading span { width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid #dadce0;
+  border-top-color: #1a73e8; animation: opcSpin .8s linear infinite; }
+
+/* ==================================================================
+   Windows 11 file picker, authored inside the 1280 x 800 stage
+   ================================================================== */
+.opf { position: absolute; left: 214px; top: 96px; width: 852px; height: 566px; z-index: 70;
+  background: #f3f3f3; border-radius: 9px; overflow: hidden;
+  box-shadow: 0 26px 60px rgba(0, 0, 0, .42), 0 0 0 1px rgba(0, 0, 0, .16);
+  font-family: "Segoe UI", system-ui, sans-serif; color: #1b1b1b; display: flex; flex-direction: column;
+  animation: opfIn .18s ease-out; }
+@keyframes opfIn { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
+.opf header { flex: 0 0 auto; height: 34px; display: flex; align-items: center; background: #f3f3f3; }
+.opf__title { padding-left: 14px; font-size: 13px; font-weight: 600; }
+.opf header button { margin-left: auto; width: 44px; height: 34px; display: grid; place-items: center; color: #1b1b1b; }
+.opf header button + button { margin-left: 0; }
+.opf header button svg { width: 11px; height: 11px; stroke-width: 1.3; }
+.opf header .opf__close:hover { background: #c42b1c; color: #fff; }
+.opf__crumbs { flex: 0 0 auto; height: 42px; display: flex; align-items: center; gap: 4px;
+  padding: 0 12px; background: #f3f3f3; }
+.opf__crumbs > button { width: 30px; height: 30px; border-radius: 5px; display: grid; place-items: center; color: #444; }
+.opf__crumbs > button:hover { background: #e6e6e6; }
+.opf__crumbs > button svg { width: 14px; height: 14px; stroke-width: 1.8; }
+.opf__path { flex: 1; height: 30px; display: flex; align-items: center; gap: 7px; padding: 0 10px;
+  border: 1px solid #d6d6d6; border-radius: 5px; background: #fff; font-size: 13px; }
+.opf__path svg { width: 15px; height: 15px; }
+.opf__path i { color: #8a8a8a; font-style: normal; }
+.opf__find { width: 200px; height: 30px; display: flex; align-items: center; gap: 7px; padding: 0 10px;
+  border: 1px solid #d6d6d6; border-radius: 5px; background: #fff; font-size: 13px; color: #6a6a6a; }
+.opf__find svg { width: 14px; height: 14px; }
+.opf__body { flex: 1; min-height: 0; display: flex; background: #fff; border-top: 1px solid #e2e2e2; }
+.opf__body aside { flex: 0 0 210px; padding: 10px 8px; border-right: 1px solid #ececec; overflow: auto; }
+.opf__body aside div { display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 5px;
+  font-size: 13px; color: #1b1b1b; }
+.opf__body aside div svg { width: 16px; height: 16px; }
+.opf__body aside div.is-active { background: #e8f0fb; }
+.opf__body main { flex: 1; min-width: 0; overflow: auto; }
+/* icon, name, date, type, size: five cells, so nothing wraps onto a
+   second line the way Explorer never does */
+.opf__cols { display: grid; grid-template-columns: 26px 1fr 148px 116px 88px; gap: 10px;
+  padding: 7px 14px; border-bottom: 1px solid #ececec; font-size: 12px; color: #5c5c5c; position: sticky; top: 0; background: #fff; }
+.opf__cols > span:first-child { grid-column: 1 / 3; }
+.opf__row { display: grid; grid-template-columns: 26px 1fr 148px 116px 88px; gap: 10px; align-items: center;
+  padding: 5px 14px; font-size: 13px; }
+.opf__row b { font-weight: 400; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opf__row > svg { width: 20px; height: 20px; }
+.opf__row span { color: #5c5c5c; font-size: 12.5px; white-space: nowrap; }
+.opf__row:hover { background: #f5f5f5; }
+.opf__row.is-selected { background: #cfe4fb; }
+.opf__thumb { width: 24px; height: 24px; border-radius: 2px; background-size: cover; background-position: center; }
+.opf footer { flex: 0 0 auto; height: 58px; display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; background: #f3f3f3; border-top: 1px solid #e2e2e2; font-size: 13px; }
+.opf footer label { color: #1b1b1b; }
+.opf__name { flex: 1; height: 30px; display: flex; align-items: center; padding: 0 10px;
+  border: 1px solid #0a68c9; border-radius: 5px; background: #fff; }
+.opf__type { width: 150px; height: 30px; display: flex; align-items: center; padding: 0 10px;
+  border: 1px solid #d6d6d6; border-radius: 5px; background: #fff; color: #4a4a4a; }
+.opf footer button { height: 30px; padding: 0 22px; border-radius: 5px; border: 1px solid #d0d0d0;
+  background: #fdfdfd; font-size: 13px; }
+.opf footer button.is-primary { background: #0a68c9; border-color: #0a68c9; color: #fff; }
+.opf__status { flex: 0 0 auto; height: 26px; display: flex; align-items: center; padding: 0 16px;
+  background: #f3f3f3; border-top: 1px solid #e6e6e6; font-size: 12px; color: #5c5c5c; }

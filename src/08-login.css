@@ -1,0 +1,95 @@
+/* ------------------------------------------------------------------
+   Sign-in screen. Two panes: brand story on the left, role picker on
+   the right. Roles are the demo's spine, so they are the hero here.
+   ------------------------------------------------------------------ */
+
+.login{
+  position:fixed;inset:0;z-index:5000;
+  display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  background:var(--bg);
+}
+body.logged-out .login{display:grid}
+
+/* ---- left: brand ---- */
+.login-brand{
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:var(--s8) var(--s9);
+  background:
+    radial-gradient(680px 460px at 22% 14%, var(--a-soft), transparent 62%),
+    radial-gradient(560px 420px at 78% 88%, color-mix(in srgb,var(--a) 12%, transparent), transparent 60%),
+    var(--bg-side);
+  border-right:1px solid var(--line);
+}
+.login-brand::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(circle at 30% 30%,#000,transparent 76%);
+  -webkit-mask-image:radial-gradient(circle at 30% 30%,#000,transparent 76%);
+}
+.login-brand > *{position:relative;z-index:1}
+
+.lb-top{display:flex;align-items:center;gap:var(--s3)}
+.lb-mark{
+  width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(140deg,var(--a),color-mix(in srgb,var(--a) 45%,#000));
+  box-shadow:0 8px 26px var(--a-soft);
+}
+.lb-mark svg{width:20px;height:20px}
+.lb-name{font-size:var(--t-xl);font-weight:600;letter-spacing:.14em}
+.lb-ver{font-size:var(--t-xs);color:var(--tx-3);letter-spacing:.04em}
+
+.lb-mid{max-width:34ch}
+.lb-h{font-size:38px;font-weight:600;line-height:1.16;letter-spacing:-.025em}
+.lb-h em{font-style:normal;color:var(--a-text)}
+.lb-p{margin-top:var(--s4);font-size:var(--t-lg);color:var(--tx-2);line-height:1.65}
+
+.lb-facts{display:flex;flex-wrap:wrap;gap:var(--s7);margin-top:var(--s7)}
+/* centred: the figures read as a row of stats rather than ragged left edges */
+.lb-fact{text-align:center;min-width:64px}
+.lb-fact .v{font-size:var(--t-2xl);font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15}
+.lb-fact .l{font-size:var(--t-xs);color:var(--tx-3);margin-top:3px}
+
+.lb-foot{display:flex;align-items:center;gap:var(--s3);font-size:var(--t-xs);color:var(--tx-3)}
+.lb-foot .dot{width:5px;height:5px;border-radius:50%;background:var(--ok);flex:none}
+
+/* ---- right: sign in ---- */
+.login-pane{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:var(--s8) var(--s9);overflow-y:auto;
+}
+.login-inner{width:100%;max-width:420px;margin:0 auto}
+.login-h{font-size:var(--t-2xl);font-weight:600;letter-spacing:-.015em}
+.login-sub{font-size:var(--t-md);color:var(--tx-2);margin-top:5px;line-height:1.55}
+
+.login-search{margin:var(--s5) 0 var(--s3)}
+
+.login-roles{display:flex;flex-direction:column;gap:6px;max-height:min(46vh,420px);overflow-y:auto;padding-right:2px}
+.lr{
+  display:flex;align-items:center;gap:var(--s3);width:100%;text-align:left;
+  padding:10px var(--s3);border-radius:var(--r);
+  border:1px solid var(--line);background:var(--bg-1);
+  transition:border-color var(--d-fast) var(--e),background var(--d-fast) var(--e),transform var(--d-fast) var(--e);
+}
+.lr:hover{border-color:var(--a);background:var(--bg-2);transform:translateX(2px)}
+.lr .mn{flex:1;min-width:0}
+.lr .nm{font-size:var(--t-md);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lr .rl{font-size:var(--t-xs);color:var(--tx-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.lr .go{width:15px;height:15px;color:var(--tx-3);flex:none;opacity:0;transition:opacity var(--d-fast) var(--e),transform var(--d-fast) var(--e)}
+.lr:hover .go{opacity:1;transform:translateX(2px)}
+.lr .tier{
+  font-size:9px;font-weight:700;letter-spacing:.06em;
+  padding:2px 6px;border-radius:var(--r-full);flex:none;
+  background:var(--bg-3);color:var(--tx-3);
+}
+.lr .tier[data-t="4"]{background:var(--a-soft);color:var(--a-text)}
+.lr .tier[data-t="3"]{background:var(--info-soft);color:var(--info)}
+
+.login-note{
+  display:flex;gap:var(--s3);margin-top:var(--s5);padding:var(--s3);
+  border-radius:var(--r);border:1px solid var(--line);background:var(--bg-1);
+  font-size:var(--t-xs);color:var(--tx-3);line-height:1.6;
+}
+.login-note .i{width:14px;height:14px;color:var(--tx-3);flex:none;margin-top:1px}
+.login-legal{margin-top:var(--s5);font-size:var(--t-xs);color:var(--tx-3);text-align:center;line-height:1.6}

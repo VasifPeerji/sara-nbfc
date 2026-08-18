@@ -1,0 +1,119 @@
+/* ------------------------------------------------------------------
+   Design tokens.
+   Every colour, radius, space and timing in the product resolves here.
+   Accent tokens are overwritten at boot from the edition's brand block,
+   so re-skinning never requires touching CSS.
+   ------------------------------------------------------------------ */
+
+:root{
+  /* accent — overwritten at runtime from SARA_EDITION.brand */
+  --a:#4d7cfe;
+  --a-soft:rgba(77,124,254,.14);
+  --a-line:rgba(77,124,254,.32);
+  --a-text:#8fb0ff;
+  --a-contrast:#ffffff;
+
+  /* semantic */
+  --ok:#2fbf71;   --ok-soft:rgba(47,191,113,.13);
+  --warn:#e0a11b; --warn-soft:rgba(224,161,27,.13);
+  --crit:#ef4a5c; --crit-soft:rgba(239,74,92,.13);
+  --info:#3aa8e0; --info-soft:rgba(58,168,224,.13);
+  --mute:#7b8494;
+
+  /* radii */
+  --r-xs:5px; --r-sm:7px; --r:10px; --r-lg:14px; --r-xl:18px; --r-2xl:24px; --r-full:999px;
+
+  /* spacing scale (4px base) */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s7:32px; --s8:40px; --s9:56px;
+
+  /* type */
+  --f:"Inter","Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:"JetBrains Mono","Cascadia Code",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --t-xs:11px; --t-sm:12px; --t-md:13px; --t-base:14px; --t-lg:15px; --t-xl:17px; --t-2xl:21px; --t-3xl:27px;
+
+  /* motion */
+  --e:cubic-bezier(.2,.8,.2,1);
+  --e-in:cubic-bezier(.4,0,1,1);
+  --d-fast:120ms; --d:180ms; --d-slow:280ms;
+
+  /* layout */
+  --rail-w:52px;
+  --side-w:268px;
+  --panel-w:440px;
+  --chat-max:768px;
+}
+
+/* ---------------- dark (default) ---------------- */
+:root, :root[data-theme="dark"]{
+  --bg:#0e0f13;
+  --bg-rail:#0a0b0e;
+  --bg-side:#121319;
+  --bg-1:#171921;
+  --bg-2:#1d2029;
+  --bg-3:#252935;
+  --bg-inset:#0b0c10;
+
+  --line:rgba(255,255,255,.065);
+  --line-2:rgba(255,255,255,.11);
+  --line-3:rgba(255,255,255,.18);
+
+  --tx:#e9ebef;
+  --tx-2:#a3aab7;
+  --tx-3:#6b7280;
+  --tx-inv:#0e0f13;
+
+  --sh-sm:0 1px 2px rgba(0,0,0,.4);
+  --sh:0 4px 16px rgba(0,0,0,.36);
+  --sh-lg:0 20px 60px rgba(0,0,0,.55);
+  --sh-panel:0 0 0 1px rgba(255,255,255,.05);
+
+  --scrim:rgba(6,7,10,.72);
+  --glass:rgba(23,25,33,.86);
+  --code-bg:#0b0c10;
+  --sel:rgba(77,124,254,.28);
+}
+
+/* ---------------- light ---------------- */
+:root[data-theme="light"]{
+  /* page is a soft grey and cards are white, so every raised surface
+     separates without needing per-component overrides */
+  --bg:#f7f8fa;
+  --bg-rail:#eef0f4;
+  --bg-side:#f2f4f7;
+  --bg-1:#ffffff;
+  --bg-2:#f0f2f6;
+  --bg-3:#e4e8ee;
+  --bg-inset:#f7f8fa;
+
+  --line:rgba(16,20,30,.09);
+  --line-2:rgba(16,20,30,.14);
+  --line-3:rgba(16,20,30,.22);
+
+  --tx:#14171f;
+  --tx-2:#525a6b;
+  --tx-3:#848c9c;
+  --tx-inv:#ffffff;
+
+  --sh-sm:0 1px 2px rgba(16,20,30,.07);
+  --sh:0 4px 18px rgba(16,20,30,.09);
+  --sh-lg:0 20px 60px rgba(16,20,30,.16);
+  --sh-panel:0 0 0 1px rgba(16,20,30,.06);
+
+  --scrim:rgba(20,23,31,.42);
+  --glass:rgba(247,248,250,.9);
+  --code-bg:#f4f6f9;
+  --sel:rgba(77,124,254,.2);
+
+  --a-text:#2d5bd8;
+  --a-soft:rgba(77,124,254,.1);
+  --mute:#6b7280;
+}
+
+/* ---------------- density ---------------- */
+:root[data-density="compact"]{ --chat-gap:18px; --msg-pad:12px; }
+:root{ --chat-gap:26px; --msg-pad:16px; }
+:root[data-density="relaxed"]{ --chat-gap:36px; --msg-pad:20px; }
+
+@media (prefers-reduced-motion:reduce){
+  :root{ --d-fast:0ms; --d:0ms; --d-slow:0ms; }
+}

@@ -1,0 +1,778 @@
+/* ==================================================================
+   15-operator-sap.css
+   ------------------------------------------------------------------
+   Three things live here.
+
+   1. The Operator overlay: the full-screen surface the browser session
+      is presented in, plus its status bar, progress and step timeline.
+      Generic; nothing in it knows which system is being driven.
+
+   2. SAP Fiori, prefix `sap-`. The Horizon theme's design tokens are
+      published, so the colour values here are the real ones. What is
+      reconstructed is the tenant's own launchpad and transactions,
+      which no two SAP customers configure the same way.
+
+   3. Mine Control, prefix `mc-`, and the Contractor Gateway, prefix
+      `cg-`. Deliberately generic: the shape common to the dispatch
+      consoles in use across the industry, not a copy of one vendor's.
+
+   Sourced versus reconstructed: MINING_FIDELITY.md.
+   ================================================================== */
+
+/* ---------------------------------------------------------------
+   1. the Operator overlay
+--------------------------------------------------------------- */
+.opov {
+  position: fixed; inset: 0; z-index: 90;
+  display: none; flex-direction: column;
+  background: var(--bg, #0b0d10);
+}
+.opov.is-open { display: flex; }
+
+.opov__head {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-bottom: 1px solid var(--line);
+  background: var(--bg-1);
+}
+.opov__mark {
+  width: 26px; height: 26px; border-radius: 7px; flex: 0 0 auto;
+  display: grid; place-items: center;
+  background: var(--ac); color: #fff;
+}
+.opov__mark svg { width: 15px; height: 15px; }
+.opov__title { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.opov__title b { font-size: 13px; font-weight: 620; letter-spacing: -.01em; }
+.opov__title span { font-size: 11px; color: var(--fg-3); }
+.opov__spacer { flex: 1 1 auto; }
+
+.opov__pick {
+  display: flex; gap: 4px; align-items: center; flex-wrap: wrap;
+  padding: 2px; border-radius: 9px; background: var(--bg-2);
+}
+.opov__pickbtn {
+  appearance: none; border: 0; cursor: pointer;
+  font: inherit; font-size: 11px; font-weight: 560;
+  padding: 5px 10px; border-radius: 7px;
+  background: transparent; color: var(--fg-2);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.opov__pickbtn:hover { background: var(--bg-3); color: var(--fg); }
+.opov__pickbtn[aria-pressed="true"] { background: var(--bg); color: var(--fg); box-shadow: var(--sh-1); }
+.opov__pickbtn i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .55; }
+.opov__pickbtn[aria-pressed="true"] i { opacity: 1; }
+
+/* speed: a presenter who has told this story ten times wants Fast, and a
+   first-time viewer wants Slow. Changing it mid-run keeps position. */
+.opov__speed {
+  display: flex; gap: 2px; align-items: center;
+  padding: 2px; border-radius: 8px; background: var(--bg-2);
+}
+.opov__speedbtn {
+  appearance: none; border: 0; cursor: pointer; font: inherit;
+  font-size: 10.5px; font-weight: 560; letter-spacing: .01em;
+  padding: 4px 9px; border-radius: 6px;
+  background: transparent; color: var(--fg-3);
+}
+.opov__speedbtn:hover { color: var(--fg); }
+.opov__speedbtn[aria-pressed="true"] { background: var(--bg); color: var(--fg); box-shadow: var(--sh-1); }
+
+.op-real-status .dot[data-tone="warn"] { background: #e0a11b; }
+
+/* ---------------------------------------------------------------
+   browser furniture the bookmark set needs
+--------------------------------------------------------------- */
+/* a letter tile stands in for a real site favicon */
+.opc__fav--tile {
+  border-radius: 3px; color: #fff;
+  font: 700 9px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: -.2px;
+}
+.opc__fav--titan { border-radius: 3px; background: var(--ac); color: #fff; font: 700 9px/1 "Segoe UI", system-ui, sans-serif; }
+.opc__mark--more { padding-left: 4px; padding-right: 4px; }
+.opc__mark--more svg { width: 14px; height: 14px; }
+
+/* the same mark, inside the new-tab page's circle */
+.opg__tile {
+  width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center;
+  font-style: normal; color: #fff; font: 700 14px/1 "Segoe UI", system-ui, sans-serif;
+}
+
+.opov__body {
+  flex: 1 1 auto; min-height: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr) 316px;
+  gap: 0;
+}
+.opov__stage {
+  position: relative; min-width: 0; overflow: auto;
+  padding: 14px 14px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+/* The side is two things: what has been done, and the conversation about
+   what it still needs. They are tabs rather than a split, because giving
+   the chat a third of a narrow column left it too small to hold a
+   question and its answer at the same time. */
+.opov__side {
+  border-left: 1px solid var(--line); background: var(--bg-1);
+  display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0;
+}
+.opov__tabs {
+  display: flex; gap: 2px; padding: 8px 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.opov__tab {
+  appearance: none; border: 0; cursor: pointer; font: inherit;
+  flex: 1 1 0; min-width: 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 11.5px; font-weight: 560; color: var(--fg-3);
+  padding: 7px 8px 8px; border-radius: 8px 8px 0 0;
+  background: transparent; position: relative;
+}
+.opov__tab svg { width: 13px; height: 13px; }
+.opov__tab:hover { color: var(--fg-2); background: var(--bg-2); }
+.opov__tab[aria-selected="true"] { color: var(--fg); background: var(--bg); }
+.opov__tab[aria-selected="true"]::after {
+  content: ""; position: absolute; left: 8px; right: 8px; bottom: -1px;
+  height: 2px; border-radius: 2px; background: var(--accent);
+}
+.opov__tab em {
+  font-style: normal; font-size: 10px; font-variant-numeric: tabular-nums;
+  color: var(--fg-4); letter-spacing: 0;
+}
+.opov__tab em:empty { display: none; }
+.opov__tab em.is-unread {
+  min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px;
+  display: inline-grid; place-items: center;
+  background: var(--accent); color: #fff; font-weight: 700;
+}
+.opov__tab em.is-ask {
+  min-width: 16px; height: 16px; border-radius: 999px;
+  display: inline-grid; place-items: center;
+  background: #e0a11b; color: #23282d; font-weight: 800;
+  animation: opDot 1.4s ease-in-out infinite;
+}
+
+.opov__panes { position: relative; min-height: 0; }
+.opov__steps, .opov__chat { position: absolute; inset: 0; display: none; }
+.opov__steps.is-on { display: block; overflow: auto; padding: 12px; }
+.opov__chat.is-on { display: flex; flex-direction: column; background: var(--bg); }
+
+.opch__h {
+  display: flex; align-items: center; gap: 7px; padding: 9px 12px 7px;
+  font-size: 11px; color: var(--fg-3);
+}
+.opch__h svg { width: 13px; height: 13px; }
+.opch__h b { color: var(--fg-2); font-weight: 620; }
+.opch__wait {
+  margin-left: auto; font-size: 10px; font-weight: 600;
+  color: #e0a11b; padding: 2px 7px; border-radius: 999px;
+  background: color-mix(in srgb, #e0a11b 16%, transparent);
+}
+
+.opch__log {
+  flex: 1 1 auto; min-height: 62px; overflow: auto;
+  padding: 0 12px 8px; display: flex; flex-direction: column; gap: 8px;
+}
+.opch__empty { font-size: 11px; color: var(--fg-4); line-height: 1.55; padding: 4px 0 8px; }
+
+.opch__m { display: flex; gap: 7px; font-size: 11.5px; line-height: 1.5; }
+.opch__m[data-who="you"] { justify-content: flex-end; }
+.opch__m[data-who="you"] > div {
+  background: var(--accent); color: #fff; border-radius: 10px 10px 3px 10px;
+  padding: 6px 9px; max-width: 84%;
+}
+.opch__m[data-who="op"] > div {
+  background: var(--bg-2); color: var(--fg); border-radius: 10px 10px 10px 3px;
+  padding: 6px 9px; max-width: 88%;
+}
+.opch__ic {
+  width: 20px; height: 20px; border-radius: 6px; flex: 0 0 auto;
+  display: grid; place-items: center; background: var(--ac); color: #fff;
+}
+.opch__ic svg { width: 11px; height: 11px; }
+.opch__note { display: block; margin-top: 3px; font-size: 10.5px; color: var(--fg-3); }
+.opch__m[data-who="you"] .opch__note { color: rgba(255, 255, 255, .8); }
+
+.opch__chips { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 2px; }
+.opch__chip {
+  appearance: none; cursor: pointer; font: inherit; font-size: 11px;
+  padding: 4px 9px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--bg-1); color: var(--fg-2);
+}
+.opch__chip:hover { border-color: var(--accent); color: var(--fg); }
+
+.opch__in {
+  display: flex; align-items: flex-end; gap: 6px;
+  padding: 8px 10px 10px; border-top: 1px solid var(--line);
+}
+.opch__in textarea {
+  flex: 1 1 auto; resize: none; font: inherit; font-size: 11.5px; line-height: 1.45;
+  padding: 7px 9px; border-radius: 9px; max-height: 90px;
+  border: 1px solid var(--line); background: var(--bg-1); color: var(--fg);
+}
+.opch__in textarea:focus { outline: none; border-color: var(--accent); }
+.opch__in .ib { flex: 0 0 auto; }
+.opch__in .ib svg { width: 14px; height: 14px; }
+
+/* ---- while the user holds the screen ---- */
+.opov.is-control .opov__stage::after {
+  content: "You have control — edit any highlighted field, then give control back";
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: 14px; z-index: 4;
+  font-size: 11px; font-weight: 560; letter-spacing: .01em;
+  padding: 6px 14px; border-radius: 999px;
+  background: var(--accent); color: #fff; box-shadow: var(--sh-2); pointer-events: none;
+}
+.opov.is-control .opptr { display: none; }
+.opov.is-control [data-op-field] {
+  outline: 2px dashed rgba(15, 108, 189, .8); outline-offset: 1px;
+  background: rgba(15, 108, 189, .07); cursor: text;
+}
+.opov.is-control [data-op-field]:focus { outline-style: solid; background: #fff; }
+.opov.is-control .td-grid tbody tr { cursor: pointer; }
+
+/* status strip under the window */
+.op-real-status {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 11.5px; color: var(--fg-2);
+  padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--bg-1);
+}
+.op-real-status b { color: var(--fg); font-weight: 600; flex: 0 0 auto; }
+.op-real-status > span:last-of-type { color: var(--fg-3); min-width: 0; }
+.op-real-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--fg-4); flex: 0 0 auto; }
+.op-real-status .dot[data-tone="brand"] { background: var(--accent); }
+.op-real-status .dot[data-tone="success"] { background: #2fbf71; }
+.op-real-status .dot--pulse { animation: opDot 1.5s ease-in-out infinite; }
+@keyframes opDot { 0%, 100% { opacity: 1; } 50% { opacity: .28; } }
+
+.op-real-progress {
+  height: 3px; border-radius: 3px; background: var(--bg-3); overflow: hidden; flex: 0 0 auto;
+}
+.op-real-progress i { display: block; height: 100%; background: var(--accent); transition: width .4s ease; }
+
+/* the step timeline */
+.op-real-loghead {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--line);
+}
+.op-real-loghead b { font-size: 12px; font-weight: 620; }
+.op-real-loghead span { font-size: 11px; color: var(--fg-3); font-variant-numeric: tabular-nums; }
+.op-real-navlog {
+  display: flex; align-items: center; gap: 7px; font-size: 11px;
+  color: var(--fg-2); padding: 7px 9px; border-radius: 7px;
+  background: var(--bg-2); margin-bottom: 8px;
+}
+.op-real-navdot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  animation: opDot 1.1s ease-in-out infinite; flex: 0 0 auto;
+}
+.op-real-steps { display: flex; flex-direction: column; gap: 2px; }
+.op-real-step {
+  display: grid; grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center; gap: 8px;
+  padding: 6px 7px; border-radius: 7px; font-size: 11.5px;
+}
+.op-real-step > span {
+  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 10px; font-weight: 640; font-variant-numeric: tabular-nums;
+  background: var(--bg-3); color: var(--fg-3);
+}
+.op-real-step > span svg { width: 11px; height: 11px; }
+.op-real-step b { font-weight: 500; color: var(--fg-2); min-width: 0; }
+.op-real-step code {
+  font-size: 10px; color: var(--fg-4); font-variant-numeric: tabular-nums;
+}
+.op-real-step[data-state="done"] > span { background: rgba(47, 191, 113, .16); color: #2fbf71; }
+.op-real-step[data-state="done"] b { color: var(--fg-3); }
+.op-real-step[data-state="run"] { background: var(--bg-2); }
+.op-real-step[data-state="run"] > span { background: var(--accent); color: #fff; }
+.op-real-step[data-state="run"] b { color: var(--fg); font-weight: 600; }
+.op-real-idle { font-size: 11.5px; color: var(--fg-3); line-height: 1.55; }
+.op-real-idle b { display: block; color: var(--fg); font-size: 12px; margin-bottom: 4px; }
+
+/* Narrow. The side panel is NOT hidden: the run asks its questions there,
+   so hiding it would leave a paused Operator with no way to answer it.
+   It moves below the screen instead. */
+@media (max-width: 1080px) {
+  .opov__body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .opov__side { border-left: 0; border-top: 1px solid var(--line); min-height: 260px; }
+}
+
+/* The header has to survive a narrow window without stacking into itself. */
+.opov__head { flex-wrap: nowrap; min-width: 0; }
+.opov__title { min-width: 0; overflow: hidden; }
+.opov__title b, .opov__title span {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+}
+#opControl { flex: 0 0 auto; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .opov__head { gap: 8px; padding: 8px 10px; }
+  .opov__title span { display: none; }
+  .opov__speed { display: none; }
+  #opControl span.i + * { display: none; }
+}
+@media (max-width: 640px) {
+  .opov__title { display: none; }
+}
+
+/* ---------------------------------------------------------------
+   2. SAP Fiori, prefix `sap-`
+
+   The Horizon theme's design tokens are published by SAP, so the
+   values below are the real ones rather than sampled from an image:
+
+     brand / primary action   #0070f2   sapBrandColor
+     page background          #f5f6f7   sapBackgroundColor
+     surface                  #ffffff   sapBaseColor
+     text                     #1d2d3e   sapTextColor
+     negative                 #d20a0a   sapNegativeColor
+     positive                 #30914c   sapPositiveColor
+     critical                 #e76500   sapCriticalColor
+     informative              #0057d2   sapInformativeColor
+
+   What is reconstructed is the tenant's own configuration: the
+   launchpad groups, the tile set, the field layouts and the record
+   data. No two SAP customers configure those the same way, and the
+   point of the run is the sequence, not the pixel.
+
+   Authored at 1280 x 720 inside the browser viewport, which the shell
+   scales. Sizes are therefore fixed, not responsive.
+
+   ONE COMPONENT SET, THREE SKINS. Mine Control and the Contractor
+   Gateway below re-declare the same custom properties and reuse every
+   sap- component. Three design systems with three sets of components
+   would be three times the surface area to keep consistent.
+--------------------------------------------------------------- */
+.sap {
+  --sap-brand:  #0070f2;
+  --sap-bg:     #f5f6f7;
+  --sap-base:   #ffffff;
+  --sap-tx:     #1d2d3e;
+  --sap-tx-2:   #556b82;
+  --sap-line:   #d9d9d9;
+  --sap-line-2: #eaecee;
+  --sap-neg:    #d20a0a;
+  --sap-pos:    #30914c;
+  --sap-crit:   #e76500;
+  --sap-info:   #0057d2;
+  --sap-sel:    #e3f2fd;
+
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  background: var(--sap-bg);
+  color: var(--sap-tx);
+  font: 400 13px/1.45 "72", "72full", Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+.sap *, .sap *::before, .sap *::after { box-sizing: border-box; }
+.sap-sp { flex: 1 1 auto; }
+
+/* ---- shell bar ---- */
+.sap-gh {
+  flex: 0 0 auto; height: 44px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 12px;
+  background: var(--sap-base);
+  border-bottom: 1px solid var(--sap-line);
+}
+.sap-gh__home { width: 22px; height: 22px; color: var(--sap-tx-2); display: grid; place-items: center; }
+.sap-gh__home svg { width: 16px; height: 16px; }
+.sap-gh__logo em {
+  font-style: normal; font-weight: 800; letter-spacing: .04em;
+  font-size: 15px; color: var(--sap-brand);
+}
+.sap-gh__title { font-size: 13px; font-weight: 700; }
+.sap-gh__search {
+  display: flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 10px; min-width: 190px;
+  border: 1px solid var(--sap-line); border-radius: 13px;
+  color: #7a8b9c; font-size: 12px; background: var(--sap-base);
+}
+.sap-gh__search svg { width: 13px; height: 13px; }
+.sap-gh__sp { flex: 1 1 auto; }
+.sap-gh__tools { display: flex; align-items: center; gap: 6px; }
+.sap-gh__tool {
+  position: relative; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--sap-tx-2);
+}
+.sap-gh__tool svg { width: 15px; height: 15px; }
+.sap-gh__tool b {
+  position: absolute; top: -1px; right: -2px;
+  min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
+  background: var(--sap-neg); color: #fff;
+  font-size: 9px; font-weight: 700; line-height: 14px; text-align: center;
+}
+.sap-gh__me {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #5b738b; color: #fff;
+  font-size: 10px; font-weight: 700;
+  display: grid; place-items: center;
+}
+
+/* ---- app navigation ---- */
+.sap-nav {
+  flex: 0 0 auto; height: 34px;
+  display: flex; align-items: stretch; gap: 16px;
+  padding: 0 14px;
+  background: var(--sap-base);
+  border-bottom: 1px solid var(--sap-line);
+}
+.sap-nav__app {
+  display: flex; align-items: center;
+  font-size: 12px; font-weight: 700; color: var(--sap-tx-2);
+  padding-right: 12px; border-right: 1px solid var(--sap-line-2);
+}
+.sap-nav__tabs { display: flex; align-items: stretch; gap: 14px; }
+.sap-tab {
+  display: flex; align-items: center;
+  font-size: 12px; color: var(--sap-tx-2);
+  border-bottom: 3px solid transparent;
+}
+.sap-tab.is-active { color: var(--sap-brand); font-weight: 700; border-bottom-color: var(--sap-brand); }
+
+.sap-main { flex: 1 1 auto; overflow: auto; padding: 12px; position: relative; }
+
+/* ---- launchpad ---- */
+.sap-lp { display: flex; flex-direction: column; gap: 16px; }
+.sap-lp__grp h4 {
+  margin: 0 0 8px; font-size: 12px; font-weight: 700;
+  color: var(--sap-tx-2);
+}
+.sap-lp__tiles { display: flex; flex-wrap: wrap; gap: 10px; }
+.sap-tile {
+  width: 168px; min-height: 88px; padding: 10px 12px;
+  background: var(--sap-base); border: 1px solid var(--sap-line);
+  border-radius: 10px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.sap-tile b { font-size: 12px; font-weight: 700; line-height: 1.3; }
+.sap-tile small { font-size: 10.5px; color: var(--sap-tx-2); margin-top: auto; }
+.sap-tile__kpi { font-size: 26px; font-weight: 300; color: var(--sap-brand); line-height: 1.1; margin-top: 4px; }
+.sap-tile.is-sel { border-color: var(--sap-brand); box-shadow: 0 0 0 2px rgba(0,112,242,.18); }
+.sap-tile.is-warn .sap-tile__kpi { color: var(--sap-crit); }
+
+/* ---- object page header ---- */
+.sap-oh {
+  background: var(--sap-base); border: 1px solid var(--sap-line);
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
+}
+.sap-oh__row { display: flex; align-items: flex-start; gap: 12px; }
+.sap-oh__id { min-width: 0; }
+.sap-oh__eyebrow { font-size: 11px; color: var(--sap-tx-2); }
+.sap-oh__title { font-size: 19px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; }
+.sap-oh__status { margin-top: 3px; }
+.sap-oh__acts { margin-left: auto; display: flex; gap: 6px; }
+.sap-oh__fields {
+  display: flex; flex-wrap: wrap; gap: 10px 26px;
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--sap-line-2);
+}
+.sap-oh__f label { display: block; font-size: 10.5px; color: var(--sap-tx-2); }
+.sap-oh__f > div { font-size: 12.5px; font-weight: 600; }
+
+/* ---- buttons ---- */
+.sap-btn {
+  appearance: none; cursor: default; font: inherit;
+  font-size: 12px; font-weight: 600;
+  height: 26px; padding: 0 12px; border-radius: 6px;
+  border: 1px solid var(--sap-brand); color: var(--sap-brand);
+  background: transparent; white-space: nowrap;
+}
+.sap-btn--emph { background: var(--sap-brand); color: #fff; }
+
+/* ---- cards ---- */
+.sap-card {
+  background: var(--sap-base); border: 1px solid var(--sap-line);
+  border-radius: 10px; margin-bottom: 12px; overflow: hidden;
+}
+.sap-card__h {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-bottom: 1px solid var(--sap-line-2);
+}
+.sap-card__h h3 { margin: 0; font-size: 13px; font-weight: 700; }
+.sap-card__h em { font-style: normal; font-weight: 400; color: var(--sap-tx-2); }
+.sap-card__b { padding: 12px; }
+.sap-card__b--flush { padding: 0; }
+.sap-card__f { padding: 8px 12px; border-top: 1px solid var(--sap-line-2); font-size: 11.5px; color: var(--sap-tx-2); }
+.sap-two { display: grid; grid-template-columns: 1.25fr 1fr; gap: 12px; align-items: start; }
+.sap-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+.sap-empty { padding: 18px 12px; text-align: center; color: var(--sap-tx-2); font-size: 12px; }
+
+/* ---- fields ---- */
+.sap-f label { display: block; font-size: 10.5px; color: var(--sap-tx-2); margin-bottom: 2px; }
+.sap-in {
+  min-height: 26px; padding: 4px 8px;
+  border: 1px solid var(--sap-line); border-bottom-color: #89919a;
+  border-radius: 5px; background: var(--sap-base);
+  font-size: 12.5px; line-height: 1.35;
+}
+.sap-in--area { min-height: 62px; }
+.sap-in.is-empty { color: #8b98a5; }
+.op-caret {
+  display: inline-block; width: 1px; height: 13px; margin-left: 1px;
+  background: var(--sap-tx); vertical-align: -2px;
+  animation: sapBlink 1s step-end infinite;
+}
+@keyframes sapBlink { 50% { opacity: 0; } }
+
+/* ---- object status: a coloured word, the way SAP does it ---- */
+.sap-os { font-size: 12px; font-weight: 600; white-space: nowrap; }
+.sap-os--ok   { color: var(--sap-pos); }
+.sap-os--warn { color: var(--sap-crit); }
+.sap-os--err  { color: var(--sap-neg); }
+.sap-os--info { color: var(--sap-info); }
+.sap-os--none { color: var(--sap-tx-2); }
+
+/* ---- tables ---- */
+.sap-t__wrap { overflow: auto; }
+.sap-t { width: 100%; border-collapse: collapse; font-size: 12px; }
+.sap-t th {
+  text-align: left; font-weight: 700; font-size: 11px; color: var(--sap-tx-2);
+  padding: 7px 10px; border-bottom: 1px solid var(--sap-line);
+  background: #fafbfc; white-space: nowrap;
+}
+.sap-t td { padding: 7px 10px; border-bottom: 1px solid var(--sap-line-2); vertical-align: top; }
+.sap-t tbody tr:last-child td { border-bottom: 0; }
+.sap-t .sap-num, .sap-t th.sap-num { text-align: right; }
+.sap-t__chk { width: 26px; }
+.sap-t__chk i {
+  display: block; width: 13px; height: 13px; border-radius: 3px;
+  border: 1px solid #89919a; background: var(--sap-base);
+}
+.sap-t__chk i.is-on { background: var(--sap-brand); border-color: var(--sap-brand); }
+.sap-t__act { width: 22px; color: var(--sap-tx-2); text-align: center; }
+.sap-t tbody tr.is-sel { background: var(--sap-sel); }
+.sap-t tbody tr.is-new { background: #eaf7ee; }
+.sap-t tbody tr.is-alert { background: #fdeded; }
+.sap-t tbody tr.is-warn { background: #fff4e5; }
+
+/* ---- KPI row ---- */
+.sap-kpis { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.sap-kpi {
+  flex: 1 1 128px; min-width: 128px; padding: 9px 12px;
+  background: var(--sap-base); border: 1px solid var(--sap-line); border-radius: 10px;
+}
+.sap-kpi label { display: block; font-size: 10.5px; color: var(--sap-tx-2); }
+.sap-kpi b { display: block; font-size: 21px; font-weight: 300; line-height: 1.2; }
+.sap-kpi small { font-size: 10.5px; color: var(--sap-tx-2); }
+.sap-kpi.is-warn b { color: var(--sap-crit); }
+.sap-kpi.is-err b { color: var(--sap-neg); }
+.sap-kpi.is-ok b { color: var(--sap-pos); }
+
+/* ---- message strip ---- */
+.sap-strip {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 11px; border-radius: 8px; margin-bottom: 12px;
+  font-size: 12px; line-height: 1.45;
+  background: #eaf1fb; border: 1px solid #b6d2f5; color: #12324f;
+}
+.sap-strip svg { width: 14px; height: 14px; flex: 0 0 auto; margin-top: 1px; }
+.sap-strip--ok   { background: #ebf5ee; border-color: #b5ddc1; color: #14532d; }
+.sap-strip--warn { background: #fdf3e6; border-color: #f4cfa0; color: #6b3b06; }
+.sap-strip--err  { background: #fdecec; border-color: #f3bcbc; color: #7a1010; }
+
+.sap-toast {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 8px; margin-bottom: 12px;
+  background: #ebf5ee; border: 1px solid #b5ddc1; color: #14532d;
+  font-size: 12px; font-weight: 600;
+}
+.sap-toast svg { width: 14px; height: 14px; }
+
+.sap-list { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6; }
+.sap-list li { margin-bottom: 3px; }
+
+/* ---- dialog ---- */
+.sap-dlg__bd {
+  position: absolute; inset: 0; z-index: 5;
+  background: rgba(0,0,0,.35);
+  display: grid; place-items: center; padding: 24px;
+}
+.sap-dlg {
+  width: 520px; max-width: 100%; max-height: 100%;
+  display: flex; flex-direction: column;
+  background: var(--sap-base); border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.3);
+  overflow: hidden;
+}
+.sap-dlg--wide { width: 720px; }
+.sap-dlg__h {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; border-bottom: 1px solid var(--sap-line-2);
+}
+.sap-dlg__h b { font-size: 14px; font-weight: 700; flex: 1 1 auto; }
+.sap-dlg__h i { color: var(--sap-tx-2); }
+.sap-dlg__h svg { width: 14px; height: 14px; display: block; }
+.sap-dlg__b { padding: 14px; overflow: auto; }
+.sap-dlg__b .sap-strip:last-child { margin-bottom: 0; }
+.sap-dlg__f {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 14px; border-top: 1px solid var(--sap-line-2);
+  background: #fafbfc;
+}
+
+/* ---- danger tags, printed at the end of the isolation run ---- */
+.sap-tags { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.sap-tag {
+  width: 104px; padding: 7px 8px; border-radius: 6px;
+  background: #fff; border: 2px solid var(--sap-neg);
+  display: flex; flex-direction: column; gap: 1px; text-align: center;
+}
+.sap-tag b { font-size: 12px; font-weight: 800; color: var(--sap-neg); letter-spacing: .04em; }
+.sap-tag span { font-size: 8.5px; font-weight: 700; letter-spacing: .03em; }
+.sap-tag em { font-style: normal; font-size: 10px; font-weight: 700; margin-top: 3px; }
+.sap-tag small { font-size: 8.5px; color: var(--sap-tx-2); line-height: 1.25; }
+
+/* ---------------------------------------------------------------
+   3a. Mine Control, prefix `mc-`
+
+   The dispatch console. Dark, dense and readable from three metres
+   away on a wall screen, because that is where it lives. Deliberately
+   generic: this is the shape the dispatch systems share, not a copy
+   of any one vendor's product. It re-declares the same custom
+   properties, so every sap- component above recolours itself.
+--------------------------------------------------------------- */
+.mc {
+  --sap-base:   #161c24;
+  --sap-bg:     #0e1319;
+  --sap-tx:     #e8edf3;
+  --sap-tx-2:   #93a3b5;
+  --sap-line:   #26303c;
+  --sap-line-2: #1e2731;
+  --sap-brand:  #e0a11b;
+  --sap-neg:    #ff5a52;
+  --sap-pos:    #4ec27a;
+  --sap-crit:   #ffab3d;
+  --sap-info:   #59a5ff;
+  --sap-sel:    #1d2836;
+
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  background: var(--sap-bg); color: var(--sap-tx);
+  font: 400 13px/1.45 "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+}
+.mc *, .mc *::before, .mc *::after { box-sizing: border-box; }
+.mc-sp { flex: 1 1 auto; }
+.mc-gh {
+  flex: 0 0 auto; height: 44px; display: flex; align-items: center; gap: 18px;
+  padding: 0 14px; background: #10161d; border-bottom: 1px solid var(--sap-line);
+}
+.mc-gh__logo { display: flex; align-items: center; gap: 8px; }
+.mc-gh__logo svg { width: 17px; height: 17px; color: var(--sap-brand); }
+.mc-gh__logo b { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+.mc-gh__logo em { font-style: normal; font-size: 11px; color: var(--sap-tx-2); }
+.mc-gh__tabs { display: flex; align-items: stretch; gap: 16px; height: 100%; }
+.mc-tab {
+  display: flex; align-items: center; font-size: 12px; color: var(--sap-tx-2);
+  border-bottom: 3px solid transparent;
+}
+.mc-tab.is-active { color: var(--sap-brand); font-weight: 700; border-bottom-color: var(--sap-brand); }
+.mc-gh__shift { text-align: right; }
+.mc-gh__shift label { display: block; font-size: 10px; color: var(--sap-tx-2); }
+.mc-gh__shift b { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mc-main { flex: 1 1 auto; overflow: auto; padding: 12px; position: relative; }
+
+/* the dark skin, applied to the shared components */
+.mc .sap-kpi, .mc .sap-card, .mc .sap-oh {
+  background: var(--sap-base); border-color: var(--sap-line);
+}
+.mc .sap-t th { background: #131a22; color: var(--sap-tx-2); border-bottom-color: var(--sap-line); }
+.mc .sap-t td { border-bottom-color: var(--sap-line-2); }
+.mc .sap-t tbody tr.is-sel { background: var(--sap-sel); }
+.mc .sap-t tbody tr.is-alert { background: #2a1a1c; }
+.mc .sap-t tbody tr.is-new { background: #16281e; }
+.mc .sap-in { background: #0f151c; border-color: var(--sap-line); border-bottom-color: #3a4756; color: var(--sap-tx); }
+.mc .sap-in.is-empty { color: #667889; }
+.mc .op-caret { background: var(--sap-tx); }
+.mc .sap-card__h { border-bottom-color: var(--sap-line-2); }
+.mc .sap-dlg { background: var(--sap-base); color: var(--sap-tx); }
+.mc .sap-dlg__f { background: #121820; border-top-color: var(--sap-line-2); }
+.mc .sap-dlg__h { border-bottom-color: var(--sap-line-2); }
+.mc .sap-btn { border-color: var(--sap-brand); color: var(--sap-brand); }
+.mc .sap-btn--emph { background: var(--sap-brand); color: #16202b; }
+.mc .sap-strip { background: #12212f; border-color: #23415c; color: #cfe2f5; }
+.mc .sap-strip--ok { background: #12251a; border-color: #235c37; color: #cdeed9; }
+.mc .sap-strip--warn { background: #2a2213; border-color: #5c4823; color: #f4e0bd; }
+.mc .sap-strip--err { background: #2a1517; border-color: #5f2528; color: #f6cfd0; }
+
+.mc-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.mc-unit { display: flex; flex-direction: column; }
+.mc-unit__row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; border-bottom: 1px solid var(--sap-line-2);
+}
+.mc-unit__row:last-child { border-bottom: 0; }
+.mc-unit__row label { flex: 0 0 132px; font-size: 11px; color: var(--sap-tx-2); }
+.mc-unit__row b { font-size: 12.5px; font-weight: 600; }
+
+.mc-lanes { display: flex; flex-direction: column; }
+.mc-lane { padding: 10px 12px; border-bottom: 1px solid var(--sap-line-2); }
+.mc-lane:last-child { border-bottom: 0; }
+.mc-lane.is-sel { background: var(--sap-sel); }
+.mc-lane__h { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.mc-lane__h b { font-size: 13px; font-weight: 700; }
+.mc-lane__h span { font-size: 11px; color: var(--sap-tx-2); flex: 1 1 auto; }
+.mc-lane__trucks { display: flex; flex-wrap: wrap; gap: 6px; }
+.mc-lane__trucks em {
+  font-style: normal; font-size: 11px; font-weight: 700;
+  padding: 4px 9px; border-radius: 6px;
+  background: #1f2a36; border: 1px solid var(--sap-line); color: var(--sap-tx);
+}
+.mc-lane__trucks em.is-new { background: #16321f; border-color: #2f6b42; color: #8ee0aa; }
+.mc-lane__trucks em.is-down { background: #331a1c; border-color: #6b2f33; color: #ff9d97; text-decoration: line-through; }
+.mc-lane__trucks em.is-gone { opacity: .3; text-decoration: line-through; }
+
+/* ---------------------------------------------------------------
+   3b. Contractor Gateway, prefix `cg-`
+   A supplier-facing portal, so it is lighter and simpler than the
+   two systems above. Same components again.
+--------------------------------------------------------------- */
+.cg {
+  --sap-brand:  #f97316;
+  --sap-bg:     #f7f7f8;
+  --sap-base:   #ffffff;
+  --sap-tx:     #1d2d3e;
+  --sap-tx-2:   #6b7a8b;
+  --sap-line:   #dcdfe3;
+  --sap-line-2: #eceef1;
+  --sap-neg:    #d20a0a;
+  --sap-pos:    #30914c;
+  --sap-crit:   #e76500;
+  --sap-info:   #0057d2;
+  --sap-sel:    #fff3e8;
+
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  background: var(--sap-bg); color: var(--sap-tx);
+  font: 400 13px/1.45 system-ui, "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+.cg *, .cg *::before, .cg *::after { box-sizing: border-box; }
+.cg-gh {
+  flex: 0 0 auto; height: 46px; display: flex; align-items: center; gap: 20px;
+  padding: 0 14px; background: var(--sap-base); border-bottom: 1px solid var(--sap-line);
+}
+.cg-gh__logo { display: flex; align-items: center; gap: 8px; }
+.cg-gh__logo svg { width: 17px; height: 17px; color: var(--sap-brand); }
+.cg-gh__logo b { font-size: 14px; font-weight: 700; }
+.cg-gh__tabs { display: flex; align-items: stretch; gap: 16px; height: 100%; }
+.cg-tab {
+  display: flex; align-items: center; font-size: 12px; color: var(--sap-tx-2);
+  border-bottom: 3px solid transparent;
+}
+.cg-tab.is-active { color: var(--sap-brand); font-weight: 700; border-bottom-color: var(--sap-brand); }
+.cg-gh__me { font-size: 12px; font-weight: 600; color: var(--sap-tx-2); }
+.cg-main { flex: 1 1 auto; overflow: auto; padding: 12px; position: relative; }
+.cg .sap-btn { border-color: var(--sap-brand); color: var(--sap-brand); }
+.cg .sap-btn--emph { background: var(--sap-brand); color: #fff; }
+.cg .sap-t tbody tr.is-sel { background: var(--sap-sel); }
+
+/* the side-by-side that carries the whole contractor story */
+.cg-diff { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cg-diff__col { padding: 10px 12px; border-radius: 9px; border: 1px solid var(--sap-line); }
+.cg-diff__col h5 { margin: 0 0 6px; font-size: 11.5px; font-weight: 700; }
+.cg-diff__col ul { margin: 0; padding-left: 16px; font-size: 11.5px; line-height: 1.55; }
+.cg-diff__col.is-bad { background: #fdecec; border-color: #f3bcbc; }
+.cg-diff__col.is-bad h5 { color: #7a1010; }
+.cg-diff__col.is-good { background: #ebf5ee; border-color: #b5ddc1; }
+.cg-diff__col.is-good h5 { color: #14532d; }
