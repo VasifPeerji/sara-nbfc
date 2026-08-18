@@ -138,10 +138,29 @@ Config.roles.forEach((r) =>
    that something readable comes back at all. */
 H.section("Every prompt card retrieves something");
 
+/* search() returns { sources, blocked, stats }, not an array. Reading .length
+   off the result object yields undefined, which compares false against
+   everything and reports the whole wall as broken.
+
+   Presence alone is a weak assertion: BM25 returns something for almost any
+   query that shares a word with any document. The floor is what makes this
+   check mean anything. Measured across the corpus, real matches sit at 6 and
+   above while noise tops out around 4, so a card below the floor is pulling
+   a document that happens to share vocabulary rather than one that answers
+   it. RE-MEASURE THIS as the corpus grows; it is corpus-size dependent. */
+const CARD_FLOOR = 6.0;
+
 Config.roles.forEach((r) => {
   (r.prompts || []).forEach((p) => {
-    const hits = Retrieval.search(p.q, { role: r, topK: 3 });
-    H.ok(hits.length > 0, `${r.key} · "${p.t}" retrieves nothing readable\n      ${p.q}`);
+    const res = Retrieval.search(p.q, { role: r, topK: 3 });
+    const got = (res && res.sources) || [];
+    const top = got.length ? Number(got[0].score || 0) : 0;
+    H.ok(top >= CARD_FLOOR,
+         `${r.key} · "${p.t}" tops out at ${top.toFixed(1)} (floor ${CARD_FLOOR})` +
+         `\n      ${p.q}` +
+         `\n      best match: ${got.length ? got[0].id + " — " + got[0].title : "nothing"}` +
+         (res && res.blocked && res.blocked.length
+            ? `\n      ${res.blocked.length} withheld on access, so the gap may be a scope problem` : ""));
   });
 });
 
