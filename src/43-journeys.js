@@ -816,6 +816,12 @@ const Journeys = (function(){
      so a task always produces its document. */
   function build(){
     const j = active.journey;
+    /* Recompute before building rather than trusting whatever was last
+       worked out. Answers can be written by prefill, by a correction, or
+       by a caller that never went through answer(), and a record showing a
+       figure derived from a superseded answer is the one defect here that
+       nobody would catch by reading it. */
+    recompute();
     const a = active.answers;
     const p = j.produce || {};
 

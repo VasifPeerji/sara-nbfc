@@ -28,8 +28,18 @@ H.section("Every task is complete enough to run");
     H.ok(!!j.title && j.title.length > 6, at + " has a real title");
     H.ok(!!j.tagline, at + " has a tagline for the card");
     H.ok(Icons.has(j.icon), at + ' uses a real icon ("' + j.icon + '")');
-    H.ok(j.steps.length >= 3, at + " asks for enough to be worth doing");
-    H.ok(j.steps.length <= 12, at + " is short enough that someone finishes it");
+    /* The cap is on what the person is ASKED, not on the number of steps.
+       A calc, check or clock step is a result rather than a question: it
+       works something out from earlier answers and shows it. Counting a
+       computed figure against the budget for someone's patience would push
+       tasks towards showing less working, which is the opposite of the
+       point. */
+    const DERIVED_TYPES = ["calc", "check", "clock"];
+    const asked = j.steps.filter(s => DERIVED_TYPES.indexOf(s.type) === -1);
+    H.ok(asked.length >= 3, at + " asks for enough to be worth doing");
+    H.ok(asked.length <= 12,
+         at + " asks " + asked.length + " questions, which is more than someone will finish");
+    H.ok(j.steps.length <= 16, at + " has " + j.steps.length + " steps in total, which is too long to follow");
     H.ok(!!j.produce, at + " produces something");
     H.ok(!!j.produce.title, at + " names what it produces");
     H.ok((j.produce.sections || []).length >= 2, at + " produces a document with real structure");
@@ -41,7 +51,12 @@ H.section("Every task is complete enough to run");
 
 H.section("Every step can be answered");
 {
-  const TYPES = ["choice", "multi", "text", "textarea", "number", "date", "confirm"];
+  /* The derived types ask nothing: they work something out from earlier
+     answers and show it. They still carry `q`, because the step is
+     announced before the working appears. */
+  const TYPES = ["choice", "multi", "text", "textarea", "number", "date", "confirm",
+                 "calc", "check", "clock", "table", "file"];
+  const DERIVED = ["calc", "check", "clock"];
   J.forEach(function(j){
     const ids = j.steps.map(s => s.id);
     H.eq(new Set(ids).size, ids.length, 'task "' + j.id + '" has unique field ids');
@@ -72,6 +87,75 @@ H.section("Every step can be answered");
           H.ok(src < i, at + ' branches on a field asked before it ("' + f + '")');
         });
       }
+
+      /* A derived step computes from what came before, so everything it
+         reads has to have been asked already. A line referring forward
+         silently evaluates to zero, which is the worst possible failure in
+         a figure somebody sends to a customer. */
+      if(DERIVED.indexOf(s.type) !== -1){
+        const earlier = j.steps.slice(0, i).map(x => x.id);
+        const own = [];
+        const refs = [];
+        if(s.type === "calc"){
+          H.ok(!!(s.compute && s.compute.lines || []).length, at + " declares lines to compute");
+          (s.compute.lines || []).forEach(function(l){
+            H.ok(!!l.label, at + " has a label on every line");
+            H.ok(!!l.op, at + " names an operation on every line");
+            if(l.as) own.push(l.as);
+            ["from", "of", "rate", "days", "pct", "principal", "months", "part", "whole", "to"]
+              .forEach(function(k){
+                const v = l[k];
+                if(typeof v === "string") refs.push(v);
+                else if(Array.isArray(v)) v.forEach(function(x){ if(typeof x === "string") refs.push(x); });
+              });
+            if(l.when) Object.keys(l.when).forEach(function(f){ refs.push(f); });
+          });
+          if(s.compute.total && s.compute.total.of) s.compute.total.of.forEach(function(k){ refs.push(k); });
+        }
+        if(s.type === "check"){
+          H.ok(!!(s.rules || []).length, at + " declares rules to check");
+          (s.rules || []).forEach(function(r){
+            H.ok(!!r.label, at + " has a label on every rule");
+            if(typeof r.of === "string") refs.push(r.of);
+            if(r.when) Object.keys(r.when).forEach(function(f){ refs.push(f); });
+          });
+        }
+        if(s.type === "clock"){
+          const clocks = s.clocks || (s.clock ? [s.clock] : []);
+          H.ok(clocks.length > 0, at + " declares at least one clock");
+          clocks.forEach(function(c){
+            H.ok(!!c.label, at + " has a label on every clock");
+            H.ok(c.every !== undefined, at + " states an interval on every clock");
+            if(typeof c.from === "string") refs.push(c.from);
+          });
+        }
+        refs.forEach(function(ref){
+          /* a bare numeric literal is a constant, not a reference */
+          if(/^-?[\d.]+$/.test(String(ref))) return;
+          H.ok(earlier.indexOf(ref) !== -1 || own.indexOf(ref) !== -1,
+               at + ' reads "' + ref + '", which is not asked before it and is not one of its own lines');
+        });
+      }
+
+      if(s.type === "table"){
+        H.ok((s.columns || []).length >= 2, at + " declares at least two columns");
+        const keys = (s.columns || []).map(c => c.key);
+        H.eq(new Set(keys).size, keys.length, at + " has distinct column keys");
+        H.ok(keys.every(Boolean), at + " has no empty column keys");
+      }
+
+      if(s.type === "file"){
+        H.ok((s.fields || []).length >= 1, at + " names at least one field to read");
+        (s.fields || []).forEach(function(f){
+          H.ok(!!f.key, at + " has a key on every field");
+          const pats = Array.isArray(f.match) ? f.match : [f.match];
+          pats.forEach(function(pat){
+            let ok = true;
+            try{ new RegExp(pat); }catch(e){ ok = false; }
+            H.ok(ok, at + ' has an invalid pattern for "' + f.key + '"');
+          });
+        });
+      }
     });
   });
 }
@@ -100,6 +184,17 @@ H.section("Cited guidance resolves to a real, readable document");
     });
 
     (j.produce.sections || []).forEach(function(sec){
+      if(sec.fromStep){
+        const src = j.steps.filter(x => x.id === sec.fromStep)[0];
+        H.ok(!!src, 'task "' + j.id + '" has a section reading step "' + sec.fromStep + '", which does not exist');
+        if(src) H.ok(["calc", "check", "clock"].indexOf(src.type) !== -1,
+          'task "' + j.id + '" reads step "' + sec.fromStep + '", which is a ' + src.type + ' and produces no working');
+      }
+      if(sec.fromTable){
+        const src = j.steps.filter(x => x.id === sec.fromTable)[0];
+        H.ok(!!src && src.type === "table",
+          'task "' + j.id + '" has a section reading table "' + sec.fromTable + '", which is not a table step');
+      }
       if(!sec.fromDoc) return;
       const doc = Config.kb.find(d => d.id === sec.fromDoc);
       H.ok(!!doc, 'task "' + j.id + '" quotes a document that exists ("' + sec.fromDoc + '")');
