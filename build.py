@@ -54,6 +54,7 @@ JS_FILES = [
     "25-llm.js",
     "26-charts.js",
     "26b-diagrams.js",     # lending workings, distributions and chains
+    "42-calc.js",          # deterministic computation: no eval, no model
     "27-artifacts.js",
     "28-panel.js",
     "29-chat.js",

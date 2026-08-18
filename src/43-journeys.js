@@ -89,11 +89,289 @@ const Journeys = (function(){
     };
   }
 
+  /* ==================================================================
+     THE DERIVED STEPS
+
+     A calc, check or clock step asks nothing. It works something out from
+     what the person has already given, shows the working, and asks them to
+     look at it before moving on. That is the whole point: a figure with no
+     working is a calculator, and nobody signs in to use a calculator.
+
+     Results are kept in `active.derived` as well as in `answers`, so a
+     later step can build on a figure and the produced record can carry the
+     whole working rather than only the number. Nothing here calls a model,
+     so all of it runs with no key and no network.
+     ================================================================== */
+
+  function today(){ return new Date().toISOString().slice(0, 10); }
+
+  function derive(step, answers){
+    try{
+      if(step.type === "calc")  return Calc.run(step.compute || {}, answers, { asOn: today() });
+      if(step.type === "check") return { rows: Calc.check(step.rules || [], answers) };
+      if(step.type === "clock"){
+        const list = (step.clocks || (step.clock ? [step.clock] : []))
+          .map(function(c){ return Calc.clock(c, answers, today()); })
+          .filter(Boolean);
+        return { clocks: list };
+      }
+    }catch(e){
+      /* a derived step must never take the task down: the person can still
+         finish, and the record says the figure could not be worked out */
+      return { error: e.message };
+    }
+    return null;
+  }
+
+  /** Every named value computed so far, so a later line or rule can refer
+      to an earlier step's figure by name. */
+  function derivedValues(){
+    const out = {};
+    Object.keys(active.derived || {}).forEach(function(k){
+      const d = active.derived[k];
+      if(d && d.values) Object.assign(out, d.values);
+      if(d && d.total) out[k] = d.total.value;
+    });
+    return out;
+  }
+
+  /** Refresh every derived step. Called whenever an answer changes,
+      because a figure computed from an answer the person has since edited
+      is worse than no figure at all. */
+  function recompute(){
+    if(!active) return;
+    active.derived = active.derived || {};
+    (active.journey.steps || []).forEach(function(s){
+      if(s.type !== "calc" && s.type !== "check" && s.type !== "clock") return;
+      if(!visible(s, active.answers)){ delete active.derived[s.id]; return; }
+      const d = derive(s, Object.assign({}, active.answers, derivedValues()));
+      active.derived[s.id] = d;
+      /* the headline result is also an answer, so `when` and later lines can
+         branch on it without the edition repeating the computation */
+      if(d && d.total) active.answers[s.id] = d.total.value;
+      else if(d && d.rows) active.answers[s.id] = Calc.blockers(d.rows).length ? "Blocked" : "Clear";
+      else if(d && d.clocks && d.clocks.length) active.answers[s.id] = d.clocks[0].due;
+    });
+  }
+
   /* ================= rendering ================= */
+
+  function money(n){ return Config.company.currency.symbol + Calc.money(n); }
+
+  function unitised(v, unit){
+    if(unit === "percent") return Calc.money(v, 2) + "%";
+    if(unit === "days")    return Calc.money(v, 0) + " days";
+    if(unit === "number")  return Calc.money(v, 0);
+    return money(v);
+  }
+
+  /** A citation chip is drawn only if the reader can open what it points
+      at. A chip that opens nothing is worse than no chip. */
+  function citeChip(id){
+    if(!id) return "";
+    const doc = Config.kb.find(function(d){ return d.id === id; });
+    if(!doc || !Retrieval.visibleTo(doc, currentRole())) return "";
+    return '<button class="jn-src" onclick="Modals.openDoc(\'' + escJs(id) + '\')" ' +
+           'title="' + escAttr(doc.title) + '">' + esc(id) + "</button>";
+  }
+
+  function computationMarkup(res){
+    if(!res || res.error) return '<div class="jn-cerr">' + Icons.el("alert") +
+      "<span>This figure could not be worked out: " + esc((res && res.error) || "unknown") + "</span></div>";
+    let html = '<div class="jn-calc"><table class="jn-ct"><tbody>';
+    (res.lines || []).forEach(function(l){
+      if(l.skipped){
+        /* A line that does not apply stays in, saying why. Removing it
+           reads as an oversight, and "no charge is payable, because the
+           facility is floating rate to an individual" is the most useful
+           line in a foreclosure quote. */
+        html += '<tr class="is-skip"><td class="jn-cl">' + esc(l.label) +
+          '<span class="jn-cbec">' + esc(l.because) + "</span></td>" +
+          '<td class="jn-cv">nil</td><td class="jn-cs">' + citeChip(l.cite) + "</td></tr>";
+        return;
+      }
+      html += '<tr' + (l.error ? ' class="is-err"' : "") + '><td class="jn-cl">' + esc(l.label) +
+        (l.note ? '<span class="jn-cnote">' + esc(l.note) + "</span>" : "") +
+        (l.error ? '<span class="jn-cbec">' + esc(l.error) + "</span>" : "") + "</td>" +
+        '<td class="jn-cv">' + (l.negative ? "-" : "") + esc(unitised(l.value, l.unit)) + "</td>" +
+        '<td class="jn-cs">' + citeChip(l.cite) + "</td></tr>";
+    });
+    html += "</tbody>";
+    if(res.total){
+      html += '<tfoot><tr><td class="jn-cl">' + esc(res.total.label) + "</td>" +
+        '<td class="jn-cv">' + esc(unitised(res.total.value, res.total.unit)) + "</td>" +
+        '<td class="jn-cs"></td></tr></tfoot>';
+    }
+    return html + "</table></div>";
+  }
+
+  function checksMarkup(res){
+    const rows = (res && res.rows) || [];
+    const bad = Calc.blockers(rows);
+    let html = '<div class="jn-checks">';
+    rows.forEach(function(c){
+      const ic = c.state === "pass" ? "check" : c.state === "fail" ? "close" : "minus";
+      html += '<div class="jn-chk is-' + c.state + (c.blocking === false ? " is-advisory" : "") + '">' +
+        '<span class="jn-chi">' + Icons.el(ic) + "</span>" +
+        '<span class="jn-chm"><span class="jn-cht">' + esc(c.label) +
+          (c.blocking === false ? '<span class="jn-adv">advisory</span>' : "") + "</span>" +
+          (c.detail ? '<span class="jn-chd">' + esc(c.detail) + "</span>" : "") + "</span>" +
+        '<span class="jn-chs">' + citeChip(c.cite) + "</span>" +
+      "</div>";
+    });
+    if(bad.length){
+      html += '<div class="jn-halt">' + Icons.el("alert") +
+        "<span>" + bad.length + (bad.length === 1 ? " condition is" : " conditions are") +
+        " not met. This task will record why rather than produce the document.</span></div>";
+    }
+    return html + "</div>";
+  }
+
+  function clocksMarkup(res){
+    const list = (res && res.clocks) || [];
+    let html = '<div class="jn-clocks">';
+    list.forEach(function(c){
+      const state = c.overdue ? "is-over" : (c.daysLeft !== null && c.daysLeft <= 7 ? "is-soon" : "is-ok");
+      html += '<div class="jn-clock ' + state + '">' +
+        '<span class="jn-cki">' + Icons.el("clock") + "</span>" +
+        '<span class="jn-ckm">' +
+          '<span class="jn-ckt">' + esc(c.label) + "</span>" +
+          '<span class="jn-ckd">Due ' + esc(fmtDate(c.due)) +
+            (c.daysLeft === null ? "" : c.overdue
+              ? " · overdue by " + Math.abs(c.daysLeft) + " days"
+              : " · " + c.daysLeft + " days left") + "</span>" +
+          (c.owner ? '<span class="jn-cko">Owner: ' + esc(c.owner) + "</span>" : "") +
+          (c.consequence ? '<span class="jn-ckc">' + esc(c.consequence) + "</span>" : "") +
+        "</span>" +
+        '<span class="jn-cks">' + citeChip(c.cite) + "</span>" +
+      "</div>";
+    });
+    return html + "</div>";
+  }
+
+  /* ---- the repeating table step ---- */
+
+  function tableRows(step){
+    const rows = active.answers[step.id];
+    return Array.isArray(rows) ? rows : [];
+  }
+
+  function tableMarkup(step){
+    const cols = step.columns || [];
+    const rows = tableRows(step);
+    let html = '<div class="jn-tbl"><table class="jn-tt"><thead><tr>' +
+      cols.map(function(c){ return "<th>" + esc(c.label || c.key) + "</th>"; }).join("") +
+      '<th class="jn-tx"></th></tr></thead><tbody>';
+    rows.forEach(function(row, ri){
+      html += "<tr>" + cols.map(function(c){
+        const v = row[c.key] === undefined ? "" : row[c.key];
+        const t = (c.kind === "number" || c.kind === "money") ? "number" : c.kind === "date" ? "date" : "text";
+        return '<td><input class="inp jn-tc" data-row="' + ri + '" data-col="' + escAttr(c.key) + '" ' +
+          'type="' + t + '" value="' + escAttr(String(v)) + '" ' +
+          'placeholder="' + escAttr(c.placeholder || "") + '" onchange="Journeys.cell(this)"></td>';
+      }).join("") +
+      '<td class="jn-tx"><button class="jn-trm" onclick="Journeys.dropRow(' + ri + ')" ' +
+        'aria-label="Remove this row">' + Icons.el("close") + "</button></td></tr>";
+    });
+    html += "</tbody></table>" +
+      '<div class="jn-tacts">' +
+        '<button class="btn" onclick="Journeys.addRow()">' + Icons.el("plus") + "Add a row</button>" +
+        '<button class="btn btn-primary" onclick="Journeys.submit()">Continue</button>' +
+      "</div></div>";
+    return html;
+  }
+
+  /* ---- the file step ----
+     This reads what the person attached to the conversation rather than
+     building a second upload control. That path is already parsed, already
+     indexed and already covered by tests; duplicating it here would mean
+     two things to keep working and one of them would rot. */
+
+  function attachedDocs(){
+    if(typeof Attachments === "undefined") return [];
+    try{ return (Attachments.forConvo ? Attachments.forConvo() : Attachments.all()) || []; }
+    catch(e){ return []; }
+  }
+
+  /** Pull named values out of parsed text with declared patterns. A pattern
+      that finds nothing returns empty rather than a guess: a missing field
+      the person can fill is recoverable, an invented one travels into the
+      record as fact. */
+  function extractFields(text, fields){
+    const out = {};
+    (fields || []).forEach(function(f){
+      let val = "";
+      (Array.isArray(f.match) ? f.match : [f.match]).some(function(pat){
+        if(!pat) return false;
+        let re;
+        try{ re = new RegExp(pat, "i"); }catch(e){ return false; }
+        const m = re.exec(text || "");
+        if(m){ val = String(m[1] !== undefined ? m[1] : m[0]).trim(); return true; }
+        return false;
+      });
+      out[f.key] = val;
+    });
+    return out;
+  }
+
+  function fileMarkup(step){
+    const docs = attachedDocs().filter(function(d){
+      if(!step.accept) return true;
+      const k = String(d.kind || "").toLowerCase();
+      return step.accept.some(function(a){ return k.indexOf(String(a).toLowerCase()) !== -1; });
+    });
+    const chosen = active.answers[step.id];
+
+    let html = '<div class="jn-files">';
+    if(!docs.length){
+      html += '<div class="jn-fdrop">' + Icons.el("upload") +
+        "<span><b>Attach the document to this conversation</b>" +
+        "<span>Use the paperclip in the message box below. It is read on this machine and is not uploaded.</span></span></div>";
+    }else{
+      docs.forEach(function(d){
+        const on = chosen && chosen.name === (d.title || d.name);
+        html += '<button class="jn-fitem' + (on ? " on" : "") + '" onclick="Journeys.useFile(\'' +
+          escJs(String(d.id || d.name)) + '\')">' +
+          '<span class="jn-fic">' + Icons.el("file") + "</span>" +
+          '<span class="jn-fm"><span class="jn-fn">' + esc(d.title || d.name) + "</span>" +
+          '<span class="jn-fd">' + esc(FileParse.label(d.kind || "")) + "</span></span>" +
+        "</button>";
+      });
+    }
+    if(chosen && chosen.fields){
+      html += '<div class="jn-fx"><div class="jn-fxh">Read from ' + esc(chosen.name) + "</div>";
+      Object.keys(chosen.fields).forEach(function(k){
+        const f = (step.fields || []).filter(function(x){ return x.key === k; })[0] || {};
+        const v = chosen.fields[k];
+        html += '<div class="jn-fxr' + (v ? "" : " is-missing") + '"><span>' + esc(f.label || k) + "</span>" +
+          "<b>" + esc(v || "not found in this document") + "</b></div>";
+      });
+      html += "</div>";
+    }
+    return html + '<div class="jn-facts">' +
+      '<button class="btn btn-primary" onclick="Journeys.submit()">Continue</button>' +
+      (step.optional ? '<button class="btn jn-skip" onclick="Journeys.skip()">No document to attach</button>' : "") +
+    "</div></div>";
+  }
 
   function fieldMarkup(step){
     const id = "jf_" + step.id;
     const answer = active.answers[step.id];
+
+    if(step.type === "calc" || step.type === "check" || step.type === "clock"){
+      const res = (active.derived || {})[step.id];
+      const body = step.type === "calc"  ? computationMarkup(res)
+                 : step.type === "check" ? checksMarkup(res)
+                 :                         clocksMarkup(res);
+      const bad = step.type === "check" ? Calc.blockers((res && res.rows) || []) : [];
+      const halting = step.halt !== false && bad.length > 0;
+      return body + '<div class="jn-dacts">' +
+        '<button class="btn btn-primary" onclick="Journeys.submit()">' +
+          (halting ? "Record why this cannot proceed" : "Continue") + "</button></div>";
+    }
+
+    if(step.type === "table") return tableMarkup(step);
+    if(step.type === "file")  return fileMarkup(step);
 
     if(step.type === "choice" || step.type === "multi"){
       const multi = step.type === "multi";
@@ -302,6 +580,38 @@ const Journeys = (function(){
   function submit(){
     const step = stepAt();
     if(!step) return;
+
+    /* A derived step asks nothing, so continuing is just acknowledging what
+       was worked out. Where a blocking check has failed, this is also the
+       point at which the task stops producing a document and starts
+       recording why. */
+    if(step.type === "calc" || step.type === "check" || step.type === "clock"){
+      if(step.type === "check" && step.halt !== false){
+        const res = (active.derived || {})[step.id];
+        const bad = Calc.blockers((res && res.rows) || []);
+        if(bad.length){ active.halted = { step: step.id, reasons: bad }; }
+      }
+      advance();
+      return;
+    }
+
+    if(step.type === "table"){
+      const rows = tableRows(step).filter(function(r){
+        return Object.keys(r).some(function(k){ return String(r[k] || "").trim() !== ""; });
+      });
+      if(!rows.length && !step.optional){ toast("Add at least one row", "warn"); return; }
+      active.answers[step.id] = rows;
+      advance();
+      return;
+    }
+
+    if(step.type === "file"){
+      const chosen = active.answers[step.id];
+      if(!chosen && !step.optional){ toast("Attach the document, or skip if there is none", "warn"); return; }
+      advance();
+      return;
+    }
+
     if(step.type === "multi"){
       const cur = active.answers[step.id];
       if((!cur || !cur.length) && !step.optional){ toast("Pick at least one", "warn"); return; }
@@ -312,6 +622,67 @@ const Journeys = (function(){
     const value = node ? String(node.value || "").trim() : "";
     if(!value && !step.optional){ toast("This one is needed to finish the task", "warn"); return; }
     answer(value);
+  }
+
+  /* ---- table step handlers ---- */
+
+  function addRow(){
+    const step = stepAt();
+    if(!step || step.type !== "table") return;
+    const rows = tableRows(step).slice();
+    const blank = {};
+    (step.columns || []).forEach(function(c){ blank[c.key] = ""; });
+    rows.push(blank);
+    active.answers[step.id] = rows;
+    paint();
+  }
+
+  function dropRow(i){
+    const step = stepAt();
+    if(!step || step.type !== "table") return;
+    const rows = tableRows(step).slice();
+    rows.splice(i, 1);
+    active.answers[step.id] = rows;
+    paint();
+  }
+
+  /* Written straight into the answer rather than repainting, so the person
+     does not lose focus mid-row. Repainting on every keystroke in a table
+     is how a data entry step becomes unusable. */
+  function cell(node){
+    const step = stepAt();
+    if(!step || step.type !== "table" || !node) return;
+    const rows = tableRows(step).slice();
+    const ri = parseInt(node.getAttribute("data-row"), 10);
+    const col = node.getAttribute("data-col");
+    if(!rows[ri]) return;
+    rows[ri][col] = node.value;
+    active.answers[step.id] = rows;
+    recompute();
+  }
+
+  /* ---- file step handler ---- */
+
+  function useFile(ref){
+    const step = stepAt();
+    if(!step || step.type !== "file") return;
+    const doc = attachedDocs().filter(function(d){
+      return String(d.id) === String(ref) || String(d.name) === String(ref) || String(d.title) === String(ref);
+    })[0];
+    if(!doc){ toast("That attachment is no longer available", "warn"); return; }
+    const text = String(doc.body || doc.text || "");
+    active.answers[step.id] = {
+      name: doc.title || doc.name,
+      kind: doc.kind || "",
+      chars: text.length,
+      fields: extractFields(text, step.fields),
+    };
+    /* extracted values become answers in their own right, so a later
+       computation can use them without the edition restating them */
+    const f = active.answers[step.id].fields || {};
+    Object.keys(f).forEach(function(k){ if(f[k] !== "") active.answers[k] = f[k]; });
+    recompute();
+    paint();
   }
 
   function skip(){
@@ -327,6 +698,8 @@ const Journeys = (function(){
     active.answers[step.id] = value;
     /* answering it by hand means it is theirs now, not the request's */
     if(active.prefilled) delete active.prefilled[step.id];
+    /* every figure downstream of this answer is now stale */
+    recompute();
     advance();
   }
 
@@ -466,6 +839,29 @@ const Journeys = (function(){
         }
         return null;
       }
+      /* A section can carry the working from a derived step rather than
+         prose. The record then shows how the figure was reached, which is
+         the difference between a document somebody can act on and a number
+         they have to take on trust. */
+      if(s.fromStep){
+        const d = (active.derived || {})[s.fromStep];
+        if(!d) return null;
+        const src = (j.steps || []).filter(function(x){ return x.id === s.fromStep; })[0] || {};
+        if(d.lines)  return { h: s.h || src.q || "Working", computation: d, body: s.body ? fill(s.body, a) : "" };
+        if(d.rows)   return { h: s.h || src.q || "Checks", checks: d.rows, body: s.body ? fill(s.body, a) : "" };
+        if(d.clocks) return { h: s.h || src.q || "Dates", clocks: d.clocks, body: s.body ? fill(s.body, a) : "" };
+        return null;
+      }
+
+      /* A table step's rows, rendered as a table rather than flattened
+         into a sentence. */
+      if(s.fromTable){
+        const rows = Array.isArray(a[s.fromTable]) ? a[s.fromTable] : [];
+        if(!rows.length) return null;
+        const src = (j.steps || []).filter(function(x){ return x.id === s.fromTable; })[0] || {};
+        return { h: s.h || src.q || "Entries", rows: rows, columns: src.columns || [] };
+      }
+
       const out = { h: s.h, body: fill(s.body, a) };
       if(s.diagram){
         const d = buildDiagram(s.diagram, a);
@@ -473,6 +869,30 @@ const Journeys = (function(){
       }
       return out;
     }).filter(Boolean);
+
+    /* ---- the halt ----
+       A task that always produces a document is a liability in a lending
+       business. Where a blocking check failed, the record says what could
+       not be satisfied and who it goes to, and it does not pretend to be
+       the thing the person set out to produce. */
+    if(active.halted){
+      const h = j.produce && j.produce.halt || {};
+      const reasons = active.halted.reasons || [];
+      return {
+        type: "document",
+        kind: h.kind || "Hold notice",
+        halted: true,
+        title: fill(h.title || ("Cannot proceed: " + j.title), a),
+        meta: meta,
+        sections: [
+          { h: h.h || "Why this cannot proceed",
+            body: fill(h.intro || "The following conditions are required before this can go ahead and are not satisfied. This record exists so the position is documented; it is not the document the task would otherwise have produced.", a) },
+          { h: "Conditions not met", checks: reasons },
+        ].concat(sections.filter(function(s){ return s.keepOnHalt; }))
+         .concat(h.route ? [{ h: "What happens next", body: fill(h.route, a) }] : []),
+        footer: fill(h.footer || (p.footer || ""), a),
+      };
+    }
 
     return {
       type: "document",
@@ -568,10 +988,14 @@ const Journeys = (function(){
     reopen: reopen, cancel: cancel, restart: restart, showResult: showResult,
     prefilledCount: prefilledCount,
     available: available, forRole: forRole, all: all, find: find,
+    /* the derived and repeating steps */
+    addRow: addRow, dropRow: dropRow, cell: cell, useFile: useFile,
     /* exposed for the tests */
     _visible: visible, _steps: steps, _fill: fill, _diagram: buildDiagram,
+    _derive: derive, _recompute: recompute, _extract: extractFields,
     get active(){ return active; },
     get answers(){ return active ? active.answers : null; },
+    get derived(){ return active ? active.derived : null; },
     _build: function(){ return build(); },
   };
 })();

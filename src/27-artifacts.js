@@ -33,11 +33,141 @@ const Artifacts = (function(){
   const STATUS_CLASS = { ok: "chip-ok", good: "chip-ok", warn: "chip-warn", warning: "chip-warn",
                          crit: "chip-crit", critical: "chip-crit", info: "chip-info" };
 
+  /* ==================================================================
+     WORKED SECTIONS
+
+     A section of a produced record can carry the working behind a figure
+     rather than prose: the lines of a computation with the document that
+     fixed each one, a list of conditions with what passed and what did
+     not, a set of dated obligations, or the rows of a table the person
+     filled in.
+
+     These live here rather than in the journey module because the record
+     has to render identically in the panel, in the print view, in a
+     download and in the copy-to-clipboard text. Drawing them where the
+     task runs would mean four implementations and three of them wrong.
+     ================================================================== */
+
+  function amount(v, unit){
+    if(typeof Calc === "undefined") return esc(str(v));
+    if(unit === "percent") return esc(Calc.money(Calc.num(v), 2) + "%");
+    if(unit === "days")    return esc(Calc.money(Calc.num(v), 0) + " days");
+    if(unit === "number")  return esc(Calc.money(Calc.num(v), 0));
+    const sym = (Config.company && Config.company.currency && Config.company.currency.symbol) || "";
+    return esc(sym + Calc.money(Calc.num(v)));
+  }
+
+  function citeRef(id){
+    if(!id) return "";
+    return '<span class="wk-src">' + esc(str(id)) + "</span>";
+  }
+
+  function worked(s){
+    if(!s) return "";
+    let out = "";
+
+    if(s.computation && arr(s.computation.lines).length){
+      const c = s.computation;
+      out += '<div class="wk"><table class="wk-t"><tbody>';
+      arr(c.lines).forEach(function(l){
+        if(l.skipped){
+          out += '<tr class="is-skip"><td>' + esc(str(l.label)) +
+            '<span class="wk-note">' + esc(str(l.because)) + "</span></td>" +
+            '<td class="wk-v">nil</td><td class="wk-c">' + citeRef(l.cite) + "</td></tr>";
+          return;
+        }
+        out += "<tr><td>" + esc(str(l.label)) +
+          (l.note ? '<span class="wk-note">' + esc(str(l.note)) + "</span>" : "") + "</td>" +
+          '<td class="wk-v">' + (l.negative ? "-" : "") + amount(l.value, l.unit) + "</td>" +
+          '<td class="wk-c">' + citeRef(l.cite) + "</td></tr>";
+      });
+      out += "</tbody>";
+      if(c.total){
+        out += '<tfoot><tr><td>' + esc(str(c.total.label)) + "</td>" +
+               '<td class="wk-v">' + amount(c.total.value, c.total.unit) + "</td><td></td></tr></tfoot>";
+      }
+      out += "</table></div>";
+    }
+
+    if(arr(s.checks).length){
+      out += '<div class="wk-checks">';
+      arr(s.checks).forEach(function(c){
+        const st = str(c.state || "fail");
+        out += '<div class="wk-chk is-' + esc(st) + '">' +
+          '<span class="wk-ci">' + Icons.el(st === "pass" ? "check" : st === "fail" ? "close" : "minus") + "</span>" +
+          "<span><b>" + esc(str(c.label)) + "</b>" +
+          (c.detail ? "<span>" + esc(str(c.detail)) + "</span>" : "") + "</span>" +
+          citeRef(c.cite) + "</div>";
+      });
+      out += "</div>";
+    }
+
+    if(arr(s.clocks).length){
+      out += '<div class="wk-clocks">';
+      arr(s.clocks).forEach(function(c){
+        out += '<div class="wk-clk' + (c.overdue ? " is-over" : "") + '">' +
+          "<span><b>" + esc(str(c.label)) + "</b>" +
+          "<span>Due " + esc(fmtDate(str(c.due))) +
+          (c.daysLeft === null || c.daysLeft === undefined ? "" :
+            (c.overdue ? " · overdue by " + Math.abs(c.daysLeft) + " days"
+                       : " · " + c.daysLeft + " days left")) + "</span>" +
+          (c.owner ? "<span>Owner: " + esc(str(c.owner)) + "</span>" : "") +
+          (c.consequence ? "<span>" + esc(str(c.consequence)) + "</span>" : "") +
+          "</span>" + citeRef(c.cite) + "</div>";
+      });
+      out += "</div>";
+    }
+
+    if(arr(s.rows).length){
+      const cols = arr(s.columns).length ? arr(s.columns)
+                 : Object.keys(s.rows[0] || {}).map(function(k){ return { key: k, label: k }; });
+      out += '<div class="wk"><table class="wk-t"><thead><tr>' +
+        cols.map(function(c){ return "<th>" + esc(str(c.label || c.key)) + "</th>"; }).join("") +
+        "</tr></thead><tbody>";
+      arr(s.rows).forEach(function(r){
+        out += "<tr>" + cols.map(function(c){
+          const v = r[c.key];
+          const money = c.kind === "money" || c.kind === "number";
+          return '<td' + (money ? ' class="wk-v"' : "") + ">" +
+                 (money ? amount(v, c.kind === "number" ? "number" : "money") : esc(str(v))) + "</td>";
+        }).join("") + "</tr>";
+      });
+      out += "</tbody></table></div>";
+    }
+
+    return out;
+  }
+
+  function workedText(s){
+    const lines = [];
+    if(s.computation){
+      arr(s.computation.lines).forEach(function(l){
+        lines.push("  " + str(l.label) + ": " +
+          (l.skipped ? "nil — " + str(l.because) : str(l.value)) +
+          (l.cite ? "   [" + str(l.cite) + "]" : ""));
+      });
+      if(s.computation.total) lines.push("  " + str(s.computation.total.label) + ": " + str(s.computation.total.value));
+    }
+    arr(s.checks).forEach(function(c){
+      const mark = c.state === "pass" ? "[pass]" : c.state === "fail" ? "[FAIL]" : "[n/a] ";
+      lines.push("  " + mark + " " + str(c.label) + (c.detail ? " — " + str(c.detail) : "") +
+        (c.cite ? "   [" + str(c.cite) + "]" : ""));
+    });
+    arr(s.clocks).forEach(function(c){
+      lines.push("  " + str(c.label) + ": due " + str(c.due) +
+        (c.overdue ? " (OVERDUE)" : "") + (c.owner ? ", owner " + str(c.owner) : ""));
+    });
+    arr(s.rows).forEach(function(r){
+      lines.push("  " + Object.keys(r).map(function(k){ return k + ": " + str(r[k]); }).join(", "));
+    });
+    return lines.length ? lines.join("\n") : "";
+  }
+
   /* ================= 1. document ================= */
   function renderDocument(a){
     const sections = arr(a.sections);
     const meta = arr(a.meta).filter(function(m){ return m && (m.k || m.v); });
-    return '<div class="art"><div class="doc">' +
+    return '<div class="art"><div class="doc' + (a.halted ? " is-halted" : "") + '">' +
       '<div class="doc-head">' +
         '<div class="doc-kind">' + esc(str(a.kind, "Document")) + "</div>" +
         '<div class="doc-title">' + esc(str(a.title, "Untitled")) + "</div>" +
@@ -53,7 +183,8 @@ const Artifacts = (function(){
                  different document from a permit that lists it. */
               const dg = (s && s.diagram && typeof Diagrams !== "undefined")
                 ? Diagrams.render(s.diagram) : "";
-              return (s && s.h ? "<h4>" + esc(str(s.h)) + "</h4>" : "") + body(s && s.body) + dg;
+              return (s && s.h ? "<h4>" + esc(str(s.h)) + "</h4>" : "") +
+                     body(s && s.body) + worked(s) + dg;
             }).join("")
           : body(a.body)) +
       "</div>" +
@@ -66,7 +197,11 @@ const Artifacts = (function(){
     lines.push("");
     arr(a.sections).forEach(function(s){
       if(s && s.h) lines.push(str(s.h), "-".repeat(String(s.h).length));
-      lines.push(MD.strip(str(s && s.body)), "");
+      lines.push(MD.strip(str(s && s.body)));
+      /* the working has to survive a copy-paste as much as the prose does */
+      const w = workedText(s || {});
+      if(w) lines.push(w);
+      lines.push("");
       /* the drawing has to survive a copy-paste, so it flattens too */
       if(s && s.diagram && typeof Diagrams !== "undefined"){
         const d = Diagrams.toText(s.diagram);

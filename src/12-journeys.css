@@ -190,3 +190,167 @@ textarea.jn-in{resize:vertical;min-height:70px;font-family:inherit}
   font-size:var(--t-2xs,10px);font-weight:600;letter-spacing:.02em;
   background:color-mix(in srgb,var(--a) 16%,transparent);color:var(--a-text)
 }
+
+/* ---------------------------------------------------------------
+   THE DERIVED STEPS
+
+   A computation, a set of checks, a set of dated obligations, or a
+   table the person fills in. What these share is that the working is
+   the content: a figure on its own could have come from a calculator,
+   and the reason to read it here is the line by line and the document
+   behind each line.
+
+   Numbers are tabular throughout. A column of figures that does not
+   align reads as sloppy in a document somebody sends to a customer.
+--------------------------------------------------------------- */
+.jn-calc{margin:var(--s3) 0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--bg-1)}
+.jn-ct{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.jn-ct td{padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:top}
+.jn-ct tbody tr:last-child td{border-bottom:0}
+.jn-cl{color:var(--tx-2)}
+.jn-cv{
+  text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;
+  font-weight:600;color:var(--tx);width:1%
+}
+.jn-cs{width:1%;text-align:right;padding-left:0}
+.jn-ct tfoot td{
+  padding:11px 12px;border-top:2px solid var(--line);background:var(--bg-2);
+  font-weight:700;color:var(--tx)
+}
+.jn-ct tfoot .jn-cv{font-size:var(--t-md)}
+.jn-cnote,.jn-cbec{display:block;margin-top:3px;font-size:var(--t-xs);color:var(--tx-3);line-height:1.45}
+/* A line that does not apply stays visible and says why. Removing it
+   reads as an oversight, and it is often the most useful line in a quote. */
+.jn-ct tr.is-skip .jn-cl,.jn-ct tr.is-skip .jn-cv{color:var(--tx-3)}
+.jn-ct tr.is-skip .jn-cv{font-weight:500}
+.jn-ct tr.is-err .jn-cbec{color:var(--crit)}
+.jn-cerr{
+  display:flex;gap:8px;align-items:flex-start;padding:11px 13px;
+  border:1px solid var(--crit);border-radius:var(--r);
+  background:var(--crit-soft);color:var(--tx-2);font-size:var(--t-sm)
+}
+.jn-cerr .i{color:var(--crit);flex:none}
+
+/* the document each line came from */
+.jn-src{
+  border:1px solid var(--line);background:var(--bg);border-radius:var(--r-sm);
+  padding:2px 7px;font-size:var(--t-2xs,10px);font-weight:600;color:var(--tx-3);
+  font-family:var(--f-mono);cursor:pointer;white-space:nowrap;transition:var(--d-fast)
+}
+.jn-src:hover{border-color:var(--a);color:var(--a-text);background:var(--a-soft)}
+
+/* ---- checks ---- */
+.jn-checks{display:flex;flex-direction:column;gap:6px;margin:var(--s3) 0}
+.jn-chk{
+  display:flex;gap:10px;align-items:flex-start;padding:10px 12px;
+  border:1px solid var(--line);border-radius:var(--r);background:var(--bg-1)
+}
+.jn-chi{flex:none;width:20px;height:20px;display:grid;place-items:center;border-radius:var(--r-full)}
+.jn-chk.is-pass .jn-chi{background:var(--ok-soft);color:var(--ok)}
+.jn-chk.is-fail .jn-chi{background:var(--crit-soft);color:var(--crit)}
+.jn-chk.is-na .jn-chi{background:var(--bg-2);color:var(--tx-3)}
+.jn-chk.is-fail{border-color:color-mix(in srgb,var(--crit) 40%,var(--line))}
+.jn-chk.is-fail.is-advisory{border-color:color-mix(in srgb,var(--warn) 40%,var(--line))}
+.jn-chk.is-fail.is-advisory .jn-chi{background:var(--warn-soft);color:var(--warn)}
+.jn-chm{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.jn-cht{font-size:var(--t-sm);font-weight:600;color:var(--tx)}
+.jn-chd{font-size:var(--t-xs);color:var(--tx-3);line-height:1.45}
+.jn-chs{flex:none;align-self:center}
+.jn-adv{
+  margin-left:6px;padding:1px 6px;border-radius:var(--r-full);
+  font-size:var(--t-2xs,10px);font-weight:600;
+  background:var(--warn-soft);color:var(--warn)
+}
+/* The task is about to stop. Say so before the button changes, not after. */
+.jn-halt{
+  display:flex;gap:8px;align-items:flex-start;margin-top:2px;padding:11px 13px;
+  border:1px solid var(--crit);border-radius:var(--r);
+  background:var(--crit-soft);color:var(--tx-2);font-size:var(--t-sm);line-height:1.5
+}
+.jn-halt .i{color:var(--crit);flex:none;margin-top:1px}
+
+/* ---- obligation clocks ---- */
+.jn-clocks{display:flex;flex-direction:column;gap:6px;margin:var(--s3) 0}
+.jn-clock{
+  display:flex;gap:10px;align-items:flex-start;padding:11px 13px;
+  border:1px solid var(--line);border-left-width:3px;border-radius:var(--r);background:var(--bg-1)
+}
+.jn-clock.is-ok{border-left-color:var(--ok)}
+.jn-clock.is-soon{border-left-color:var(--warn)}
+.jn-clock.is-over{border-left-color:var(--crit);background:var(--crit-soft)}
+.jn-cki{flex:none;color:var(--tx-3);margin-top:1px}
+.jn-clock.is-over .jn-cki{color:var(--crit)}
+.jn-ckm{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.jn-ckt{font-size:var(--t-sm);font-weight:600;color:var(--tx)}
+.jn-ckd{font-size:var(--t-xs);color:var(--tx-2);font-variant-numeric:tabular-nums}
+.jn-clock.is-over .jn-ckd{color:var(--crit);font-weight:600}
+.jn-cko,.jn-ckc{font-size:var(--t-xs);color:var(--tx-3);line-height:1.45}
+.jn-cks{flex:none;align-self:center}
+
+/* ---- the repeating table ---- */
+.jn-tbl{margin:var(--s3) 0}
+.jn-tt{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.jn-tt th{
+  text-align:left;padding:6px 8px;font-size:var(--t-xs);font-weight:600;
+  color:var(--tx-3);border-bottom:1px solid var(--line);white-space:nowrap
+}
+.jn-tt td{padding:3px 4px 3px 0;border-bottom:1px solid var(--line-2)}
+.jn-tt td:first-child{padding-left:0}
+.jn-tc{width:100%;padding:6px 8px;font-size:var(--t-sm)}
+.jn-tc[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+.jn-tx{width:1%}
+.jn-trm{
+  display:grid;place-items:center;width:26px;height:26px;border-radius:var(--r-sm);
+  border:1px solid transparent;background:transparent;color:var(--tx-3);cursor:pointer
+}
+.jn-trm:hover{border-color:var(--crit);background:var(--crit-soft);color:var(--crit)}
+.jn-tacts{display:flex;gap:8px;margin-top:var(--s3)}
+.jn-tacts .btn{flex:1}
+
+/* ---- the file step ---- */
+.jn-files{display:flex;flex-direction:column;gap:8px;margin:var(--s3) 0}
+.jn-fdrop{
+  display:flex;gap:11px;align-items:flex-start;padding:15px;
+  border:1px dashed var(--line);border-radius:var(--r);background:var(--bg-1);color:var(--tx-3)
+}
+.jn-fdrop .i{flex:none;margin-top:2px;color:var(--tx-3)}
+.jn-fdrop span{display:flex;flex-direction:column;gap:3px;font-size:var(--t-xs);line-height:1.5}
+.jn-fdrop b{font-size:var(--t-sm);color:var(--tx)}
+.jn-fitem{
+  display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:10px 12px;
+  border:1px solid var(--line);border-radius:var(--r);background:var(--bg-1);cursor:pointer;
+  transition:var(--d-fast)
+}
+.jn-fitem:hover{border-color:var(--a)}
+.jn-fitem.on{border-color:var(--a);background:var(--a-soft)}
+.jn-fic{flex:none;color:var(--tx-3)}
+.jn-fitem.on .jn-fic{color:var(--a-text)}
+.jn-fm{display:flex;flex-direction:column;gap:2px;min-width:0}
+.jn-fn{font-size:var(--t-sm);font-weight:600;color:var(--tx)}
+.jn-fd{font-size:var(--t-xs);color:var(--tx-3)}
+.jn-fx{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.jn-fxh{
+  padding:8px 12px;background:var(--bg-2);border-bottom:1px solid var(--line);
+  font-size:var(--t-xs);font-weight:600;color:var(--tx-3)
+}
+.jn-fxr{
+  display:flex;justify-content:space-between;gap:12px;align-items:baseline;
+  padding:8px 12px;border-bottom:1px solid var(--line-2);font-size:var(--t-sm)
+}
+.jn-fxr:last-child{border-bottom:0}
+.jn-fxr span{color:var(--tx-3)}
+.jn-fxr b{color:var(--tx);text-align:right}
+/* A field the parser could not find is marked rather than left blank.
+   A blank reads as zero; this reads as something to go and check. */
+.jn-fxr.is-missing b{color:var(--warn);font-weight:500;font-style:italic}
+.jn-facts{display:flex;gap:8px}
+.jn-facts .btn{flex:1}
+
+.jn-dacts{margin-top:var(--s3)}
+.jn-dacts .btn{width:100%}
+
+@media (max-width:560px){
+  .jn-ct td,.jn-ct tfoot td{padding:8px 9px}
+  .jn-cs{display:none}
+  .jn-tacts,.jn-facts{flex-direction:column}
+}

@@ -337,3 +337,67 @@
 .web-open .mn{min-width:0}
 .web-open .tt{display:block;font-size:var(--t-md);font-weight:500}
 .web-open .ss{display:block;font-size:var(--t-xs);color:var(--tx-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------------------------------------------------------------
+   WORKED SECTIONS IN A PRODUCED RECORD
+
+   The same content as the derived steps, but inside the document the
+   task produces, which is printed, downloaded and sent on. Quieter than
+   the in-conversation version: the record is read, not interacted with.
+--------------------------------------------------------------- */
+.wk{margin:10px 0 14px;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.wk-t{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.wk-t th{
+  text-align:left;padding:7px 11px;background:var(--bg-2);border-bottom:1px solid var(--line);
+  font-size:var(--t-xs);font-weight:600;color:var(--tx-3);white-space:nowrap
+}
+.wk-t td{padding:8px 11px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--tx-2)}
+.wk-t tbody tr:last-child td{border-bottom:0}
+.wk-v{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600;color:var(--tx);width:1%}
+.wk-c{width:1%;text-align:right}
+.wk-t tfoot td{padding:9px 11px;border-top:2px solid var(--line);background:var(--bg-2);font-weight:700;color:var(--tx)}
+.wk-note{display:block;margin-top:2px;font-size:var(--t-xs);color:var(--tx-3);line-height:1.45}
+.wk-t tr.is-skip td{color:var(--tx-3)}
+.wk-t tr.is-skip .wk-v{font-weight:500}
+.wk-src{
+  font-family:var(--f-mono);font-size:var(--t-2xs,10px);font-weight:600;
+  color:var(--tx-3);white-space:nowrap
+}
+
+.wk-checks{display:flex;flex-direction:column;gap:5px;margin:10px 0 14px}
+.wk-chk{
+  display:flex;gap:9px;align-items:flex-start;padding:8px 11px;
+  border:1px solid var(--line);border-radius:var(--r-sm);font-size:var(--t-sm)
+}
+.wk-chk>span:nth-child(2){display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.wk-chk b{font-weight:600;color:var(--tx)}
+.wk-chk span span{font-size:var(--t-xs);color:var(--tx-3);line-height:1.45}
+.wk-ci{flex:none;margin-top:1px}
+.wk-chk.is-pass .wk-ci{color:var(--ok)}
+.wk-chk.is-fail .wk-ci{color:var(--crit)}
+.wk-chk.is-na .wk-ci{color:var(--tx-3)}
+.wk-chk.is-fail{border-color:color-mix(in srgb,var(--crit) 40%,var(--line));background:var(--crit-soft)}
+
+.wk-clocks{display:flex;flex-direction:column;gap:5px;margin:10px 0 14px}
+.wk-clk{
+  display:flex;gap:9px;align-items:flex-start;padding:9px 11px;
+  border:1px solid var(--line);border-left-width:3px;border-left-color:var(--tx-3);
+  border-radius:var(--r-sm);font-size:var(--t-sm)
+}
+.wk-clk>span:first-child{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.wk-clk b{font-weight:600;color:var(--tx)}
+.wk-clk span span{font-size:var(--t-xs);color:var(--tx-3);line-height:1.45}
+.wk-clk.is-over{border-left-color:var(--crit);background:var(--crit-soft)}
+.wk-clk.is-over span span:first-of-type{color:var(--crit);font-weight:600}
+
+/* A record that refused to produce the thing it was asked for must not
+   look like the thing it was asked for. */
+.doc.is-halted .doc-kind{color:var(--crit)}
+.doc.is-halted .doc-head{border-bottom-color:var(--crit)}
+
+@media print{
+  .wk,.wk-chk,.wk-clk{break-inside:avoid}
+  .wk-t th{background:transparent;border-bottom:1px solid #999}
+  .wk-t tfoot td{background:transparent}
+  .wk-chk.is-fail,.wk-clk.is-over{background:transparent}
+}

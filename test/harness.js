@@ -82,7 +82,7 @@ global.speechSynthesis = { speak(){}, cancel(){}, speaking: false };
 /* ---------- module loading (mirrors build.py order) ---------- */
 const JS_FILES = [
   "19-logos.js", "20-icons.js", "21-util.js", "22-state.js", "23-markdown.js", "24-retrieval.js",
-  "25-llm.js", "26-charts.js", "26b-diagrams.js", "27-artifacts.js", "28-panel.js", "29-chat.js",
+  "25-llm.js", "26-charts.js", "26b-diagrams.js", "42-calc.js", "27-artifacts.js", "28-panel.js", "29-chat.js",
   "30-sidebar.js", "31-login.js", "32-settings.js", "33-palette.js", "34-export.js",
   "36-library.js", "37-models.js", "38-files.js", "39-web.js", "43-journeys.js",
   "45-operator-lending.js", "44-operator-shell.js", "46-router.js", "47-analytics.js",
