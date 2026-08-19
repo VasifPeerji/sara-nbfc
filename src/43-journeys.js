@@ -178,29 +178,29 @@ const Journeys = (function(){
   function computationMarkup(res){
     if(!res || res.error) return '<div class="jn-cerr">' + Icons.el("alert") +
       "<span>This figure could not be worked out: " + esc((res && res.error) || "unknown") + "</span></div>";
-    let html = '<div class="jn-calc"><table class="jn-ct"><tbody>';
+    let html = '<div class="jn-calc"><table class="jn-cwt"><tbody>';
     (res.lines || []).forEach(function(l){
       if(l.skipped){
         /* A line that does not apply stays in, saying why. Removing it
            reads as an oversight, and "no charge is payable, because the
            facility is floating rate to an individual" is the most useful
            line in a foreclosure quote. */
-        html += '<tr class="is-skip"><td class="jn-cl">' + esc(l.label) +
-          '<span class="jn-cbec">' + esc(l.because) + "</span></td>" +
-          '<td class="jn-cv">nil</td><td class="jn-cs">' + citeChip(l.cite) + "</td></tr>";
+        html += '<tr class="is-skip"><td class="jn-cwl">' + esc(l.label) +
+          '<span class="jn-cwbec">' + esc(l.because) + "</span></td>" +
+          '<td class="jn-cwv">nil</td><td class="jn-cws">' + citeChip(l.cite) + "</td></tr>";
         return;
       }
-      html += '<tr' + (l.error ? ' class="is-err"' : "") + '><td class="jn-cl">' + esc(l.label) +
+      html += '<tr' + (l.error ? ' class="is-err"' : "") + '><td class="jn-cwl">' + esc(l.label) +
         (l.note ? '<span class="jn-cnote">' + esc(l.note) + "</span>" : "") +
-        (l.error ? '<span class="jn-cbec">' + esc(l.error) + "</span>" : "") + "</td>" +
-        '<td class="jn-cv">' + (l.negative ? "-" : "") + esc(unitised(l.value, l.unit)) + "</td>" +
-        '<td class="jn-cs">' + citeChip(l.cite) + "</td></tr>";
+        (l.error ? '<span class="jn-cwbec">' + esc(l.error) + "</span>" : "") + "</td>" +
+        '<td class="jn-cwv">' + (l.negative ? "-" : "") + esc(unitised(l.value, l.unit)) + "</td>" +
+        '<td class="jn-cws">' + citeChip(l.cite) + "</td></tr>";
     });
     html += "</tbody>";
     if(res.total){
-      html += '<tfoot><tr><td class="jn-cl">' + esc(res.total.label) + "</td>" +
-        '<td class="jn-cv">' + esc(unitised(res.total.value, res.total.unit)) + "</td>" +
-        '<td class="jn-cs"></td></tr></tfoot>';
+      html += '<tfoot><tr><td class="jn-cwl">' + esc(res.total.label) + "</td>" +
+        '<td class="jn-cwv">' + esc(unitised(res.total.value, res.total.unit)) + "</td>" +
+        '<td class="jn-cws"></td></tr></tfoot>';
     }
     return html + "</table></div>";
   }
@@ -999,6 +999,7 @@ const Journeys = (function(){
     /* exposed for the tests */
     _visible: visible, _steps: steps, _fill: fill, _diagram: buildDiagram,
     _derive: derive, _recompute: recompute, _extract: extractFields,
+    _computationMarkup: computationMarkup,
     get active(){ return active; },
     get answers(){ return active ? active.answers : null; },
     get derived(){ return active ? active.derived : null; },

@@ -204,26 +204,26 @@ textarea.jn-in{resize:vertical;min-height:70px;font-family:inherit}
    align reads as sloppy in a document somebody sends to a customer.
 --------------------------------------------------------------- */
 .jn-calc{margin:var(--s3) 0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--bg-1)}
-.jn-ct{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
-.jn-ct td{padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:top}
-.jn-ct tbody tr:last-child td{border-bottom:0}
-.jn-cl{color:var(--tx-2)}
-.jn-cv{
+.jn-cwt{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.jn-cwt td{padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:top}
+.jn-cwt tbody tr:last-child td{border-bottom:0}
+.jn-cwl{color:var(--tx-2)}
+.jn-cwv{
   text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;
   font-weight:600;color:var(--tx);width:1%
 }
-.jn-cs{width:1%;text-align:right;padding-left:0}
-.jn-ct tfoot td{
+.jn-cws{width:1%;text-align:right;padding-left:0}
+.jn-cwt tfoot td{
   padding:11px 12px;border-top:2px solid var(--line);background:var(--bg-2);
   font-weight:700;color:var(--tx)
 }
-.jn-ct tfoot .jn-cv{font-size:var(--t-md)}
-.jn-cnote,.jn-cbec{display:block;margin-top:3px;font-size:var(--t-xs);color:var(--tx-3);line-height:1.45}
+.jn-cwt tfoot .jn-cwv{font-size:var(--t-md)}
+.jn-cnote,.jn-cwbec{display:block;margin-top:3px;font-size:var(--t-xs);color:var(--tx-3);line-height:1.45}
 /* A line that does not apply stays visible and says why. Removing it
    reads as an oversight, and it is often the most useful line in a quote. */
-.jn-ct tr.is-skip .jn-cl,.jn-ct tr.is-skip .jn-cv{color:var(--tx-3)}
-.jn-ct tr.is-skip .jn-cv{font-weight:500}
-.jn-ct tr.is-err .jn-cbec{color:var(--crit)}
+.jn-cwt tr.is-skip .jn-cwl,.jn-cwt tr.is-skip .jn-cwv{color:var(--tx-3)}
+.jn-cwt tr.is-skip .jn-cwv{font-weight:500}
+.jn-cwt tr.is-err .jn-cwbec{color:var(--crit)}
 .jn-cerr{
   display:flex;gap:8px;align-items:flex-start;padding:11px 13px;
   border:1px solid var(--crit);border-radius:var(--r);
@@ -350,7 +350,7 @@ textarea.jn-in{resize:vertical;min-height:70px;font-family:inherit}
 .jn-dacts .btn{width:100%}
 
 @media (max-width:560px){
-  .jn-ct td,.jn-ct tfoot td{padding:8px 9px}
-  .jn-cs{display:none}
+  .jn-cwt td,.jn-cwt tfoot td{padding:8px 9px}
+  .jn-cws{display:none}
   .jn-tacts,.jn-facts{flex-direction:column}
 }

@@ -7,7 +7,7 @@
    Run:  node test/test_render.js [edition]
 */
 const H = require("./harness");
-const edition = process.argv[2] || "base";
+const edition = process.argv[2] || "nbfc";
 H.loadEdition(edition);
 H.loadSrc();
 
@@ -149,5 +149,64 @@ H.section("Streaming safety");
   }
   H.eq(bad, null, "no partial render ever produces broken markup");
 }
+
+/* ================= two components, two vocabularies =================
+
+   A class name is a contract between one component's markup and one
+   block of stylesheet. Two components sharing a name makes the later
+   stylesheet rule win over markup that never asked for it, and nothing
+   errors: it simply renders wrong somewhere nobody is looking.
+
+   That happened here for real. The computation table's citation cell
+   and the card's subtitle were both `.jn-cs`, so a rule meant to shrink
+   a table cell to its chip — width:1% — landed on a paragraph, which
+   rendered three pixels wide and one word per line. Every test passed,
+   because every test checked markup rather than layout.
+
+   The card is one component with two callers, so the two walls sharing
+   its names is right and is asserted as such. What must not overlap is
+   a component of the DOCUMENT with a component of the CHROME: they are
+   styled by different people at different times for different reasons.
+*/
+H.section("Two components never share a class name");
+
+function classesIn(html) {
+  const out = new Set();
+  (String(html).match(/class="([^"]*)"/g) || []).forEach(m => {
+    m.slice(7, -1).split(/\s+/).forEach(c => { if (c && c.indexOf("is-") !== 0) out.add(c); });
+  });
+  return out;
+}
+
+const signedIn = Config.roles.find(r => r.key === "central_ops") || Config.roles[0];
+S.role = signedIn;
+S.user = Config.users.find(u => u.roleKey === signedIn.key) || { name: "Test", roleKey: signedIn.key };
+
+/* the document: a guided task printing its working */
+const working = classesIn(Journeys._computationMarkup({
+  lines: [
+    { label: "Principal outstanding", value: 412600, cite: "PR-006" },
+    { label: "Foreclosure charge", skipped: true,
+      because: "the facility is floating rate to an individual", cite: "PR-006" },
+  ],
+  total: { label: "Payable to close", value: 412600 },
+}));
+H.ok(working.size >= 4, "the computation table emits its own classes (" + working.size + ")");
+
+/* the chrome: the cards a person picks work from */
+const routerCards = classesIn(Router.cardsMarkup(4, 3));
+const taskCards = classesIn(Journeys.cardsMarkup(4));
+H.ok(routerCards.size >= 4, "the router card wall emits classes (" + routerCards.size + ")");
+H.ok(taskCards.size >= 4, "the guided task cards emit classes (" + taskCards.size + ")");
+
+H.eq([...working].filter(c => routerCards.has(c)), [],
+  "the computation table and the router card wall share no class name");
+H.eq([...working].filter(c => taskCards.has(c)), [],
+  "the computation table and the guided task cards share no class name");
+
+/* and the positive half: the card really is one component, not two that
+   happen to look alike, so the two walls are expected to share it */
+H.ok([...taskCards].filter(c => routerCards.has(c)).length >= 3,
+  "the two card walls draw the same card component rather than two copies of it");
 
 H.report(`SARA render safety (${edition})`);
