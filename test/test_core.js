@@ -703,4 +703,94 @@ H.section("Theme: the boot bootstrap and the runtime agree");
   global.matchMedia = prevMM;
 }
 
+/* ==================================================================
+   a floater is not closed by the click that opened it
+   ------------------------------------------------------------------
+   The document-level click handler closes any open menu when you click
+   away from one. It cannot tell "clicked away" from "just opened", so
+   the click that opened a menu closed it again inside the same event.
+   From the outside the button did nothing at all, which is how the
+   download button was broken in every build of this product.
+
+   Four of the five openers hid it by calling stopPropagation on an
+   event they happened to be handed. The download button is invoked as
+   `Panel.download()` with no event to stop, so it could not.
+
+   There is no DOM here to dispatch a real click through, so what is
+   pinned is the handshake the fix rests on: placeFloater raises a flag,
+   the handler consumes it exactly once, and it does not survive to
+   swallow the next click.
+   ================================================================== */
+H.section("A menu survives the click that opened it");
+
+H.ok(typeof floaterJustOpened === "function",
+  "the handshake exists for the document handler to use");
+
+/* nothing opened: the handler must close floaters as normal */
+H.eq(floaterJustOpened(), false, "with no floater just opened, a click closes what is open");
+
+/* opening one raises it exactly once */
+placeFloater(stubFloater(), 10, 10);
+H.eq(floaterJustOpened(), true, "the click that opened a floater is recognised and skipped");
+H.eq(floaterJustOpened(), false, "and only that one click: the next one closes as normal");
+
+/* two in a row still consume one each */
+placeFloater(stubFloater(), 10, 10);
+placeFloater(stubFloater(), 20, 20);
+H.eq(floaterJustOpened(), true, "reopening while one is open is still one click");
+H.eq(floaterJustOpened(), false, "and the click after it closes");
+
+function stubFloater() {
+  const n = H.stubNode("div");
+  n.className = "menu";
+  return n;
+}
+
+/* and the handler must actually ask. A fix nobody calls is not a fix. */
+const initSrc = require("fs").readFileSync(
+  require("path").join(__dirname, "..", "src", "40-init.js"), "utf8");
+const clickHandler = initSrc.slice(initSrc.indexOf('addEventListener("click"'));
+H.ok(clickHandler.indexOf("floaterJustOpened()") !== -1 &&
+     clickHandler.indexOf("floaterJustOpened()") < clickHandler.indexOf("closeFloaters()"),
+  "the document click handler asks before it closes");
+
+/* ==================================================================
+   the layout follows the window, not just the width it started at
+   ------------------------------------------------------------------
+   The pane layout was decided once, at boot, from the width at that
+   moment, and never revisited. The stylesheet goes on honouring its
+   breakpoints as the window changes; the classes saying which panes
+   are open did not. Narrow a laptop window to half the screen and the
+   sidebar stayed an open column while the stylesheet had already made
+   it a floating overlay, so it covered the conversation with no scrim
+   and no way to dismiss it.
+
+   Only the crossings are acted on. Two things have to hold, and they
+   pull in opposite directions: a pane that is now floating over the
+   conversation has to be collapsed, and a pane the person closed by
+   hand must not be reopened behind their back.
+   ================================================================== */
+H.section("Panes follow the window across a breakpoint");
+
+H.ok(typeof Panel.syncBreakpoints === "function", "the breakpoints are re-read after boot");
+
+const initFile = require("fs").readFileSync(
+  require("path").join(__dirname, "..", "src", "40-init.js"), "utf8");
+H.has(initFile, 'addEventListener("resize"', "something listens for the window changing");
+H.has(initFile, "Panel.syncBreakpoints()", "and asks the panes to catch up");
+H.has(initFile, "requestAnimationFrame", "coalesced into a frame, because a drag fires it by the hundred");
+
+/* the collapse-and-restore rule, read off the source: it is the half
+   that cannot be checked without a real window to resize */
+const panelFile = require("fs").readFileSync(
+  require("path").join(__dirname, "..", "src", "28-panel.js"), "utf8");
+const sync = panelFile.slice(panelFile.indexOf("function syncBreakpoints"),
+                            panelFile.indexOf("/* ---------------- resize ----------------"));
+H.ok(sync.indexOf("weCollapsedSide") !== -1 && sync.indexOf("weClosedPanel") !== -1,
+  "it remembers which panes IT closed, so it only restores those");
+H.ok(sync.indexOf("wasSideOverlay === null") !== -1,
+  "the first call sets a baseline rather than acting on it");
+H.ok(sync.indexOf("syncOverlayScrim()") !== -1,
+  "and the scrim is re-synced, or an overlay opens over an undimmed conversation");
+
 H.report("SARA providers");

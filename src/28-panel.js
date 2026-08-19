@@ -50,6 +50,57 @@ const Panel = (function(){
       (isPanelOverlay() && S.panelOpen) || (isSideOverlay() && sideOpen));
   }
 
+  /* ---------------- the breakpoints, after boot ----------------
+
+     Only the CROSSINGS are acted on, not every resize. Reapplying the
+     boot rule on each event would fight a person who has just closed a
+     pane by hand, and reopening one on the way back up is only right
+     when we were the ones who closed it in the first place. */
+  let wasSideOverlay = null, wasPanelOverlay = null;
+  let weCollapsedSide = false, weClosedPanel = false;
+
+  function syncBreakpoints(){
+    const app = document.getElementById("app");
+    if(!app) return;
+    const sideNow = isSideOverlay(), panelNow = isPanelOverlay();
+
+    /* first call establishes the baseline rather than acting on it: at
+       boot the layout has already been set from the same widths */
+    if(wasSideOverlay === null){
+      wasSideOverlay = sideNow;
+      wasPanelOverlay = panelNow;
+      return;
+    }
+
+    if(sideNow !== wasSideOverlay){
+      if(sideNow){
+        /* it has just become a floating overlay, so an open sidebar is
+           now covering the conversation rather than sitting beside it */
+        weCollapsedSide = !app.classList.contains("side-off");
+        app.classList.add("side-off");
+      }else if(weCollapsedSide){
+        app.classList.remove("side-off");
+        weCollapsedSide = false;
+      }
+      wasSideOverlay = sideNow;
+    }
+
+    if(panelNow !== wasPanelOverlay){
+      if(panelNow){
+        weClosedPanel = !!S.panelOpen;
+        if(S.panelOpen) close();
+      }else if(weClosedPanel){
+        open();
+        weClosedPanel = false;
+      }
+      wasPanelOverlay = panelNow;
+    }
+
+    const railChats = el("railChats");
+    if(railChats) railChats.classList.toggle("on", !app.classList.contains("side-off"));
+    syncOverlayScrim();
+  }
+
   /* ---------------- resize ---------------- */
   function initResize(){
     const grip = el("panelGrip");
@@ -356,7 +407,7 @@ const Panel = (function(){
   return {
     open: open, close: close, toggle: toggle, toggleWide: toggleWide,
     isNarrow: isNarrow, isPanelOverlay: isPanelOverlay, isSideOverlay: isSideOverlay,
-    initResize: initResize,
+    initResize: initResize, syncBreakpoints: syncBreakpoints,
     add: add, find: find, show: show, step: step, repaint: repaint, paint: paint,
     current: current,
     startBuilding: startBuilding, cancelBuilding: cancelBuilding,
