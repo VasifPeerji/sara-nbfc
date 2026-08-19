@@ -528,4 +528,118 @@ OP_ORDER.forEach(key => {
   });
 });
 
+/* ==================================================================
+   9. the two measured constants
+   ------------------------------------------------------------------
+   The corpus floor and the noise list are numbers somebody measured
+   against a corpus, and this corpus is not the one they were first
+   measured against. Both are pinned here so that adding documents,
+   which changes IDF, fails this file rather than quietly changing what
+   the product treats as its own business.
+   ================================================================== */
+H.section("The corpus floor sits above the junk, not below the questions");
+
+/* Real questions, across every role and segment, phrased as the people
+   who hold those roles phrase them. */
+const REAL_QUESTIONS = [
+  ["branch_manager", "what margin can we fund a used tipper at"],
+  ["credit_manager", "what is the ceiling for a used commercial vehicle over five years"],
+  ["cpa", "what counts as an officially valid document for address proof"],
+  ["loan_ops", "what has to be on the file before we can disburse"],
+  ["pdd_officer", "how long do we have to get the hypothecation endorsed"],
+  ["repo_coordinator", "what has to be true before we can take possession of a vehicle"],
+  ["field_collections", "what are the rules on the hours a recovery agent may call"],
+  ["acm", "when does an account become non performing"],
+  ["gold_appraiser", "what notice is required before a gold auction"],
+  ["capmkt_ops", "what haircut applies to loans against shares"],
+  ["wholesale_rm", "what happens if a borrower breaches a financial covenant"],
+  ["cse", "how is a foreclosure charge calculated on a floating rate loan"],
+  ["gro", "what is the timeline for responding to a grievance"],
+  ["chief_compliance", "what does scale based regulation require of a middle layer nbfc"],
+  ["principal_officer", "what triggers a suspicious transaction report"],
+  ["reporting_analyst", "which returns does an nbfc file quarterly"],
+  ["treasury_analyst", "what are the asset liability mismatch limits"],
+  ["cro", "how is expected credit loss provisioning staged"],
+  ["digital_pm", "what has to be disclosed in a key facts statement"],
+  ["central_ops", "how are co-lending receipts apportioned between partners"],
+  ["rcu_officer", "what happens when a document is found to be forged"],
+  ["bc_agent", "what is the household income limit for a microfinance loan"],
+];
+
+/* Nothing here is company business by any reading. */
+const JUNK_QUESTIONS = [
+  "what is the capital of Portugal",
+  "write me a poem about the sea",
+  "who won the football last night",
+  "recommend a restaurant for dinner",
+  "how do I bake sourdough bread",
+  "what is the tallest mountain in the world",
+  "tell me a joke about penguins",
+  "what year did the second world war end",
+  "how many kilometres is a marathon",
+  "what is the best film of all time",
+  "explain photosynthesis to a child",
+  "what is the offside rule in football",
+  "give me a workout plan for the week",
+  "how do I get a stain out of a shirt",
+  "what is the population of Brazil",
+  "how long should I boil an egg",
+  "what is the speed of light",
+];
+
+function topScore(q) {
+  const hit = Retrieval.search(q, { role: S.role, topK: 4 });
+  const src = hit && hit.sources && hit.sources[0];
+  return src && typeof src.score === "number" ? src.score : 0;
+}
+
+let junkTop = 0, realTop = 0, realLow = Infinity;
+JUNK_QUESTIONS.forEach(q => { signIn("md_ceo"); junkTop = Math.max(junkTop, topScore(q)); });
+REAL_QUESTIONS.forEach(([role, q]) => {
+  signIn(role);
+  const s = topScore(q);
+  realTop = Math.max(realTop, s);
+  realLow = Math.min(realLow, s);
+});
+
+H.ok(junkTop < Router.CORPUS_FLOOR,
+  "general-knowledge junk tops out at " + junkTop.toFixed(1) +
+  ", under the floor of " + Router.CORPUS_FLOOR);
+H.ok(realTop > Router.CORPUS_FLOOR * 2,
+  "a real question reaches " + realTop.toFixed(1) + ", well clear of it");
+
+/* The two ranges overlap, and that is the point: the floor cannot be a
+   question detector, so it is not asked to be one. A real question
+   below it still reaches the corpus, through the in-domain branch. */
+H.ok(realLow < junkTop,
+  "the ranges overlap (" + realLow.toFixed(1) + " vs " + junkTop.toFixed(1) +
+  "), so the floor is a junk filter and not a question detector");
+
+REAL_QUESTIONS.forEach(([role, q]) => {
+  signIn(role);
+  const d = rule(q);
+  H.ok(d.intent !== "outofdomain", 'in domain: "' + q + '" (' + d.intent + ", " + d.why + ")");
+});
+JUNK_QUESTIONS.forEach(q => {
+  signIn("md_ceo");
+  const d = rule(q);
+  H.eq(d.intent, "outofdomain", 'out of domain: "' + q + '" (' + d.why + ")");
+});
+
+H.section("The domain vocabulary does not depend on who signed in first");
+
+/* It is built once and cached. Building it from the runs the CURRENT
+   role can reach meant whoever signed in first decided, for the whole
+   session, what the product considered to be its own business — 1,014
+   words for one profile against 1,043 for another. */
+const vocab = Router._domainVocab();
+["sales_officer", "central_ops", "md_ceo", "dealer_exec"].forEach(k => {
+  signIn(k);
+  H.eq(Router._domainVocab().size, vocab.size,
+    "the vocabulary is the same size signed in as " + k);
+});
+["foreclosure", "covenant", "auction", "repossession", "cersai", "mandate"].forEach(w => {
+  H.ok(vocab.has(w), 'the vocabulary knows "' + w + '" whoever is signed in');
+});
+
 H.report("SARA intent router");

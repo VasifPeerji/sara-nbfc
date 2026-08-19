@@ -542,5 +542,41 @@ endpoints().then(delivery).then(retries).then(async function () {
   H.eq(JSON.parse(posts[0].opts.body).label, "nbfc",
     "an unlabelled build still identifies itself by edition");
 
-  H.report("SARA usage analytics");
+  /* ==================================================================
+   how the routing was decided
+   ------------------------------------------------------------------
+   The deterministic classifier is the product's claim to work with no
+   API key at all. Nothing was counting how often it was enough, which
+   made it the one claim in the room with no number behind it.
+   ================================================================== */
+H.section("The usage panel counts how much routing needed no model");
+
+Analytics.clear();
+Analytics.identify({ name: "Test", org: "Streebo", email: "t@example.com" });
+
+const DECISIONS = [
+  { intent: "knowledge", target: null, source: "rules" },
+  { intent: "knowledge", target: null, source: "rules" },
+  { intent: "operator", target: "collections", source: "rules" },
+  { intent: "task", target: "foreclosure_quote", source: "rules" },
+  { intent: "knowledge", target: null, source: "llm" },
+];
+DECISIONS.forEach((dec, i) => {
+  Analytics.turn("question " + i, { text: "answer " + i, sources: [], decision: dec },
+                 { role: "central_ops", ms: 400 });
+});
+
+const sum = Analytics.summary();
+H.eq(sum.questions, 5, "five exchanges recorded");
+H.eq(sum.ruleRouted, 4, "four of them were routed with no model call");
+H.ok(sum.routedBy.some(x => x.k === "rules" && x.n === 4), "the tally names the rules path");
+H.ok(sum.routedBy.some(x => x.k === "llm" && x.n === 1), "and the model path");
+
+/* it has to reach the panel and the export, or it is a number nobody
+   can see and nobody can check afterwards */
+H.has(Analytics.paneMarkup(), "routed with no model call", "the panel says so in words");
+H.has(Analytics.toCsv(), "routed by", "the export carries the column");
+H.has(Analytics.toCsv(), "rules", "and the value");
+
+H.report("SARA usage analytics");
 });

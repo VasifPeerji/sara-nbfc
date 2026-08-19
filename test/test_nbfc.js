@@ -144,10 +144,22 @@ H.section("Every prompt card retrieves something");
 
    Presence alone is a weak assertion: BM25 returns something for almost any
    query that shares a word with any document. The floor is what makes this
-   check mean anything. Measured across the corpus, real matches sit at 6 and
-   above while noise tops out around 4, so a card below the floor is pulling
-   a document that happens to share vocabulary rather than one that answers
-   it. RE-MEASURE THIS as the corpus grows; it is corpus-size dependent. */
+   check mean anything.
+
+   Measured over the finished corpus, across all 185 cards:
+
+     weakest card   6.4   md_ceo, "A problem nobody has connected"
+     tenth centile  9.7
+     median        16.2
+     strongest     42.2
+
+   So the floor holds, with 0.4 of margin on one card and a great deal on
+   the rest. That one is the weakest because it is deliberately the
+   broadest question on the wall: it asks across documents rather than
+   into one, which is the whole point of it.
+
+   This is corpus-size dependent, because IDF rises with the corpus.
+   RE-MEASURE rather than assume if documents are added or removed. */
 const CARD_FLOOR = 6.0;
 
 Config.roles.forEach((r) => {

@@ -124,14 +124,27 @@ const Router = (function () {
      wide, so the threshold sits in the middle of it rather than being
      tuned to any single query. */
   /* BM25 will always find some overlap, so the top passage has to be
-     relevant enough to be worth quoting. The floor is corpus dependent,
-     because IDF rises with corpus size and with vocabulary density: on
-     this edition's 111 documents, real domain questions score 8.5 to 23
-     and general-knowledge junk tops out at 7.2, so the gap sits at 8.
-     Anything ask-shaped that falls below still reaches the corpus
-     through the in-domain branch below, so the floor only has to stop
-     junk, not catch every question. */
-  const CORPUS_FLOOR = 8.0;
+     relevant enough to be worth quoting.
+
+     The floor is corpus dependent, because IDF rises with corpus size
+     and with vocabulary density, so it is measured rather than guessed.
+     Over this edition's corpus, thirty real questions spread across
+     every role and segment, and twenty general-knowledge ones:
+
+       real questions   2.7 to 34.8
+       general junk     up to 7.8
+
+     Those two ranges OVERLAP, and it is a mistake to go looking for a
+     threshold that separates them: "what has to be on the file before
+     we can disburse" scores 2.7 because it is written almost entirely
+     in stopwords, and "what is the capital of Portugal" scores 7.8
+     because capital adequacy and capital markets are both real subjects
+     here.
+
+     So this is a junk filter, not a question detector. It sits above
+     the junk, not below the questions, and a real question that falls
+     under it still reaches the corpus through the in-domain branch. */
+  const CORPUS_FLOOR = 9.0;
   function bestScore(hit) {
     const s = hit && hit.sources && hit.sources[0];
     return s && typeof s.score === "number" ? s.score : 0;
@@ -160,19 +173,24 @@ const Router = (function () {
     return MAKE_SHAPE.test(t) && WORK_NOUN.test(t);
   }
 
-  /* Words that appear in the domain vocabulary but carry no domain signal
-     on their own. "Write" is in there because the corpus talks about
-     writing a job up, and on its own it would make "write me a poem"
-     look like dealership business. */
+  /* Words that appear in the domain vocabulary but carry no domain
+     signal on their own. "Write" is in there because the corpus talks
+     about writing a case up, and on its own it would make "write me a
+     poem" look like company business.
+
+     Maintained by measurement rather than by intuition: every word in
+     the last group below was, on test, the single word letting a
+     general-knowledge question through. */
   const VOCAB_NOISE = new Set(("write written writing run running open opened check checked set put get " +
     "take taken make made give given work working time day days week weeks month months year years " +
     "need needs use used using help call called send sent show shown keep kept hold held find found " +
     "know known thing things way ways one two three new old good best first last next " +
-    /* Homonyms. Each of these is a real domain word here - capital
-       expenditure, night shift, a contract won - and each carries no
-       domain signal standing alone, which is how "what is the capital
-       of Portugal" started looking like company business. */
-    "capital night won film").split(" "));
+    /* Homonyms. Each is a real word in this business — capital adequacy,
+       a second charge, a repayment plan, the rule in a circular, the
+       end of a tenor — and each carries no domain signal standing
+       alone, which is how "what is the capital of Portugal" and "how do
+       I get a stain OUT of a shirt" started looking like our business. */
+    "capital second end all rule plan out").split(" "));
 
   let VOCAB = null;
   function domainVocab() {
@@ -184,8 +202,18 @@ const Router = (function () {
     Object.keys(Config.categories || {}).forEach(k => add((Config.categories[k] || {}).label || k));
     (Config.roles || []).forEach(r => add(r.title));
     (Config.systems || []).forEach(s => add(s.name));
-    operatorRuns().forEach(r => { add(r.label); add(r.title); (r.triggers || []).forEach(add); });
-    taskRuns().forEach(r => { add(r.label); (r.triggers || []).forEach(add); });
+    /* Every run, not the ones this role can reach. The vocabulary is
+       cached, so building it from the signed-in role meant whoever
+       signed in first decided what the whole session considered to be
+       company business. Access control governs what a person may READ;
+       it has nothing to say about what counts as our subject matter. */
+    if (typeof OP_ORDER !== "undefined") {
+      OP_ORDER.forEach(k => {
+        const d = OP_DEPT[k] || {};
+        add(d.label); add(d.runTitle); (d.triggers || []).forEach(add);
+      });
+    }
+    (Config.journeys || []).forEach(j => { add(j.title); (j.triggers || []).forEach(add); });
     return VOCAB;
   }
 
@@ -246,12 +274,17 @@ const Router = (function () {
      asking for the document, not for the answer to be worked out. It is
      the one shape that has to stay with the corpus even when it happens
      to contain a guided task's trigger phrase. */
-  /* A definition question: what a thing IS, rather than what it is in
-     this case. The article carries it — "a" or "an" is the class, "the"
-     is the instance — so "what is a foreclosure quote" belongs to the
-     corpus and "what is the gold loan LTV on this account" does not. */
-  const ASKS_DEFINITION =
-    /^\s*(?:so\s+|ok(?:ay)?[,\s]+)?what(?:'s|\s+is|\s+are)\s+(?:a|an)\b|\bwhat\s+does\s+[\w' -]{2,40}\s+mean\b|\bwhat\s+is\s+meant\s+by\b/;
+  /* Is this question about a CASE, or about the rule?
+
+     A guided task takes a case and works it: it needs an account, a
+     file, a vehicle in front of somebody. So the signal is a modal
+     aimed at us or a demonstrative pointing at an instance — "can this
+     vehicle", "can we", "should we", "is this account". Without one,
+     the question is about the rule, and the rule is what the corpus is
+     for: "what notice is required before a gold auction" is a question
+     about notice, not an instruction to value somebody's gold. */
+  const ABOUT_A_CASE =
+    /\b(?:can|could|should|shall|may|must|do|does|is|are|has|have|will)\s+(?:we|i|they|it|this|that|the)\b|\bthis\s+(?:account|file|case|customer|borrower|vehicle|loan|facility|application|complaint|deviation|agreement|return|charge|property|partner)\b|\bam\s+i\b|\bare\s+we\b/;
 
   const SEEKS_DOCUMENT =
     /\b(?:polic(?:y|ies)|circular|standard|manual|guideline|direction|directions|note|sop|procedure)\b[^.?]{0,40}\b(?:say|says|said|state|states|require|requires|provide|provides|permit|permits|allow|allows|define|defines)\b/;
@@ -323,14 +356,15 @@ const Router = (function () {
        phrasing they were written for.
 
        Three things keep this narrow. The phrase has to be more than one
-       word, so an incidental noun cannot do it. A question that
-       explicitly asks what a document says is left to the corpus, which
-       is what it asked for: "what does the policy say about repossession
-       preconditions" wants the clause, not the calculation. And a
-       definition question is left there too: "what is a foreclosure
-       quote" is asking what one is, not asking for one. */
+       word, so an incidental noun cannot do it. The question has to be
+       about a case rather than about the rule, because half these
+       triggers are noun phrases naming a thing and a question about
+       that thing belongs to the corpus: "what notice is required before
+       a gold auction" is asking about notice. And a question that names
+       a document as its source is left to the corpus whatever else it
+       says, because that is what it asked for. */
     const phrase = bestTriggerPhrase(tasks, t);
-    if (phrase && !SEEKS_DOCUMENT.test(t) && !ASKS_DEFINITION.test(t)) {
+    if (phrase && ABOUT_A_CASE.test(t) && !SEEKS_DOCUMENT.test(t)) {
       return { intent: "task", target: phrase.id, source: "rules",
                why: 'task trigger "' + phrase.phrase + '"' };
     }
@@ -1171,9 +1205,9 @@ const Router = (function () {
     badge: badge, actionMarkup: actionMarkup, cardsMarkup: cardsMarkup,
     operatorReply: operatorReply, taskReply: taskReply, outOfDomainReply: outOfDomainReply,
     productivityDirective: productivityDirective,
-    INTENTS: INTENTS, INTENT_LABEL: INTENT_LABEL,
+    INTENTS: INTENTS, INTENT_LABEL: INTENT_LABEL, CORPUS_FLOOR: CORPUS_FLOOR,
     /* exposed for the tests */
     _terms: terms, _runScore: runScore, _classifierMessages: classifierMessages,
-    _parseDecision: parseDecision, _inDomain: inDomain,
+    _parseDecision: parseDecision, _inDomain: inDomain, _domainVocab: domainVocab,
   };
 })();

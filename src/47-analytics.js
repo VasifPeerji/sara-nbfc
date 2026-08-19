@@ -174,6 +174,7 @@ const Analytics = (function () {
     if (typeof data.blocked === "number") e.blk = data.blocked;
     if (typeof data.chars === "number") e.ch = data.chars;
     if (data.intent) e.i = data.intent;
+    if (data.routedBy) e.rb = data.routedBy;
     if (data.ev) e.e = data.ev;
     if (data.role) e.r = data.role;
     if (data.model) e.mdl = data.model;
@@ -237,6 +238,7 @@ const Analytics = (function () {
       role: x.role || "",
       intent: dec.intent || x.intent || "knowledge",
       target: dec.target || "",
+      routedBy: dec.source || "",
       sources: cited.length,
       blocked: blkd.length,
       cited: cited,
@@ -618,6 +620,11 @@ const Analytics = (function () {
       withheld: turns.reduce((s, e) => s + (e.blk || 0), 0),
       refusals: count("refused"),
       intents: tally("turn", "i"),
+      routedBy: tally("turn", "rb"),
+      /* How much of the routing needed no model at all. It is the
+         product's own claim, so it is a measured number rather than a
+         sentence in a deck, and it is the first thing anyone asks. */
+      ruleRouted: turns.filter(e => e.rb === "rules").length,
       roles: tally("signin", "r"),
       docs: Object.keys(citedAll).map(k => ({ k: k, n: citedAll[k] })).sort((a, b) => b.n - a.n),
       opened: tally("doc", "did"),
@@ -651,11 +658,11 @@ const Analytics = (function () {
   }
 
   function toCsv() {
-    const rows = [["at", "session", "kind", "role", "intent", "target", "id", "event",
+    const rows = [["at", "session", "kind", "role", "intent", "target", "routed by", "id", "event",
                    "sources", "withheld", "ms", "question", "answer"]];
     load().events.forEach(e => rows.push([
       e.at ? new Date(e.at).toISOString() : "", e.s || "", e.k || "", e.r || "", e.i || "",
-      e.tg || "", e.did || "", e.e || "",
+      e.tg || "", e.rb || "", e.did || "", e.e || "",
       e.src === undefined ? "" : e.src, e.blk === undefined ? "" : e.blk,
       e.ms === undefined ? "" : e.ms,
       (e.q || "").replace(/"/g, '""'), (e.a || "").replace(/"/g, '""'),
@@ -768,7 +775,13 @@ const Analytics = (function () {
     "</div>" +
 
     '<div class="set-sec"><div class="set-sec-t">' + Icons.el("route") + "Where the questions went</div>" +
-      bar(s.intents, s.questions, 6) + "</div>" +
+      bar(s.intents, s.questions, 6) +
+      (s.questions
+        ? '<div class="an-note">' + Icons.el("zap") +
+          Math.round((s.ruleRouted / s.questions) * 100) + " per cent of these were routed with no model call: " +
+          s.ruleRouted + " of " + s.questions + "." +
+          "</div>"
+        : "") + "</div>" +
 
     '<div class="set-sec"><div class="set-sec-t">' + Icons.el("users") + "Profiles used</div>" +
       bar(s.roles, s.roles.reduce(function (a, b) { return a + b.n; }, 0), 8) + "</div>" +
