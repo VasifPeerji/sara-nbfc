@@ -1993,7 +1993,7 @@ window.SARA_EDITION = {
       icon: "user",
       for: ["cpa", "loan_ops", "central_ops", "branch_manager", "gold_appraiser"],
       triggers: ["kyc validation", "identification pack", "is this address proof acceptable",
-                 "ckyc upload", "officially valid document", "kyc deficiency"],
+                 "officially valid document", "kyc deficiency"],
       doneTitle: "Pack assessed",
       doneNote: "The position on each requirement and the registry readiness are in the workspace.",
       steps: [
@@ -2167,7 +2167,7 @@ window.SARA_EDITION = {
       tagline: "Classify it, start the clock, and find out whether it is one of many",
       icon: "users",
       for: ["gro", "pno", "cse", "branch_manager", "central_ops"],
-      triggers: ["complaint triage", "classify this complaint", "grievance clock",
+      triggers: ["complaint triage", "triage this complaint", "classify this complaint", "grievance clock",
                  "is this systemic", "ombudsman readiness", "complaint response"],
       doneTitle: "Triaged",
       doneNote: "The classification, the clock and the systemic position are in the workspace.",

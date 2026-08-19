@@ -100,7 +100,7 @@ const Router = (function () {
      used to match anywhere, so "the brakes squeal WHEN cold" read as a
      question and a clear instruction to raise a repair order was
      answered from the knowledge base instead of being carried out. */
-  const ASK_OPENERS = /^\s*(?:so\s+|and\s+|ok(?:ay)?[,\s]+|hey[,\s]+)?(what|why|when|which|who|whose|how|can|could|should|would|is|are|do|does|did|am|has|have)\b/i;
+  const ASK_OPENERS = /^\s*(?:so\s+|and\s+|ok(?:ay)?[,\s]+|hey[,\s]+)?(what|why|when|where|which|who|whom|whose|how|can|could|should|would|is|are|do|does|did|am|has|have)\b/i;
   const ASK_PHRASES = /\b(explain|describe|tell me about|difference between|what is|what are|what does|why is|why does|how do i|how does|how long|how much|how many|can i|am i allowed|is it ok|are we allowed|should i|what happens if|walk me through)\b/i;
   const ASK_TOPIC = /\b(policy|rule|procedure|guideline|standard|requirement)s?\s+(?:on|for|about|regarding|says?)\b/i;
   function isAsk(t) {
@@ -189,6 +189,25 @@ const Router = (function () {
     return VOCAB;
   }
 
+  /** Does the text contain this phrase as whole words?
+
+      A plain indexOf does not: "los" is inside "foreclosure", so an
+      acronym trigger scored on every question that happened to contain
+      a longer word wrapping it, and the wrong product answered. Every
+      occurrence is checked rather than only the first, because the one
+      that lands on a word boundary is rarely the one that comes first. */
+  function hasPhrase(text, phrase) {
+    if (!phrase) return false;
+    let i = text.indexOf(phrase);
+    while (i !== -1) {
+      const before = i === 0 ? " " : text.charAt(i - 1);
+      const after = i + phrase.length >= text.length ? " " : text.charAt(i + phrase.length);
+      if (!/[a-z0-9]/.test(before) && !/[a-z0-9]/.test(after)) return true;
+      i = text.indexOf(phrase, i + 1);
+    }
+    return false;
+  }
+
   /** Overlap between a query and a run's own trigger vocabulary. */
   function runScore(run, words, text) {
     const bag = new Set();
@@ -201,7 +220,7 @@ const Router = (function () {
        happens to appear in a tagline */
     (run.triggers || []).forEach(tr => {
       const t = String(tr).toLowerCase();
-      if (text.indexOf(t) !== -1) score += t.indexOf(" ") !== -1 ? 5 : 3;
+      if (hasPhrase(text, t)) score += t.indexOf(" ") !== -1 ? 5 : 3;
     });
     return score;
   }
@@ -221,6 +240,37 @@ const Router = (function () {
     if (isNamedReport(t)) return 6;
     if (/\breport\b/i.test(t)) return 3;
     return 0;
+  }
+
+  /* A question that names a source of authority and a saying verb is
+     asking for the document, not for the answer to be worked out. It is
+     the one shape that has to stay with the corpus even when it happens
+     to contain a guided task's trigger phrase. */
+  /* A definition question: what a thing IS, rather than what it is in
+     this case. The article carries it — "a" or "an" is the class, "the"
+     is the instance — so "what is a foreclosure quote" belongs to the
+     corpus and "what is the gold loan LTV on this account" does not. */
+  const ASKS_DEFINITION =
+    /^\s*(?:so\s+|ok(?:ay)?[,\s]+)?what(?:'s|\s+is|\s+are)\s+(?:a|an)\b|\bwhat\s+does\s+[\w' -]{2,40}\s+mean\b|\bwhat\s+is\s+meant\s+by\b/;
+
+  const SEEKS_DOCUMENT =
+    /\b(?:polic(?:y|ies)|circular|standard|manual|guideline|direction|directions|note|sop|procedure)\b[^.?]{0,40}\b(?:say|says|said|state|states|require|requires|provide|provides|permit|permits|allow|allows|define|defines)\b/;
+
+  /** The longest multi-word trigger, among the tasks this person can
+      run, that appears in the text word for word. Longest wins, because
+      a five-word phrase is a far more deliberate match than a two-word
+      one that happens to sit inside it. */
+  function bestTriggerPhrase(tasks, text) {
+    let best = null;
+    tasks.forEach(entry => {
+      (entry.r.triggers || []).forEach(tr => {
+        const p = String(tr).toLowerCase();
+        if (p.indexOf(" ") === -1) return;
+        if (!hasPhrase(text, p)) return;
+        if (!best || p.length > best.phrase.length) best = { id: entry.r.id, phrase: p };
+      });
+    });
+    return best;
   }
 
   function rulesClassify(text) {
@@ -263,6 +313,26 @@ const Router = (function () {
        to go and record a result in the system of record. */
     if (isCompose(t)) {
       return { intent: "productivity", target: null, source: "rules", why: "composition request" };
+    }
+
+    /* A guided task's own trigger phrase, word for word, is its author
+       saying "this is the question this task is for". Many of these
+       tasks exist precisely to answer a question — can this be
+       repossessed, can this file disburse, who can approve this — so
+       requiring the text not to be a question would rule out the very
+       phrasing they were written for.
+
+       Three things keep this narrow. The phrase has to be more than one
+       word, so an incidental noun cannot do it. A question that
+       explicitly asks what a document says is left to the corpus, which
+       is what it asked for: "what does the policy say about repossession
+       preconditions" wants the clause, not the calculation. And a
+       definition question is left there too: "what is a foreclosure
+       quote" is asking what one is, not asking for one. */
+    const phrase = bestTriggerPhrase(tasks, t);
+    if (phrase && !SEEKS_DOCUMENT.test(t) && !ASKS_DEFINITION.test(t)) {
+      return { intent: "task", target: phrase.id, source: "rules",
+               why: 'task trigger "' + phrase.phrase + '"' };
     }
 
     /* A very strong subject match carries even a bare noun phrase:
@@ -480,7 +550,45 @@ const Router = (function () {
                         return m ? m[1].toUpperCase().replace(/\s/g, "-") : ""; };
   const readOdo = t => { const m = t.match(/\b(\d{2,3}[,\s]?\d{3})\s*(?:km|kms|miles)?\b/i);
                          return m ? m[1].replace(/[,\s]/g, "") : ""; };
-  const readPlate = t => { const m = t.match(/\b([A-Z]{2,3}[-\s]?\d{2,4}[A-Z]?)\b/); return m ? m[1] : ""; };
+  /* An identifier is segments of letters and digits joined by hyphens,
+     carrying at least one digit and at least one letter. That is a plant
+     tag (HT-412), a loan account (LN-CV-2026-0118420), a registration
+     (MH-31-CQ-4482), a complaint (CMS-2026-0084713) and a return
+     (DNBS-04A). It is not a date: a date has no letters in it. */
+  const ID_SHAPE = "[A-Za-z0-9]{1,8}(?:-[A-Za-z0-9]{1,8}){1,5}";
+  function identifiersIn(t) {
+    const out = [];
+    const re = new RegExp("\\b" + ID_SHAPE + "\\b", "g");
+    let m;
+    while ((m = re.exec(t))) {
+      if (/\d/.test(m[0]) && /[A-Za-z]/.test(m[0])) out.push({ v: m[0].toUpperCase(), at: m.index });
+    }
+    return out;
+  }
+
+  /** Which of the identifiers in a sentence this field is about.
+
+      Prefer the one this field's own words introduce. Failing that, take
+      one that no OTHER field's words introduce. And if every candidate
+      plainly belongs to somebody else, return nothing, so the run stops
+      and asks rather than recording the account number as the vehicle. */
+  function pickIdentifier(t, mine, others) {
+    const found = identifiersIn(t);
+    if (!found.length) return "";
+    const near = (at, words) => {
+      const before = t.slice(Math.max(0, at - 26), at).toLowerCase();
+      return (words || []).some(w => {
+        const x = String(w).toLowerCase();
+        return x.length > 2 && new RegExp("\\b" + esc4re(x) + "\\b[^\\w]{0,4}$").test(before);
+      });
+    };
+    const own = found.find(c => near(c.at, mine));
+    if (own) return own.v;
+    const free = found.find(c => !near(c.at, others));
+    return free ? free.v : "";
+  }
+
+  const readPlate = (t, ctx) => pickIdentifier(t, (ctx && ctx.mine) || [], (ctx && ctx.others) || []);
   const readPart = t => { const m = t.match(/\b([0-9A-Z]{3,}(?:[-\s][0-9A-Z]{2,}){1,3})\b/);
                           return (m && /\d/.test(m[1])) ? m[1].trim() : ""; };
   const readMoney = t => { const m = t.match(/(?:^|[^\w-])\$\s?([\d][\d,]*(?:\.\d{2})?)/);
@@ -497,9 +605,8 @@ const Router = (function () {
      registration?" is answered by either. The readers are tried in order
      and the first that finds something wins. */
   /** A loan, account or facility identifier, as a lending system writes it. */
-  function readAssetId(t) {
-    const m = t.match(/\b([A-Za-z]{2,4}-\d{1,5})\b/);
-    return m ? m[1].toUpperCase() : "";
+  function readAssetId(t, ctx) {
+    return pickIdentifier(t, (ctx && ctx.mine) || [], (ctx && ctx.others) || []);
   }
 
   const SHAPES = [
@@ -557,8 +664,13 @@ const Router = (function () {
     const q = String(step.q || "");
     for (let k = 0; k < SHAPES.length; k++) {
       if (!SHAPES[k].when.test(q)) continue;
+      const ctx = {
+        mine: stepLead(step),
+        others: (siblings || []).filter(x => x.id !== step.id)
+          .reduce((a, x) => a.concat(stepLead(x)), []),
+      };
       for (let n = 0; n < SHAPES[k].read.length; n++) {
-        const v = SHAPES[k].read[n](t);
+        const v = SHAPES[k].read[n](t, ctx);
         if (v) return v;
       }
       return "";
@@ -605,24 +717,38 @@ const Router = (function () {
     }
 
     if (f.kind === "id") {
-      /* An asset, unit or plant identifier is a shape: two to four
-         letters, a hyphen, digits. Read as free text it ran on to the
-         next field's lead word and put "HT-412, the operator is" into
-         the record. A shape that matches is authoritative, and one that
-         does not returns nothing rather than falling through, so the run
-         stops and asks instead of recording a sentence as an asset. */
-      const nearId = hintRe(f, "[^.,;]{0,20}?\\b([A-Za-z]{2,4}-\\d{1,5})\\b");
-      const mi = nearId ? t.match(nearId) : null;
-      if (mi) return mi[1].toUpperCase();
-      const mi2 = t.match(/\b([A-Za-z]{2,4}-\d{1,5})\b/);
-      if (mi2) return mi2[1].toUpperCase();
-      return "";
+      /* An identifier is a shape, not a phrase: segments of letters and
+         digits joined by hyphens, carrying at least one digit and at
+         least one letter. That covers a plant tag (HT-412), an account
+         (LN-CV-2026-0118420), a registration (MH-31-CQ-4482) and a
+         return (DNBS-04A), and excludes a date, which has no letters.
+
+         Read as free text an identifier ran on to the next field's lead
+         word and put "HT-412, the operator is" into the record. Matched
+         with too short a shape it silently truncated LN-CV-2026-0118420
+         to CV-2026, which is worse: that still looks like an account
+         number, it is simply somebody else's. So a shape that matches is
+         authoritative, and one that does not returns nothing rather than
+         falling through, and the run stops and asks. */
+      return pickIdentifier(t,
+        (f.hints || []).concat(f.lead || []),
+        (siblings || []).filter(x => x.id !== f.id)
+          .reduce((a, x) => a.concat(x.hints || [], x.lead || []), []));
     }
 
     if (f.kind === "number") {
       const near = hintRe(f, "[^.,;]{0,20}?(?:^|[^\\w-])(\\d{1,4})");
       const m1 = near ? t.match(near) : null;
       if (m1) return m1[1];
+      /* A unit usually follows its figure: "42 months", "22 people",
+         "3 vehicles". The field already lists those words as its own
+         hints, so read them from there rather than from a hardcoded
+         list that is the same thing written out again and drifts. */
+      const units = (f.hints || []).map(esc4re).filter(Boolean);
+      if (units.length) {
+        const after = t.match(new RegExp("\\b(\\d{1,4})\\s*(?:" + units.join("|") + ")\\b", "i"));
+        if (after) return after[1];
+      }
       const m2 = t.match(/\b(\d{1,4})\s*(?:weeks?|wks?|days?|hours?|hrs?)\b/i);
       if (m2) return m2[1];
       return "";
@@ -784,7 +910,15 @@ const Router = (function () {
   /** One clause per field. A value runs until the next field starts, so
       "concern is a rumbling noise, authorised up to $600" does not put
       the authorisation into the concern. */
+  /* Connectives that join one clause to the next. None of them can be
+     part of a name, a reference or a description, so wherever one
+     appears the value has already ended. Without this, a lead word with
+     no following field to cut on swallowed the rest of the sentence. */
+  const CLAUSE_END = /\s+(?:through to|so that|in order to|and then|so we can|before |after |ready for|up to sanction)\b/i;
+
   function stopAtNextField(f, v, siblings) {
+    const clause = v.search(CLAUSE_END);
+    if (clause > 2) v = v.slice(0, clause).trim();
     /* Only this department's other fields. Cutting on every department's
        lead words meant "a rumbling noise FROM the front" was truncated by
        the Reports date field, which has nothing to do with this run. */
