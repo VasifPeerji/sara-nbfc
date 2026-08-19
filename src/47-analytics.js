@@ -89,6 +89,13 @@ const Analytics = (function () {
       disclose: a.disclose === true,
       note: a.note || "",
       org: a.org || "",
+      /* Who the build is for. Only "sector" means anything; everything
+         else, including nothing, keeps the per-prospect wording. The
+         whitelist here is the reason a new field has to be added in two
+         places: cfg() is what the rest of the module reads, and a key
+         that is not in it silently does not exist. */
+      audience: a.audience === "sector" ? "sector" : "",
+      sectorLabel: a.sectorLabel || "",
     };
   }
   function rank() { return LEVELS.indexOf(cfg().level); }
@@ -338,22 +345,50 @@ const Analytics = (function () {
     const wrap = document.createElement("div");
     wrap.id = "anGate";
     wrap.className = "an-gate";
+    /* Who this build is actually for.
+
+       A build made for one named prospect says so, and should: it is
+       true, and it is what explains why the link is not to be passed
+       on. A whole-sector build must not. Its tenant is invented, so
+       naming it here would not merely be vague, it would be wrong, and
+       telling a reader the demonstration was prepared for a company
+       they have never heard of makes it look like somebody else's,
+       forwarded to them.
+
+       One flag, because it is one decision: it changes the sentence and
+       the placeholders together. Anything other than "sector", including
+       nothing at all, keeps the per-prospect wording. */
+    const sector = c.audience === "sector";
+    const intro = sector
+      ? "This is a demonstration of " + esc(Config.product.name) +
+        (org ? " by " + esc(org) : "") + ", built for the " +
+        esc(c.sectorLabel || Config.company.industry || "sector") +
+        " rather than for any one company. The link is shared with named people only. " +
+        "Confirming your details lets us verify that access is genuine and makes sure any " +
+        "follow-up reaches the right person."
+      : "This demonstration of " + esc(Config.product.name) +
+        " was prepared specifically for " + esc(Config.company.name) +
+        (org ? " by " + esc(org) : "") + ", and the link is shared with named people only. " +
+        "Confirming your details lets us verify that access is genuine and makes sure any " +
+        "follow-up reaches the right person.";
+
     wrap.innerHTML =
       '<div class="an-gate__card">' +
         '<div class="an-gate__h">Please confirm who you are</div>' +
-        '<p class="an-gate__p">This demonstration of ' + esc(Config.product.name) +
-          " was prepared specifically for " + esc(Config.company.name) +
-          (org ? " by " + esc(org) : "") + ", and the link is shared with named people only. " +
-          "Confirming your details lets us verify that access is genuine and makes sure any " +
-          "follow-up reaches the right person.</p>" +
+        '<p class="an-gate__p">' + intro + "</p>" +
         '<p class="an-gate__p an-gate__p--em">Please use your real work details. ' +
           "Nothing here is published or shared outside the project team.</p>" +
         '<label class="an-gate__l">Full name<input id="anGateName" autocomplete="name" placeholder="e.g. ' +
           /* a name out of this edition's own demo cast, so the example
              does not belong to the last prospect this was built for */
           esc((((Config.users || [])[0]) || {}).name || "Alex Morgan") + '"></label>' +
-        '<label class="an-gate__l">Organisation<input id="anGateOrg" autocomplete="organization" placeholder="e.g. ' + esc(Config.company.name) + '"></label>' +
-        '<label class="an-gate__l">Work email<input id="anGateMail" type="email" autocomplete="email" placeholder="name@' + esc(Config.company.domain || "company.com") + '"></label>' +
+        /* In a sector build the tenant is invented, so offering its name
+           as the example organisation invites the reader to think we
+           believe they work there. */
+        '<label class="an-gate__l">Organisation<input id="anGateOrg" autocomplete="organization" placeholder="e.g. ' +
+          esc(sector ? "your organisation" : Config.company.name) + '"></label>' +
+        '<label class="an-gate__l">Work email<input id="anGateMail" type="email" autocomplete="email" placeholder="' +
+          esc(sector ? "name@yourcompany.com" : "name@" + (Config.company.domain || "company.com")) + '"></label>' +
         '<div class="an-gate__err" id="anGateErr"></div>' +
         '<div class="an-gate__acts">' +
           '<button class="btn btn-primary" id="anGateGo">Continue to the demonstration</button>' +

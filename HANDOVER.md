@@ -29,6 +29,19 @@ At the top of the edition file. Company name, short name, domain, industry
 description, headquarters, headcount, sites, currency, the `about` paragraph, and the
 accent colour.
 
+**Check an invented tenant name against the RBI register before using it.** The first
+name this build carried turned out to belong to a real lender, which is not a cosmetic
+problem: the documents describe policy failures, an account in default and a complaint
+upheld against the tenant, and all of that reads as being about whoever actually holds
+the name. A web search is not sufficient and did not find it. The register is at
+`rbi.org.in`, under the list of NBFCs, and a company-name search at the Ministry of
+Corporate Affairs is worth the second minute.
+
+If the build is for the sector rather than for one named prospect, set
+`analytics.audience: "sector"` and a `sectorLabel`. That stops the identify gate telling
+the reader the demonstration was prepared specifically for a company they have never
+heard of, and stops it offering the invented tenant as the example organisation.
+
 Change `operatorSystem` if the client names their lending platform something
 particular. It is currently "the lending platform and the statutory rails" and it
 appears in the welcome wall and in the router's replies.
@@ -67,7 +80,7 @@ Retargeting is not rewriting. In order:
 3. **Drop** whole segments the client does not write. If they do no gold lending,
    remove the gold documents, the gold role, the gold guided task and the gold prompt
    cards together. The suite will tell you if you leave one behind.
-4. **Add** what they do that Anvira does not.
+4. **Add** what they do that Kritanya does not.
 
 Every document needs `id`, `title`, `cat`, `clearance`, `scopes`, `tags`, `owner`,
 `updated`, `rev`, `system` and `body`. The `tags` do real work: they feed both

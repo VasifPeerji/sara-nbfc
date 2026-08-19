@@ -513,7 +513,7 @@ H.section("The machine stays generic");
 const shell = require("fs").readFileSync(
   require("path").join(__dirname, "..", "src", "44-operator-shell.js"), "utf8");
 ["linkedin", "instagram", "hubspot", "mailchimp", "tiktok", "campaign_hero",
- "cersai", "ckyc", "anvira", "nbfc", "repossession"].forEach(word => {
+ "cersai", "ckyc", "kritanya", "nbfc", "repossession"].forEach(word => {
   H.ok(shell.toLowerCase().indexOf(word) === -1, 'the shell carries no "' + word + '"');
 });
 H.ok(shell.indexOf("state.tenant") === -1, "the shell reads Config, not the marketing tenant model");

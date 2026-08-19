@@ -578,5 +578,47 @@ H.has(Analytics.paneMarkup(), "routed with no model call", "the panel says so in
 H.has(Analytics.toCsv(), "routed by", "the export carries the column");
 H.has(Analytics.toCsv(), "rules", "and the value");
 
+/* ==================================================================
+   who the identify gate says this build is for
+   ------------------------------------------------------------------
+   A build made for one named prospect says so, and should. A
+   whole-sector build must not: its tenant is invented, so naming it
+   would not merely be vague, it would be wrong, and telling a reader
+   the demonstration was prepared for a company they have never heard
+   of makes it look like somebody else's, forwarded on.
+   ================================================================== */
+H.section("The gate does not claim this build was made for the reader");
+
+/* against the DECLARED config: this suite swaps Config.analytics for its
+   own while exercising the levels, so the live object is whatever the
+   last case left behind */
+H.eq(declared.audience, "sector", "the edition declares itself a sector build");
+H.ok(!!declared.sectorLabel, "and says which sector, so the sentence reads");
+
+/* There is no real DOM here to render the gate into, so the assertions
+   are against the source of the sentence. What has to hold is that
+   neither the tenant's name nor the per-prospect claim can reach a
+   sector build at all. */
+const src = require("fs").readFileSync(
+  require("path").join(__dirname, "..", "src", "47-analytics.js"), "utf8");
+const gateFn = src.slice(src.indexOf("const sector = c.audience"), src.indexOf("document.body.appendChild(wrap)"));
+
+H.ok(gateFn.indexOf("prepared specifically for") !== -1,
+  "the per-prospect wording still exists for the editions that need it");
+const sectorBranch = gateFn.slice(0, gateFn.indexOf(": \"This demonstration of \""));
+H.ok(sectorBranch.indexOf("Config.company.name") === -1,
+  "the sector wording never names the tenant");
+H.ok(sectorBranch.indexOf("rather than for any one company") !== -1,
+  "and says plainly that it was not built for one");
+H.ok(gateFn.indexOf('sector ? "your organisation"') !== -1,
+  "the organisation placeholder does not offer the invented tenant");
+H.ok(gateFn.indexOf('"name@yourcompany.com"') !== -1,
+  "and neither does the email placeholder");
+
+/* the name itself: a tenant that collides with a real lender turns
+   invented policy failures into statements about a real company */
+H.ok(/kritanya/i.test(Config.company.name), "the tenant is the renamed one");
+H.ok(!/anvira/i.test(JSON.stringify(Config.company)), "and no trace of the old name is left in the identity block");
+
 H.report("SARA usage analytics");
 });

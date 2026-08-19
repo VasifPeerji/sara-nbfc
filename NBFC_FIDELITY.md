@@ -60,7 +60,7 @@ Emblem of India (Prohibition of Improper Use) Act 2005, and a sales demonstratio
 no business doing it. This was a decision, not an oversight, and it is recorded in
 `src/45-operator-lending.js` where the mark is drawn.
 
-**The 107 knowledge documents** are written to be typical of the sector. They are not
+**The 109 knowledge documents** are written to be typical of the sector. They are not
 extracted from, scraped from, or derived from any lender's actual policy. Where a
 document states a regulatory position, that position is real; where it states an
 internal threshold (a margin ceiling, a delegation limit, a retention amount), that is
@@ -70,7 +70,7 @@ an invented number chosen to be plausible.
 
 Everything specific to a person, a company or a case:
 
-- **Anvira Finserv Limited**, its AUM, branch count, headcount, subsidiaries and book
+- **Kritanya Finserv Limited**, its AUM, branch count, headcount, subsidiaries and book
 - Every **employee**: all 39 sign-in profiles across 37 roles
 - Every **customer**: Ravindra Salunkhe, Sameer Qadri, Anjali Deshmukh, Meenakshi
   Raghavan and the rest
@@ -97,7 +97,7 @@ timelines.
 
 **The margin ladder** in the origination run (90 / 80 / 75 / 65 per cent by asset age,
 less five points for tippers and construction equipment) is a plausible internal credit
-policy, not a regulation. Present it as Anvira's policy, which is what the documents
+policy, not a regulation. Present it as Kritanya's policy, which is what the documents
 say it is.
 
 **Delegation limits** (who may approve a deviation of how many percentage points) are
