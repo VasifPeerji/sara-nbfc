@@ -9,6 +9,14 @@ their own business somewhere in it: wholesale and retail, secured and unsecured,
 vehicle, gold, capital markets and microfinance, across branch, dealer, agent,
 correspondent and digital channels.
 
+| | |
+|---|---|
+| Documents | 109, about 45,000 words |
+| Roles and sign-in profiles | 37 and 39 |
+| Guided tasks | 16, of which 13 can refuse to produce their document |
+| Operator applications | 8, across 72 steps |
+| Tests | 7,789 checks across 12 suites |
+
 ## Build
 
 ```bash
@@ -26,43 +34,78 @@ unterminated string ships a blank page with a useless console.
 ## Test
 
 ```bash
-node test/test_core.js nbfc      # config, retrieval, access, markdown, theme
-node test/test_journeys.js nbfc  # guided tasks, including with the API key revoked
-node test/test_operator.js nbfc  # every step anchor against its rendered screen
-node test/test_router.js nbfc    # intent classification without a model
+python run_tests.py
+```
+
+Runs every suite, cheapest first, and prints one line each. `python run_tests.py router`
+runs only the suites whose name matches. Any suite can also be run on its own:
+`node test/test_operator.js`.
+
+```bash
 node test/audit_retrieval.js nbfc
 ```
 
 `audit_retrieval.js` prints what every prompt card actually retrieves. Unit tests
-cannot catch a card that pulls the wrong document, so run it after any corpus change.
+cannot catch a card that pulls a plausible but wrong document, so run it after any
+corpus change.
+
+## The four things this demonstrates
+
+**Access control runs before retrieval, not after.** A document above a person's
+clearance, or outside their scopes, is never scored and never sent. It is not filtered
+out of an answer afterwards, and there is no prompt asking the model to be careful.
+Withheld documents are counted and reported to the model as a note, so it can refuse
+and name who to approach without seeing them. The showpiece is the customer information
+extract at clearance 2: the Managing Director at clearance 4 is refused it and a
+Grievance Officer at clearance 3 is not, because handling customer records is a
+function rather than a rank.
+
+**Retrieval is real.** BM25 over paragraph-chunked documents with stemming, field
+weighting, glossary-driven query expansion and a recency nudge. The model only ever
+receives retrieved passages, so it cannot cite a document that does not exist. A
+question like *why are first instalments bouncing on new commercial vehicle loans in
+the west* pulls eight documents across three functions, and no one of them states the
+answer.
+
+**Guided tasks are deterministic, and can refuse.** No step, branch, computation or
+document depends on a model call, so a task completes with no API key and no network:
+the suite asserts it by revoking the key first. Thirteen of the sixteen can stop and
+decline to produce their document, naming the rule they failed. The repossession gate
+checks the possession clause against the agreement **actually executed on that
+account**, not against the current template, which is a distinction no lending platform
+holds.
+
+**The Operator does the last mile, and stops when it should not do it.** Eight
+applications: origination, servicing, collections and co-lending on a deliberately
+vendor-neutral platform, then CKYCR, CERSAI, RBI CIMS and RBI CMS, named for real
+because there is exactly one of each and every registered lender files into all four.
+The collections run takes an aged account as far as the authorisation gate and then
+refuses to raise the repossession, because the knowledge base knows what the platform
+does not.
+
+## Documentation
+
+| | |
+|---|---|
+| [`NBFC_FIDELITY.md`](NBFC_FIDELITY.md) | What is real, what is reconstructed, what is invented. Read before presenting |
+| [`DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) | How to run the demonstration, and the questions you will get |
+| [`HANDOVER.md`](HANDOVER.md) | Retargeting to a named lender, and where the sharp edges are |
 
 ## Layout
 
 | Path | What it holds |
 |---|---|
 | `build.py` | Concatenates `src/` plus one edition into the single output file |
+| `run_tests.py` | Runs every suite, cheapest first |
 | `src/` | The product. Contains no company name, role, document or fact |
 | `editions/` | One file per tenant. Everything customer-specific lives here |
 | `test/` | Suites, fixtures and the retrieval audit |
 | `collector/` | Optional usage collector and its console |
 | `assets/` | Brand marks, inlined at build time |
 
-## How it works
-
-Retrieval is real: BM25 over paragraph-chunked documents with stemming, field
-weighting, glossary-driven query expansion and a recency nudge. The model only ever
-receives retrieved passages, so it cannot cite a document that does not exist.
-
-Access control runs **before** retrieval. A document above a person's clearance, or
-outside their scopes, is never scored and never sent. Withheld documents are counted
-and reported to the model as a note so it can refuse and route without seeing them.
-
-Guided tasks are deterministic. Steps, branching, computation and the resulting
-document never depend on a model call, so a task completes with no API key and no
-network. The test suite asserts this by revoking the key first.
-
 ## Retargeting
 
 Copy `editions/nbfc.js`, change the identity block, and keep the rest. The
 regulations, the operating model and the failure modes belong to the industry, not to
-the invented tenant.
+the invented tenant. [`HANDOVER.md`](HANDOVER.md) sets out what to change and in what
+order.
