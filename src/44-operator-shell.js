@@ -3,7 +3,7 @@
    The operator machine: Windows 11 running Google Chrome.
    ------------------------------------------------------------------
    This file is the machine and the browser. What the browser is
-   looking at lives in 45-operator-sap.js, which owns every
+   looking at lives in 45-operator-lending.js, which owns every
    DMS screen and the anchor map that tells the pointer which control
    each step acts on.
 
@@ -102,7 +102,7 @@ const OP_CURSOR = {
    the tenant's own systems, and works an app journey step by step.
 
    Nothing here knows what any of those screens look like. It asks
-   45-operator-sap.js for a surface and an anchor, and everything
+   45-operator-lending.js for a surface and an anchor, and everything
    else — window chrome, address bar, pointer, timing — is generic.
    ================================================================== */
 
@@ -320,29 +320,15 @@ function opTaskbar() {
 }
 
 /* --------------------------- bookmarks bar -------------------------
-   What is actually pinned on a machine at this site. Ten bookmarks to ten
-   pages of the same application is not what anyone's browser looks
+   What is actually pinned on a machine in this office. Ten bookmarks to
+   ten pages of the same application is not what anyone's browser looks
    like, and it was the fastest way to give the session away.
 
-   The system being driven is one bookmark. Everything else is the rest of the day:
-   the portal customers see, the ERP, the standards the work is
-   performed against, the quality system and the certificate register.
-
-   Re-skinning: this is the one list in the Operator that is tenant-
-   specific. Nothing else depends on it.
+   The estate itself — which systems, on which hosts, with which marks —
+   is OP_SITES, and it lives with the applications rather than here,
+   because it is the one list in the Operator that is tenant-specific
+   and nothing in the machine depends on what is in it.
 ------------------------------------------------------------------- */
-const OP_SITES = [
-  { id: "fiori",   label: "SAP Fiori",           host: "fiori.{org}.com",         mark: "F", bg: "#0070f2" },
-  { id: "control", label: "Mine Control",        host: "minecontrol.{org}.com",   mark: "M", bg: "#e0a11b" },
-  { id: "ehs",     label: "SAP EHS",             host: "fiori.{org}.com",         mark: "E", bg: "#d20a0a" },
-  { id: "gateway", label: "Contractor Gateway",  host: "gateway.{org}.com",       mark: "C", bg: "#f97316" },
-  { id: "hub",     label: "Standards Hub",       host: "standards.{org}.com",     mark: "S", bg: "#c2662e" },
-  { id: "icmm",    label: "ICMM",                host: "icmm.com",                mark: "I", bg: "#00693c" },
-  { id: "geo",     label: "Geoscience Database", host: "geoscience.{org}.com",    mark: "G", bg: "#8b5cf6" },
-  { id: "reg",     label: "Regulator portal",    host: "regulator.gov",           mark: "R", bg: "#1b4d89" },
-  { id: "outlook", label: "Outlook",             host: "outlook.office.com", icon: "outlook" },
-  { id: "teams",   label: "Teams",               host: "teams.microsoft.com", icon: "teams" },
-];
 
 /** Where a bookmark actually points. Shown on hover, the way a real
     browser does, so the estate reads as several systems on several
@@ -497,10 +483,30 @@ function fitOperatorStage(host) {
   scope.querySelectorAll(".opc__page").forEach(page => {
     const stage = page.querySelector(".opc__scale");
     if (!stage) return;
+
+    /* Release the height set by the previous fit before measuring, or
+       every fit measures its own last answer and the page can only ever
+       grow. */
+    page.style.height = "";
     const r = page.getBoundingClientRect();
     if (!r.width) return;
-    const scale = Math.max(0.18, r.width / OP_STAGE_W);
+
+    /* Fit the width AND the height actually available. Fitting the width
+       alone made the browser window taller than the overlay on a short
+       screen, which pushed the side panel — the one place the run asks
+       its questions — off the bottom, where nobody could answer it. */
+    const room = stage.closest(".opov__stage") || page.parentElement;
+    const avail = room ? room.getBoundingClientRect().bottom - r.top - 8 : 0;
+    const byWidth = r.width / OP_STAGE_W;
+    const scale = Math.max(0.18, avail > 60 ? Math.min(byWidth, avail / OP_STAGE_H) : byWidth);
+
     stage.style.setProperty("--op-scale", scale.toFixed(4));
+    /* Where the height is what binds, the scaled screen is narrower than
+       the content area it sits in. Centre it: a browser window with a
+       blank strip down one side reads as a broken page rather than as a
+       screen that has been fitted. */
+    const slack = Math.max(0, r.width - OP_STAGE_W * scale);
+    stage.style.setProperty("--op-inset", Math.round(slack / 2) + "px");
     /* the window is sized from the page rather than the other way round,
        so an application screen is never cut off half way down */
     page.style.height = Math.round(OP_STAGE_H * scale) + "px";
@@ -845,8 +851,13 @@ const OpState = (function () {
     const v = String(text || "").trim();
     if (!spec) return v;
     if (spec.kind === "money") {
+      /* The application layer knows which market this is and how figures
+         are written in it. Digit grouping is not universal and neither is
+         the symbol, so a currency convention hardcoded here would be
+         wrong somewhere the same day it was right somewhere else. */
+      if (typeof opFormatMoney === "function") return opFormatMoney(v);
       const m = v.match(/[\d,]+(?:\.\d+)?/);
-      return m ? "$" + m[0].replace(/,/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",") : v;
+      return m ? m[0].replace(/,/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",") : v;
     }
     if (spec.kind === "number") {
       const m = v.match(/[\d,]+/);

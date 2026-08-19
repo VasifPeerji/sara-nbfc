@@ -1,5 +1,5 @@
 /* ==================================================================
-   15-operator-sap.css
+   15-operator-lending.css
    ------------------------------------------------------------------
    Three things live here.
 
@@ -7,17 +7,30 @@
       is presented in, plus its status bar, progress and step timeline.
       Generic; nothing in it knows which system is being driven.
 
-   2. SAP Fiori, prefix `sap-`. The Horizon theme's design tokens are
-      published, so the colour values here are the real ones. What is
-      reconstructed is the tenant's own launchpad and transactions,
-      which no two SAP customers configure the same way.
+   2. One enterprise component set, prefix `fin-`: shell bar, object
+      page, cards, tables, fields, message strips, dialogs. Authored at
+      1280 x 720 inside the browser viewport, which the shell scales,
+      so the sizes here are fixed rather than responsive.
 
-   3. Mine Control, prefix `mc-`, and the Contractor Gateway, prefix
-      `cg-`. Deliberately generic: the shape common to the dispatch
-      consoles in use across the industry, not a copy of one vendor's.
+   3. Two skins over that one component set. The estate the Operator
+      works is a lending platform and four statutory registries, and
+      those are not the same kind of software. A viewer has to be able
+      to tell at a glance when the Operator has stopped working in the
+      company's own system and is standing in front of the regulator's.
 
-   Sourced versus reconstructed: MINING_FIDELITY.md.
+   WHY NOT A NAMED PRODUCT. No lending platform is used by a majority
+   of NBFCs, so a build that copied one vendor's chrome would be wrong
+   for almost every prospect who saw it. The platform here is the shape
+   the category shares. The registries are named, because there is
+   exactly one of each and every registered lender in the country files
+   into all four.
+
+   Sourced versus reconstructed: NBFC_FIDELITY.md.
    ================================================================== */
+
+/* ---------------------------------------------------------------
+   1. the Operator overlay
+--------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------
    1. the Operator overlay
@@ -87,7 +100,6 @@
   font: 700 9px/1 "Segoe UI", system-ui, sans-serif;
   letter-spacing: -.2px;
 }
-.opc__fav--titan { border-radius: 3px; background: var(--ac); color: #fff; font: 700 9px/1 "Segoe UI", system-ui, sans-serif; }
 .opc__mark--more { padding-left: 4px; padding-right: 4px; }
 .opc__mark--more svg { width: 14px; height: 14px; }
 
@@ -227,7 +239,7 @@
   background: rgba(15, 108, 189, .07); cursor: text;
 }
 .opov.is-control [data-op-field]:focus { outline-style: solid; background: #fff; }
-.opov.is-control .td-grid tbody tr { cursor: pointer; }
+.opov.is-control .fin-t tbody tr[data-op-pick] { cursor: pointer; }
 
 /* status strip under the window */
 .op-real-status {
@@ -293,8 +305,16 @@
    so hiding it would leave a paused Operator with no way to answer it.
    It moves below the screen instead. */
 @media (max-width: 1080px) {
-  .opov__body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .opov__side { border-left: 0; border-top: 1px solid var(--line); min-height: 260px; }
+  /* The panel is the row with the floor and the stage is the row that
+     flexes, not the other way round. Sized the other way, the stage took
+     the height it wanted from its own scale and the panel was pushed off
+     the bottom of the window, taking the answer box with it. */
+  .opov__body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .opov__stage { min-height: 0; }
+  .opov__side {
+    border-left: 0; border-top: 1px solid var(--line);
+    height: clamp(224px, 42vh, 340px); min-height: 0;
+  }
 }
 
 /* The header has to survive a narrow window without stacking into itself. */
@@ -316,93 +336,75 @@
 }
 
 /* ---------------------------------------------------------------
-   2. SAP Fiori, prefix `sap-`
 
-   The Horizon theme's design tokens are published by SAP, so the
-   values below are the real ones rather than sampled from an image:
+/* ---------------------------------------------------------------
+   2. the component set, prefix `fin-`
 
-     brand / primary action   #0070f2   sapBrandColor
-     page background          #f5f6f7   sapBackgroundColor
-     surface                  #ffffff   sapBaseColor
-     text                     #1d2d3e   sapTextColor
-     negative                 #d20a0a   sapNegativeColor
-     positive                 #30914c   sapPositiveColor
-     critical                 #e76500   sapCriticalColor
-     informative              #0057d2   sapInformativeColor
-
-   What is reconstructed is the tenant's own configuration: the
-   launchpad groups, the tile set, the field layouts and the record
-   data. No two SAP customers configure those the same way, and the
-   point of the run is the sequence, not the pixel.
-
-   Authored at 1280 x 720 inside the browser viewport, which the shell
-   scales. Sizes are therefore fixed, not responsive.
-
-   ONE COMPONENT SET, THREE SKINS. Mine Control and the Contractor
-   Gateway below re-declare the same custom properties and reuse every
-   sap- component. Three design systems with three sets of components
-   would be three times the surface area to keep consistent.
+   These are the parts every enterprise web application is assembled
+   from, in the proportions a dense back-office screen actually uses.
+   Both skins below re-declare the same custom properties, so every
+   component recolours itself rather than being drawn twice.
 --------------------------------------------------------------- */
-.sap {
-  --sap-brand:  #0070f2;
-  --sap-bg:     #f5f6f7;
-  --sap-base:   #ffffff;
-  --sap-tx:     #1d2d3e;
-  --sap-tx-2:   #556b82;
-  --sap-line:   #d9d9d9;
-  --sap-line-2: #eaecee;
-  --sap-neg:    #d20a0a;
-  --sap-pos:    #30914c;
-  --sap-crit:   #e76500;
-  --sap-info:   #0057d2;
-  --sap-sel:    #e3f2fd;
+.fin {
+  --fin-brand:  #0f766e;
+  --fin-bg:     #f3f5f7;
+  --fin-base:   #ffffff;
+  --fin-tx:     #16212b;
+  --fin-tx-2:   #5a6b7b;
+  --fin-line:   #d7dee4;
+  --fin-line-2: #ebeff2;
+  --fin-neg:    #b42318;
+  --fin-pos:    #067647;
+  --fin-crit:   #b54708;
+  --fin-info:   #175cd3;
+  --fin-sel:    #e6f4f1;
 
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
-  background: var(--sap-bg);
-  color: var(--sap-tx);
-  font: 400 13px/1.45 "72", "72full", Arial, Helvetica, sans-serif;
+  background: var(--fin-bg);
+  color: var(--fin-tx);
+  font: 400 13px/1.45 "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   overflow: hidden;
 }
-.sap *, .sap *::before, .sap *::after { box-sizing: border-box; }
-.sap-sp { flex: 1 1 auto; }
+.fin *, .fin *::before, .fin *::after { box-sizing: border-box; }
+.fin-sp { flex: 1 1 auto; }
 
 /* ---- shell bar ---- */
-.sap-gh {
+.fin-gh {
   flex: 0 0 auto; height: 44px;
   display: flex; align-items: center; gap: 12px;
   padding: 0 12px;
-  background: var(--sap-base);
-  border-bottom: 1px solid var(--sap-line);
+  background: var(--fin-base);
+  border-bottom: 1px solid var(--fin-line);
 }
-.sap-gh__home { width: 22px; height: 22px; color: var(--sap-tx-2); display: grid; place-items: center; }
-.sap-gh__home svg { width: 16px; height: 16px; }
-.sap-gh__logo em {
+.fin-gh__home { width: 22px; height: 22px; color: var(--fin-tx-2); display: grid; place-items: center; }
+.fin-gh__home svg { width: 16px; height: 16px; }
+.fin-gh__logo em {
   font-style: normal; font-weight: 800; letter-spacing: .04em;
-  font-size: 15px; color: var(--sap-brand);
+  font-size: 15px; color: var(--fin-brand);
 }
-.sap-gh__title { font-size: 13px; font-weight: 700; }
-.sap-gh__search {
+.fin-gh__title { font-size: 13px; font-weight: 700; }
+.fin-gh__search {
   display: flex; align-items: center; gap: 6px;
   height: 26px; padding: 0 10px; min-width: 190px;
-  border: 1px solid var(--sap-line); border-radius: 13px;
-  color: #7a8b9c; font-size: 12px; background: var(--sap-base);
+  border: 1px solid var(--fin-line); border-radius: 13px;
+  color: #7a8b9c; font-size: 12px; background: var(--fin-base);
 }
-.sap-gh__search svg { width: 13px; height: 13px; }
-.sap-gh__sp { flex: 1 1 auto; }
-.sap-gh__tools { display: flex; align-items: center; gap: 6px; }
-.sap-gh__tool {
+.fin-gh__search svg { width: 13px; height: 13px; }
+.fin-gh__sp { flex: 1 1 auto; }
+.fin-gh__tools { display: flex; align-items: center; gap: 6px; }
+.fin-gh__tool {
   position: relative; width: 26px; height: 26px; border-radius: 50%;
-  display: grid; place-items: center; color: var(--sap-tx-2);
+  display: grid; place-items: center; color: var(--fin-tx-2);
 }
-.sap-gh__tool svg { width: 15px; height: 15px; }
-.sap-gh__tool b {
+.fin-gh__tool svg { width: 15px; height: 15px; }
+.fin-gh__tool b {
   position: absolute; top: -1px; right: -2px;
   min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
-  background: var(--sap-neg); color: #fff;
+  background: var(--fin-neg); color: #fff;
   font-size: 9px; font-weight: 700; line-height: 14px; text-align: center;
 }
-.sap-gh__me {
+.fin-gh__me {
   width: 26px; height: 26px; border-radius: 50%;
   background: #5b738b; color: #fff;
   font-size: 10px; font-weight: 700;
@@ -410,369 +412,413 @@
 }
 
 /* ---- app navigation ---- */
-.sap-nav {
+.fin-nav {
   flex: 0 0 auto; height: 34px;
   display: flex; align-items: stretch; gap: 16px;
   padding: 0 14px;
-  background: var(--sap-base);
-  border-bottom: 1px solid var(--sap-line);
+  background: var(--fin-base);
+  border-bottom: 1px solid var(--fin-line);
 }
-.sap-nav__app {
+.fin-nav__app {
   display: flex; align-items: center;
-  font-size: 12px; font-weight: 700; color: var(--sap-tx-2);
-  padding-right: 12px; border-right: 1px solid var(--sap-line-2);
+  font-size: 12px; font-weight: 700; color: var(--fin-tx-2);
+  padding-right: 12px; border-right: 1px solid var(--fin-line-2);
 }
-.sap-nav__tabs { display: flex; align-items: stretch; gap: 14px; }
-.sap-tab {
+.fin-nav__tabs { display: flex; align-items: stretch; gap: 14px; }
+.fin-tab {
   display: flex; align-items: center;
-  font-size: 12px; color: var(--sap-tx-2);
+  font-size: 12px; color: var(--fin-tx-2);
   border-bottom: 3px solid transparent;
 }
-.sap-tab.is-active { color: var(--sap-brand); font-weight: 700; border-bottom-color: var(--sap-brand); }
+.fin-tab.is-active { color: var(--fin-brand); font-weight: 700; border-bottom-color: var(--fin-brand); }
 
-.sap-main { flex: 1 1 auto; overflow: auto; padding: 12px; position: relative; }
+.fin-main { flex: 1 1 auto; overflow: auto; padding: 12px; position: relative; }
 
 /* ---- launchpad ---- */
-.sap-lp { display: flex; flex-direction: column; gap: 16px; }
-.sap-lp__grp h4 {
+.fin-lp { display: flex; flex-direction: column; gap: 16px; }
+.fin-lp__grp h4 {
   margin: 0 0 8px; font-size: 12px; font-weight: 700;
-  color: var(--sap-tx-2);
+  color: var(--fin-tx-2);
 }
-.sap-lp__tiles { display: flex; flex-wrap: wrap; gap: 10px; }
-.sap-tile {
+.fin-lp__tiles { display: flex; flex-wrap: wrap; gap: 10px; }
+.fin-tile {
   width: 168px; min-height: 88px; padding: 10px 12px;
-  background: var(--sap-base); border: 1px solid var(--sap-line);
+  background: var(--fin-base); border: 1px solid var(--fin-line);
   border-radius: 10px;
   display: flex; flex-direction: column; gap: 2px;
 }
-.sap-tile b { font-size: 12px; font-weight: 700; line-height: 1.3; }
-.sap-tile small { font-size: 10.5px; color: var(--sap-tx-2); margin-top: auto; }
-.sap-tile__kpi { font-size: 26px; font-weight: 300; color: var(--sap-brand); line-height: 1.1; margin-top: 4px; }
-.sap-tile.is-sel { border-color: var(--sap-brand); box-shadow: 0 0 0 2px rgba(0,112,242,.18); }
-.sap-tile.is-warn .sap-tile__kpi { color: var(--sap-crit); }
+.fin-tile b { font-size: 12px; font-weight: 700; line-height: 1.3; }
+.fin-tile small { font-size: 10.5px; color: var(--fin-tx-2); margin-top: auto; }
+.fin-tile__kpi { font-size: 26px; font-weight: 300; color: var(--fin-brand); line-height: 1.1; margin-top: 4px; }
+.fin-tile.is-sel { border-color: var(--fin-brand); box-shadow: 0 0 0 2px rgba(0,112,242,.18); }
+.fin-tile.is-warn .fin-tile__kpi { color: var(--fin-crit); }
 
 /* ---- object page header ---- */
-.sap-oh {
-  background: var(--sap-base); border: 1px solid var(--sap-line);
+.fin-oh {
+  background: var(--fin-base); border: 1px solid var(--fin-line);
   border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;
 }
-.sap-oh__row { display: flex; align-items: flex-start; gap: 12px; }
-.sap-oh__id { min-width: 0; }
-.sap-oh__eyebrow { font-size: 11px; color: var(--sap-tx-2); }
-.sap-oh__title { font-size: 19px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; }
-.sap-oh__status { margin-top: 3px; }
-.sap-oh__acts { margin-left: auto; display: flex; gap: 6px; }
-.sap-oh__fields {
+.fin-oh__row { display: flex; align-items: flex-start; gap: 12px; }
+.fin-oh__id { min-width: 0; }
+.fin-oh__eyebrow { font-size: 11px; color: var(--fin-tx-2); }
+.fin-oh__title { font-size: 19px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; }
+.fin-oh__status { margin-top: 3px; }
+.fin-oh__acts { margin-left: auto; display: flex; gap: 6px; }
+.fin-oh__fields {
   display: flex; flex-wrap: wrap; gap: 10px 26px;
-  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--sap-line-2);
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--fin-line-2);
 }
-.sap-oh__f label { display: block; font-size: 10.5px; color: var(--sap-tx-2); }
-.sap-oh__f > div { font-size: 12.5px; font-weight: 600; }
+.fin-oh__f label { display: block; font-size: 10.5px; color: var(--fin-tx-2); }
+.fin-oh__f > div { font-size: 12.5px; font-weight: 600; }
 
 /* ---- buttons ---- */
-.sap-btn {
+.fin-btn {
   appearance: none; cursor: default; font: inherit;
   font-size: 12px; font-weight: 600;
   height: 26px; padding: 0 12px; border-radius: 6px;
-  border: 1px solid var(--sap-brand); color: var(--sap-brand);
+  border: 1px solid var(--fin-brand); color: var(--fin-brand);
   background: transparent; white-space: nowrap;
 }
-.sap-btn--emph { background: var(--sap-brand); color: #fff; }
+.fin-btn--emph { background: var(--fin-brand); color: #fff; }
 
 /* ---- cards ---- */
-.sap-card {
-  background: var(--sap-base); border: 1px solid var(--sap-line);
+.fin-card {
+  background: var(--fin-base); border: 1px solid var(--fin-line);
   border-radius: 10px; margin-bottom: 12px; overflow: hidden;
 }
-.sap-card__h {
+.fin-card__h {
   display: flex; align-items: center; gap: 8px;
-  padding: 9px 12px; border-bottom: 1px solid var(--sap-line-2);
+  padding: 9px 12px; border-bottom: 1px solid var(--fin-line-2);
 }
-.sap-card__h h3 { margin: 0; font-size: 13px; font-weight: 700; }
-.sap-card__h em { font-style: normal; font-weight: 400; color: var(--sap-tx-2); }
-.sap-card__b { padding: 12px; }
-.sap-card__b--flush { padding: 0; }
-.sap-card__f { padding: 8px 12px; border-top: 1px solid var(--sap-line-2); font-size: 11.5px; color: var(--sap-tx-2); }
-.sap-two { display: grid; grid-template-columns: 1.25fr 1fr; gap: 12px; align-items: start; }
-.sap-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
-.sap-empty { padding: 18px 12px; text-align: center; color: var(--sap-tx-2); font-size: 12px; }
+.fin-card__h h3 { margin: 0; font-size: 13px; font-weight: 700; }
+.fin-card__h em { font-style: normal; font-weight: 400; color: var(--fin-tx-2); }
+.fin-card__b { padding: 12px; }
+.fin-card__b--flush { padding: 0; }
+.fin-card__f { padding: 8px 12px; border-top: 1px solid var(--fin-line-2); font-size: 11.5px; color: var(--fin-tx-2); }
+.fin-two { display: grid; grid-template-columns: 1.25fr 1fr; gap: 12px; align-items: start; }
+.fin-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+.fin-empty { padding: 18px 12px; text-align: center; color: var(--fin-tx-2); font-size: 12px; }
 
 /* ---- fields ---- */
-.sap-f label { display: block; font-size: 10.5px; color: var(--sap-tx-2); margin-bottom: 2px; }
-.sap-in {
+.fin-f label { display: block; font-size: 10.5px; color: var(--fin-tx-2); margin-bottom: 2px; }
+.fin-in {
   min-height: 26px; padding: 4px 8px;
-  border: 1px solid var(--sap-line); border-bottom-color: #89919a;
-  border-radius: 5px; background: var(--sap-base);
+  border: 1px solid var(--fin-line); border-bottom-color: #89919a;
+  border-radius: 5px; background: var(--fin-base);
   font-size: 12.5px; line-height: 1.35;
 }
-.sap-in--area { min-height: 62px; }
-.sap-in.is-empty { color: #8b98a5; }
+.fin-in--area { min-height: 62px; }
+.fin-in.is-empty { color: #8b98a5; }
 .op-caret {
   display: inline-block; width: 1px; height: 13px; margin-left: 1px;
-  background: var(--sap-tx); vertical-align: -2px;
-  animation: sapBlink 1s step-end infinite;
+  background: var(--fin-tx); vertical-align: -2px;
+  animation: finBlink 1s step-end infinite;
 }
-@keyframes sapBlink { 50% { opacity: 0; } }
+@keyframes finBlink { 50% { opacity: 0; } }
 
 /* ---- object status: a coloured word, the way SAP does it ---- */
-.sap-os { font-size: 12px; font-weight: 600; white-space: nowrap; }
-.sap-os--ok   { color: var(--sap-pos); }
-.sap-os--warn { color: var(--sap-crit); }
-.sap-os--err  { color: var(--sap-neg); }
-.sap-os--info { color: var(--sap-info); }
-.sap-os--none { color: var(--sap-tx-2); }
+.fin-os { font-size: 12px; font-weight: 600; white-space: nowrap; }
+.fin-os--ok   { color: var(--fin-pos); }
+.fin-os--warn { color: var(--fin-crit); }
+.fin-os--err  { color: var(--fin-neg); }
+.fin-os--info { color: var(--fin-info); }
+.fin-os--none { color: var(--fin-tx-2); }
 
 /* ---- tables ---- */
-.sap-t__wrap { overflow: auto; }
-.sap-t { width: 100%; border-collapse: collapse; font-size: 12px; }
-.sap-t th {
-  text-align: left; font-weight: 700; font-size: 11px; color: var(--sap-tx-2);
-  padding: 7px 10px; border-bottom: 1px solid var(--sap-line);
+.fin-t__wrap { overflow: auto; }
+.fin-t { width: 100%; border-collapse: collapse; font-size: 12px; }
+.fin-t th {
+  text-align: left; font-weight: 700; font-size: 11px; color: var(--fin-tx-2);
+  padding: 7px 10px; border-bottom: 1px solid var(--fin-line);
   background: #fafbfc; white-space: nowrap;
 }
-.sap-t td { padding: 7px 10px; border-bottom: 1px solid var(--sap-line-2); vertical-align: top; }
-.sap-t tbody tr:last-child td { border-bottom: 0; }
-.sap-t .sap-num, .sap-t th.sap-num { text-align: right; }
-.sap-t__chk { width: 26px; }
-.sap-t__chk i {
+.fin-t td { padding: 7px 10px; border-bottom: 1px solid var(--fin-line-2); vertical-align: top; }
+.fin-t tbody tr:last-child td { border-bottom: 0; }
+.fin-t .fin-num, .fin-t th.fin-num { text-align: right; }
+.fin-t__chk { width: 26px; }
+.fin-t__chk i {
   display: block; width: 13px; height: 13px; border-radius: 3px;
-  border: 1px solid #89919a; background: var(--sap-base);
+  border: 1px solid #89919a; background: var(--fin-base);
 }
-.sap-t__chk i.is-on { background: var(--sap-brand); border-color: var(--sap-brand); }
-.sap-t__act { width: 22px; color: var(--sap-tx-2); text-align: center; }
-.sap-t tbody tr.is-sel { background: var(--sap-sel); }
-.sap-t tbody tr.is-new { background: #eaf7ee; }
-.sap-t tbody tr.is-alert { background: #fdeded; }
-.sap-t tbody tr.is-warn { background: #fff4e5; }
+.fin-t__chk i.is-on { background: var(--fin-brand); border-color: var(--fin-brand); }
+.fin-t__act { width: 22px; color: var(--fin-tx-2); text-align: center; }
+.fin-t tbody tr.is-sel { background: var(--fin-sel); }
+.fin-t tbody tr.is-new { background: #eaf7ee; }
+.fin-t tbody tr.is-alert { background: #fdeded; }
+.fin-t tbody tr.is-warn { background: #fff4e5; }
 
 /* ---- KPI row ---- */
-.sap-kpis { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
-.sap-kpi {
+.fin-kpis { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.fin-kpi {
   flex: 1 1 128px; min-width: 128px; padding: 9px 12px;
-  background: var(--sap-base); border: 1px solid var(--sap-line); border-radius: 10px;
+  background: var(--fin-base); border: 1px solid var(--fin-line); border-radius: 10px;
 }
-.sap-kpi label { display: block; font-size: 10.5px; color: var(--sap-tx-2); }
-.sap-kpi b { display: block; font-size: 21px; font-weight: 300; line-height: 1.2; }
-.sap-kpi small { font-size: 10.5px; color: var(--sap-tx-2); }
-.sap-kpi.is-warn b { color: var(--sap-crit); }
-.sap-kpi.is-err b { color: var(--sap-neg); }
-.sap-kpi.is-ok b { color: var(--sap-pos); }
+.fin-kpi label { display: block; font-size: 10.5px; color: var(--fin-tx-2); }
+.fin-kpi b { display: block; font-size: 21px; font-weight: 300; line-height: 1.2; }
+.fin-kpi small { font-size: 10.5px; color: var(--fin-tx-2); }
+.fin-kpi.is-warn b { color: var(--fin-crit); }
+.fin-kpi.is-err b { color: var(--fin-neg); }
+.fin-kpi.is-ok b { color: var(--fin-pos); }
 
 /* ---- message strip ---- */
-.sap-strip {
+.fin-strip {
   display: flex; align-items: flex-start; gap: 8px;
   padding: 8px 11px; border-radius: 8px; margin-bottom: 12px;
   font-size: 12px; line-height: 1.45;
   background: #eaf1fb; border: 1px solid #b6d2f5; color: #12324f;
 }
-.sap-strip svg { width: 14px; height: 14px; flex: 0 0 auto; margin-top: 1px; }
-.sap-strip--ok   { background: #ebf5ee; border-color: #b5ddc1; color: #14532d; }
-.sap-strip--warn { background: #fdf3e6; border-color: #f4cfa0; color: #6b3b06; }
-.sap-strip--err  { background: #fdecec; border-color: #f3bcbc; color: #7a1010; }
+.fin-strip svg { width: 14px; height: 14px; flex: 0 0 auto; margin-top: 1px; }
+.fin-strip--ok   { background: #ebf5ee; border-color: #b5ddc1; color: #14532d; }
+.fin-strip--warn { background: #fdf3e6; border-color: #f4cfa0; color: #6b3b06; }
+.fin-strip--err  { background: #fdecec; border-color: #f3bcbc; color: #7a1010; }
 
-.sap-toast {
+.fin-toast {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 12px; border-radius: 8px; margin-bottom: 12px;
   background: #ebf5ee; border: 1px solid #b5ddc1; color: #14532d;
   font-size: 12px; font-weight: 600;
 }
-.sap-toast svg { width: 14px; height: 14px; }
+.fin-toast svg { width: 14px; height: 14px; }
 
-.sap-list { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6; }
-.sap-list li { margin-bottom: 3px; }
+.fin-list { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6; }
+.fin-list li { margin-bottom: 3px; }
 
 /* ---- dialog ---- */
-.sap-dlg__bd {
+.fin-dlg__bd {
   position: absolute; inset: 0; z-index: 5;
   background: rgba(0,0,0,.35);
   display: grid; place-items: center; padding: 24px;
 }
-.sap-dlg {
+.fin-dlg {
   width: 520px; max-width: 100%; max-height: 100%;
   display: flex; flex-direction: column;
-  background: var(--sap-base); border-radius: 12px;
+  background: var(--fin-base); border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0,0,0,.3);
   overflow: hidden;
 }
-.sap-dlg--wide { width: 720px; }
-.sap-dlg__h {
+.fin-dlg--wide { width: 720px; }
+.fin-dlg__h {
   display: flex; align-items: center; gap: 8px;
-  padding: 11px 14px; border-bottom: 1px solid var(--sap-line-2);
+  padding: 11px 14px; border-bottom: 1px solid var(--fin-line-2);
 }
-.sap-dlg__h b { font-size: 14px; font-weight: 700; flex: 1 1 auto; }
-.sap-dlg__h i { color: var(--sap-tx-2); }
-.sap-dlg__h svg { width: 14px; height: 14px; display: block; }
-.sap-dlg__b { padding: 14px; overflow: auto; }
-.sap-dlg__b .sap-strip:last-child { margin-bottom: 0; }
-.sap-dlg__f {
+.fin-dlg__h b { font-size: 14px; font-weight: 700; flex: 1 1 auto; }
+.fin-dlg__h i { color: var(--fin-tx-2); }
+.fin-dlg__h svg { width: 14px; height: 14px; display: block; }
+.fin-dlg__b { padding: 14px; overflow: auto; }
+.fin-dlg__b .fin-strip:last-child { margin-bottom: 0; }
+.fin-dlg__f {
   display: flex; justify-content: flex-end; gap: 8px;
-  padding: 10px 14px; border-top: 1px solid var(--sap-line-2);
+  padding: 10px 14px; border-top: 1px solid var(--fin-line-2);
   background: #fafbfc;
 }
 
 /* ---- danger tags, printed at the end of the isolation run ---- */
-.sap-tags { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
-.sap-tag {
+.fin-tags { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.fin-tag {
   width: 104px; padding: 7px 8px; border-radius: 6px;
-  background: #fff; border: 2px solid var(--sap-neg);
+  background: #fff; border: 2px solid var(--fin-neg);
   display: flex; flex-direction: column; gap: 1px; text-align: center;
 }
-.sap-tag b { font-size: 12px; font-weight: 800; color: var(--sap-neg); letter-spacing: .04em; }
-.sap-tag span { font-size: 8.5px; font-weight: 700; letter-spacing: .03em; }
-.sap-tag em { font-style: normal; font-size: 10px; font-weight: 700; margin-top: 3px; }
-.sap-tag small { font-size: 8.5px; color: var(--sap-tx-2); line-height: 1.25; }
+.fin-tag b { font-size: 12px; font-weight: 800; color: var(--fin-neg); letter-spacing: .04em; }
+.fin-tag span { font-size: 8.5px; font-weight: 700; letter-spacing: .03em; }
+.fin-tag em { font-style: normal; font-size: 10px; font-weight: 700; margin-top: 3px; }
+.fin-tag small { font-size: 8.5px; color: var(--fin-tx-2); line-height: 1.25; }
 
 /* ---------------------------------------------------------------
-   3a. Mine Control, prefix `mc-`
 
-   The dispatch console. Dark, dense and readable from three metres
-   away on a wall screen, because that is where it lives. Deliberately
-   generic: this is the shape the dispatch systems share, not a copy
-   of any one vendor's product. It re-declares the same custom
-   properties, so every sap- component above recolours itself.
---------------------------------------------------------------- */
-.mc {
-  --sap-base:   #161c24;
-  --sap-bg:     #0e1319;
-  --sap-tx:     #e8edf3;
-  --sap-tx-2:   #93a3b5;
-  --sap-line:   #26303c;
-  --sap-line-2: #1e2731;
-  --sap-brand:  #e0a11b;
-  --sap-neg:    #ff5a52;
-  --sap-pos:    #4ec27a;
-  --sap-crit:   #ffab3d;
-  --sap-info:   #59a5ff;
-  --sap-sel:    #1d2836;
+/* ---- the application funnel, shown across the top of an object ---- */
+.fin-flow {
+  display: flex; align-items: stretch; gap: 0;
+  background: var(--fin-base); border: 1px solid var(--fin-line);
+  border-radius: 10px; margin-bottom: 12px; overflow: hidden;
+}
+.fin-flow__s {
+  flex: 1 1 0; min-width: 0; padding: 8px 10px 8px 20px;
+  position: relative; border-right: 1px solid var(--fin-line-2);
+}
+.fin-flow__s:last-child { border-right: 0; }
+.fin-flow__s::before {
+  content: ""; position: absolute; left: 6px; top: 50%;
+  width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
+  background: var(--fin-line); border: 1px solid var(--fin-line);
+}
+.fin-flow__s label { display: block; font-size: 10px; color: var(--fin-tx-2); }
+.fin-flow__s b { display: block; font-size: 11.5px; font-weight: 600; }
+.fin-flow__s.is-done::before { background: var(--fin-pos); border-color: var(--fin-pos); }
+.fin-flow__s.is-now { background: var(--fin-sel); }
+.fin-flow__s.is-now::before { background: var(--fin-brand); border-color: var(--fin-brand); }
+.fin-flow__s.is-now b { color: var(--fin-brand); font-weight: 700; }
+.fin-flow__s.is-stop::before { background: var(--fin-neg); border-color: var(--fin-neg); }
+.fin-flow__s.is-stop b { color: var(--fin-neg); font-weight: 700; }
 
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  background: var(--sap-bg); color: var(--sap-tx);
-  font: 400 13px/1.45 "Segoe UI", system-ui, sans-serif;
-  overflow: hidden;
+/* ---- a gate: the conditions an action is allowed under, and whether
+        each one actually holds. The only component in this file whose
+        whole purpose is to show a refusal. ---- */
+.fin-gate { display: flex; flex-direction: column; }
+.fin-gate__r {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 9px 12px; border-bottom: 1px solid var(--fin-line-2);
 }
-.mc *, .mc *::before, .mc *::after { box-sizing: border-box; }
-.mc-sp { flex: 1 1 auto; }
-.mc-gh {
-  flex: 0 0 auto; height: 44px; display: flex; align-items: center; gap: 18px;
-  padding: 0 14px; background: #10161d; border-bottom: 1px solid var(--sap-line);
+.fin-gate__r:last-child { border-bottom: 0; }
+.fin-gate__m {
+  flex: 0 0 auto; width: 17px; height: 17px; border-radius: 50%;
+  display: grid; place-items: center; margin-top: 1px;
+  font-size: 11px; font-weight: 700; line-height: 1;
 }
-.mc-gh__logo { display: flex; align-items: center; gap: 8px; }
-.mc-gh__logo svg { width: 17px; height: 17px; color: var(--sap-brand); }
-.mc-gh__logo b { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
-.mc-gh__logo em { font-style: normal; font-size: 11px; color: var(--sap-tx-2); }
-.mc-gh__tabs { display: flex; align-items: stretch; gap: 16px; height: 100%; }
-.mc-tab {
-  display: flex; align-items: center; font-size: 12px; color: var(--sap-tx-2);
-  border-bottom: 3px solid transparent;
+.fin-gate__r.is-pass .fin-gate__m { background: #e7f4ed; color: var(--fin-pos); }
+.fin-gate__r.is-fail .fin-gate__m { background: #fceceb; color: var(--fin-neg); }
+.fin-gate__t { min-width: 0; }
+.fin-gate__t b { display: block; font-size: 12.5px; font-weight: 600; }
+.fin-gate__r.is-fail .fin-gate__t b { color: var(--fin-neg); }
+.fin-gate__t span { display: block; font-size: 11.5px; color: var(--fin-tx-2); line-height: 1.5; margin-top: 2px; }
+.fin-gate__t em {
+  display: block; font-style: normal; font-size: 10.5px; margin-top: 3px;
+  color: var(--fin-tx-2); font-weight: 600;
 }
-.mc-tab.is-active { color: var(--sap-brand); font-weight: 700; border-bottom-color: var(--sap-brand); }
-.mc-gh__shift { text-align: right; }
-.mc-gh__shift label { display: block; font-size: 10px; color: var(--sap-tx-2); }
-.mc-gh__shift b { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.mc-main { flex: 1 1 auto; overflow: auto; padding: 12px; position: relative; }
 
-/* the dark skin, applied to the shared components */
-.mc .sap-kpi, .mc .sap-card, .mc .sap-oh {
-  background: var(--sap-base); border-color: var(--sap-line);
+/* ---- an acknowledgement receipt. Every registry run ends in one, and
+        the reference number is the thing the person watching writes
+        down, so it is set in tabular figures and given room. ---- */
+.fin-ack {
+  border: 1px solid var(--fin-line); border-radius: 10px;
+  background: var(--fin-base); overflow: hidden;
 }
-.mc .sap-t th { background: #131a22; color: var(--sap-tx-2); border-bottom-color: var(--sap-line); }
-.mc .sap-t td { border-bottom-color: var(--sap-line-2); }
-.mc .sap-t tbody tr.is-sel { background: var(--sap-sel); }
-.mc .sap-t tbody tr.is-alert { background: #2a1a1c; }
-.mc .sap-t tbody tr.is-new { background: #16281e; }
-.mc .sap-in { background: #0f151c; border-color: var(--sap-line); border-bottom-color: #3a4756; color: var(--sap-tx); }
-.mc .sap-in.is-empty { color: #667889; }
-.mc .op-caret { background: var(--sap-tx); }
-.mc .sap-card__h { border-bottom-color: var(--sap-line-2); }
-.mc .sap-dlg { background: var(--sap-base); color: var(--sap-tx); }
-.mc .sap-dlg__f { background: #121820; border-top-color: var(--sap-line-2); }
-.mc .sap-dlg__h { border-bottom-color: var(--sap-line-2); }
-.mc .sap-btn { border-color: var(--sap-brand); color: var(--sap-brand); }
-.mc .sap-btn--emph { background: var(--sap-brand); color: #16202b; }
-.mc .sap-strip { background: #12212f; border-color: #23415c; color: #cfe2f5; }
-.mc .sap-strip--ok { background: #12251a; border-color: #235c37; color: #cdeed9; }
-.mc .sap-strip--warn { background: #2a2213; border-color: #5c4823; color: #f4e0bd; }
-.mc .sap-strip--err { background: #2a1517; border-color: #5f2528; color: #f6cfd0; }
+.fin-ack__h {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: #f0f8f4; border-bottom: 1px solid #cfe7db;
+  color: #14532d; font-size: 12.5px; font-weight: 700;
+}
+.fin-ack__h svg { width: 15px; height: 15px; }
+.fin-ack__b { padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+.fin-ack__f label { display: block; font-size: 10.5px; color: var(--fin-tx-2); }
+.fin-ack__f b { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.fin-ack__f.is-wide { grid-column: 1 / -1; }
+.fin-ack__f.is-wide b { font-size: 15px; }
+.fin-ack__f small { display: block; font-size: 10.5px; color: var(--fin-tx-2); }
 
-.mc-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
-.mc-unit { display: flex; flex-direction: column; }
-.mc-unit__row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 7px 12px; border-bottom: 1px solid var(--sap-line-2);
-}
-.mc-unit__row:last-child { border-bottom: 0; }
-.mc-unit__row label { flex: 0 0 132px; font-size: 11px; color: var(--sap-tx-2); }
-.mc-unit__row b { font-size: 12.5px; font-weight: 600; }
+/* ---- side by side: what we hold against what the other side holds ---- */
+.fin-diff { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fin-diff__col { padding: 10px 12px; border-radius: 9px; border: 1px solid var(--fin-line); background: var(--fin-base); }
+.fin-diff__col h5 { margin: 0 0 6px; font-size: 11.5px; font-weight: 700; }
+.fin-diff__col ul { margin: 0; padding-left: 16px; font-size: 11.5px; line-height: 1.55; }
+.fin-diff__col.is-bad { background: #fdecec; border-color: #f3bcbc; }
+.fin-diff__col.is-bad h5 { color: #7a1010; }
+.fin-diff__col.is-good { background: #ebf5ee; border-color: #b5ddc1; }
+.fin-diff__col.is-good h5 { color: #14532d; }
 
-.mc-lanes { display: flex; flex-direction: column; }
-.mc-lane { padding: 10px 12px; border-bottom: 1px solid var(--sap-line-2); }
-.mc-lane:last-child { border-bottom: 0; }
-.mc-lane.is-sel { background: var(--sap-sel); }
-.mc-lane__h { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.mc-lane__h b { font-size: 13px; font-weight: 700; }
-.mc-lane__h span { font-size: 11px; color: var(--sap-tx-2); flex: 1 1 auto; }
-.mc-lane__trucks { display: flex; flex-wrap: wrap; gap: 6px; }
-.mc-lane__trucks em {
-  font-style: normal; font-size: 11px; font-weight: 700;
-  padding: 4px 9px; border-radius: 6px;
-  background: #1f2a36; border: 1px solid var(--sap-line); color: var(--sap-tx);
+/* ---- label and value rows, for a record summary panel ---- */
+.fin-mini { display: flex; flex-direction: column; }
+.fin-mini__r {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 7px 12px; border-bottom: 1px solid var(--fin-line-2);
 }
-.mc-lane__trucks em.is-new { background: #16321f; border-color: #2f6b42; color: #8ee0aa; }
-.mc-lane__trucks em.is-down { background: #331a1c; border-color: #6b2f33; color: #ff9d97; text-decoration: line-through; }
-.mc-lane__trucks em.is-gone { opacity: .3; text-decoration: line-through; }
+.fin-mini__r:last-child { border-bottom: 0; }
+.fin-mini__r label { flex: 0 0 152px; font-size: 11px; color: var(--fin-tx-2); }
+.fin-mini__r b { font-size: 12.5px; font-weight: 600; min-width: 0; }
+.fin-mini__r b.is-neg { color: var(--fin-neg); }
+
+/* ---- a bar, for a margin or a cover ratio against its ceiling ---- */
+.fin-bar { display: flex; align-items: center; gap: 9px; }
+.fin-bar__t { flex: 1 1 auto; height: 7px; border-radius: 4px; background: var(--fin-line-2); position: relative; overflow: hidden; }
+.fin-bar__t i { display: block; height: 100%; background: var(--fin-brand); }
+.fin-bar__t.is-over i { background: var(--fin-neg); }
+.fin-bar__t u {
+  position: absolute; top: -2px; bottom: -2px; width: 2px;
+  background: var(--fin-tx-2); text-decoration: none;
+}
+.fin-bar b { flex: 0 0 auto; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ---------------------------------------------------------------
-   3b. Contractor Gateway, prefix `cg-`
-   A supplier-facing portal, so it is lighter and simpler than the
-   two systems above. Same components again.
+   3a. the lending platform
+
+   Four modules on one product: origination, servicing, collections
+   and co-lending. One global bar with a module switcher, because that
+   is how a suite tells you which of its modules you are standing in.
 --------------------------------------------------------------- */
-.cg {
-  --sap-brand:  #f97316;
-  --sap-bg:     #f7f7f8;
-  --sap-base:   #ffffff;
-  --sap-tx:     #1d2d3e;
-  --sap-tx-2:   #6b7a8b;
-  --sap-line:   #dcdfe3;
-  --sap-line-2: #eceef1;
-  --sap-neg:    #d20a0a;
-  --sap-pos:    #30914c;
-  --sap-crit:   #e76500;
-  --sap-info:   #0057d2;
-  --sap-sel:    #fff3e8;
+.fin[data-sys="platform"] .fin-gh { background: #0c3b37; border-bottom-color: #0a302d; color: #e8f2f0; }
+.fin-gh__logo { display: flex; align-items: center; gap: 7px; }
+.fin-gh__logo svg { width: 16px; height: 16px; }
+.fin-gh__logo b { font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; }
+.fin[data-sys="platform"] .fin-gh__home,
+.fin[data-sys="platform"] .fin-gh__title { color: #cfe3e0; }
+.fin[data-sys="platform"] .fin-gh__search {
+  background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.18); color: #b7d2ce;
+}
+.fin[data-sys="platform"] .fin-gh__tool { color: #cfe3e0; }
+.fin[data-sys="platform"] .fin-gh__me { background: #14b8a6; color: #06302c; }
+.fin-gh__mod {
+  display: flex; align-items: center; gap: 6px;
+  height: 24px; padding: 0 9px; border-radius: 6px;
+  background: rgba(255,255,255,.12); font-size: 11.5px; font-weight: 600;
+}
+.fin-gh__mod em { font-style: normal; opacity: .65; font-weight: 400; }
+.fin-gh__mod::after { content: "\25BE"; font-size: 9px; opacity: .7; }
 
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  background: var(--sap-bg); color: var(--sap-tx);
-  font: 400 13px/1.45 system-ui, "Segoe UI", sans-serif;
-  overflow: hidden;
-}
-.cg *, .cg *::before, .cg *::after { box-sizing: border-box; }
-.cg-gh {
-  flex: 0 0 auto; height: 46px; display: flex; align-items: center; gap: 20px;
-  padding: 0 14px; background: var(--sap-base); border-bottom: 1px solid var(--sap-line);
-}
-.cg-gh__logo { display: flex; align-items: center; gap: 8px; }
-.cg-gh__logo svg { width: 17px; height: 17px; color: var(--sap-brand); }
-.cg-gh__logo b { font-size: 14px; font-weight: 700; }
-.cg-gh__tabs { display: flex; align-items: stretch; gap: 16px; height: 100%; }
-.cg-tab {
-  display: flex; align-items: center; font-size: 12px; color: var(--sap-tx-2);
-  border-bottom: 3px solid transparent;
-}
-.cg-tab.is-active { color: var(--sap-brand); font-weight: 700; border-bottom-color: var(--sap-brand); }
-.cg-gh__me { font-size: 12px; font-weight: 600; color: var(--sap-tx-2); }
-.cg-main { flex: 1 1 auto; overflow: auto; padding: 12px; position: relative; }
-.cg .sap-btn { border-color: var(--sap-brand); color: var(--sap-brand); }
-.cg .sap-btn--emph { background: var(--sap-brand); color: #fff; }
-.cg .sap-t tbody tr.is-sel { background: var(--sap-sel); }
+/* ---------------------------------------------------------------
+   3b. the statutory registries
 
-/* the side-by-side that carries the whole contractor story */
-.cg-diff { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.cg-diff__col { padding: 10px 12px; border-radius: 9px; border: 1px solid var(--sap-line); }
-.cg-diff__col h5 { margin: 0 0 6px; font-size: 11.5px; font-weight: 700; }
-.cg-diff__col ul { margin: 0; padding-left: 16px; font-size: 11.5px; line-height: 1.55; }
-.cg-diff__col.is-bad { background: #fdecec; border-color: #f3bcbc; }
-.cg-diff__col.is-bad h5 { color: #7a1010; }
-.cg-diff__col.is-good { background: #ebf5ee; border-color: #b5ddc1; }
-.cg-diff__col.is-good h5 { color: #14532d; }
+   CKYCR and CERSAI are one operator; CIMS and CMS are the Reserve
+   Bank. Both families are filing portals rather than products: a thin
+   utility strip, a banded identity header, a breadcrumb, and a form.
+   Cooler, flatter and squarer than the platform, which is the whole
+   point — the change of scenery is the signal that the Operator has
+   left the company's own estate.
+
+   The identity mark is a plain lettered tile. No public authority's
+   emblem is drawn anywhere in this file: reproducing the State Emblem
+   is restricted under the State Emblem of India (Prohibition of
+   Improper Use) Act 2005, and a demonstration has no business doing
+   it. NBFC_FIDELITY.md records that decision.
+--------------------------------------------------------------- */
+.fin[data-sys="gov"] {
+  --fin-brand:  #1b4d89;
+  --fin-bg:     #eef1f5;
+  --fin-tx:     #182634;
+  --fin-tx-2:   #5c6b7c;
+  --fin-line:   #cdd6e0;
+  --fin-line-2: #e4e9ef;
+  --fin-sel:    #e6eef8;
+  font: 400 13px/1.5 "Segoe UI", Tahoma, Verdana, system-ui, sans-serif;
+}
+.fin[data-sys="gov"] .fin-card,
+.fin[data-sys="gov"] .fin-oh,
+.fin[data-sys="gov"] .fin-kpi,
+.fin[data-sys="gov"] .fin-ack { border-radius: 4px; }
+.fin[data-sys="gov"] .fin-btn { border-radius: 3px; }
+.fin[data-sys="gov"] .fin-in { border-radius: 3px; }
+
+.fin-util {
+  flex: 0 0 auto; height: 24px;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 14px; background: #12395f; color: #cfdcea;
+  font-size: 10.5px; letter-spacing: .01em;
+}
+.fin-util span { opacity: .85; }
+.fin-util .fin-sp { flex: 1 1 auto; }
+.fin-util em { font-style: normal; font-weight: 700; letter-spacing: .02em; }
+
+.fin-gh--gov { height: 52px; background: var(--fin-base); border-bottom: 3px solid var(--fin-brand); }
+.fin-gh__mark {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 4px;
+  display: grid; place-items: center;
+  background: var(--fin-brand); color: #fff;
+  font-size: 12px; font-weight: 800; letter-spacing: .03em;
+}
+.fin-gh__id { min-width: 0; }
+.fin-gh__id b { display: block; font-size: 14px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; }
+.fin-gh__id em { font-style: normal; font-size: 10.5px; color: var(--fin-tx-2); }
+.fin-gh__re { text-align: right; }
+.fin-gh__re label { display: block; font-size: 10px; color: var(--fin-tx-2); }
+.fin-gh__re b { font-size: 11.5px; font-weight: 700; }
+
+.fin-nav--gov { height: 32px; background: var(--fin-brand); border-bottom: 0; padding: 0 14px; }
+.fin-nav--gov .fin-nav__app { color: rgba(255,255,255,.75); border-right-color: rgba(255,255,255,.25); }
+.fin-nav--gov .fin-tab { color: rgba(255,255,255,.8); }
+.fin-nav--gov .fin-tab.is-active { color: #fff; border-bottom-color: #fff; font-weight: 700; }
+
+.fin-crumb {
+  flex: 0 0 auto;
+  padding: 6px 14px; background: #e2e8f0; border-bottom: 1px solid var(--fin-line);
+  font-size: 10.5px; color: var(--fin-tx-2);
+}
+.fin-crumb b { color: var(--fin-tx); font-weight: 600; }
