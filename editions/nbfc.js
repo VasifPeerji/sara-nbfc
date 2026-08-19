@@ -3364,6 +3364,20 @@ window.SARA_EDITION = {
         "Requests for access. A request from outside the matter team, including from senior management, is considered by the Head of Legal against whether the requester needs the advice to act. Where the answer is no, the request is declined and the Head of Legal offers a briefing on the position instead, which meets the need without risking the protection.",
     },
 
+    {
+      id: "RS-005", title: "Customer Information Extract: Individual Records", cat: "service", clearance: 2, scopes: ["custpii"],
+      owner: "Head of Customer Service", updated: "2026-07-24", rev: "6.2", system: "Customer Relationship",
+      tags: ["custpii", "customer information", "individual", "personal information", "extract", "restricted", "designated", "identification", "contact"],
+      body:
+        "Access to this extract is confined to the roles designated to handle individual customer information: the Risk Containment Unit, Central Operations, the Grievance Redressal Officer, the Principal Nodal Officer and the Principal Officer for financial crime. It holds identification numbers, contact details, addresses, bank particulars, family and reference details, and the correspondence held against named individuals.\n\n" +
+        "Why this is not a matter of seniority. The designation is the whole control. Handling individual customer information is a function, not a rank, and a person who does not need it to do their job does not become entitled to it by being promoted. A request from any level, including the board and the Managing Director, is declined unless the requester holds the designation. Declining it is not an obstruction; the information a senior person actually needs is almost always the aggregate, which is available to them in the ordinary reporting.\n\n" +
+        "What may be given out instead. Almost every legitimate question about a customer can be answered without their personal information: whether an account is in order, what a charge was for, what stage a complaint has reached, what the exposure is. Sara answers those from the operational documents and names the designated role to approach where the underlying record is genuinely needed. The pattern to follow is: answer the question, withhold the record.\n\n" +
+        "Purpose limitation. Information is used for the purpose it was collected for. Contact details taken for servicing a facility are not used for marketing another one. A field agency is given the minimum required to perform the visit, in writing, with the reason recorded, and nothing further. Where a customer has withdrawn consent for a purpose, the withdrawal is honoured in every system rather than in the one it was recorded in.\n\n" +
+        "Disclosure to third parties. Nothing is disclosed to a person other than the customer without the customer's consent or a lawful requirement. A relative, an employer, a guarantor or a co-applicant is not the customer. A guarantor is told what they are liable for and nothing about the borrower's other affairs. A request from an authority is routed to the Principal Officer and answered in writing against the specific power relied on.\n\n" +
+        "Retention and correction. Records are retained for the prescribed period after closure and no longer. A customer who tells us a detail is wrong has it corrected in the system of record and in every system fed from it, and is told when it has been done. A correction that is made in one place and not the others is how a regularised account is still reported as delinquent, which is the single most common complaint reaching the Ombudsman.\n\n" +
+        "Access logging. Every read of this extract is logged with the person, the record and the reason. The log is reviewed monthly by the Head of Customer Service, and a read without a matching case or complaint reference is raised as an incident. The control is the review, not the log: a log nobody reads is a record of what happened rather than a reason for it not to."
+    },
+
     /* ================= OPEN COUNTERPARTS TO THE RESTRICTED SET =================
        Every restricting scope needs a document at clearance 1 that explains the
        process without exposing the case, or the control becomes a dead end and
@@ -3381,6 +3395,22 @@ window.SARA_EDITION = {
         "If somebody asks you for information of this kind. Including somebody senior, and including somebody who seems entitled to it: refer them to the Company Secretary's office rather than deciding yourself. Being senior is not a legitimate purpose, and you are not expected to make that judgement.\n\n" +
         "Who to contact. The Company Secretary's office for anything on this page. You will not be penalised for raising something that turns out not to be price sensitive.",
     },
+    {
+      id: "SV-005", title: "Customer Information: What Every Employee Must Do", cat: "service", clearance: 1, scopes: ["policy", "service", "ops"],
+      owner: "Head of Customer Service", updated: "2026-07-24", rev: "2.1", system: "Policy Repository",
+      tags: ["custpii", "customer information", "personal information", "privacy", "consent", "purpose", "disclosure", "everybody", "who to ask"],
+      body:
+        "You will handle customer information every day. This document is for everybody and says what you must do with it. The extract holding individual records is restricted to the designated roles, and this page tells you how to get what you actually need without it.\n\n" +
+        "The rule in one line. Use what you were given for the reason you were given it, tell nobody who does not need it, and do not go looking for a record you have no case for.\n\n" +
+        "You almost never need the record. Nearly every real question can be answered without a customer's personal information: whether the account is in order, what a charge was for, what stage a complaint has reached, what is outstanding, what the next step is. Ask the question rather than asking for the file. Sara answers those from the operational documents, and where the underlying record is genuinely needed it names the role to approach.\n\n" +
+        "Who holds the designation. The Risk Containment Unit, Central Operations, the Grievance Redressal Officer, the Principal Nodal Officer and the Principal Officer for financial crime. It is a function and not a rank: a senior person who does not handle customer records does not hold it, and asking them to look something up for you is asking them to break the same rule.\n\n" +
+        "What you must not do. Do not use a contact detail taken for servicing to sell something. Do not tell a relative, an employer, a co-applicant or a guarantor anything about the borrower's other affairs; a guarantor is told what they are liable for and nothing more. Do not photograph a screen or a document. Do not send customer details over a personal channel. Do not give a field agency more than the visit requires.\n\n" +
+        "If somebody outside Anvira asks. A police officer, a government office, a lawyer, a bank: route it to the Principal Officer and say that is what you are doing. Do not confirm or deny that somebody is a customer. Confirming it is itself a disclosure, and it is the one people give away without noticing.\n\n" +
+        "If a customer tells you something is wrong. Get it corrected in the system of record, and check it has flowed through to the others. A correction made in one place and not the rest is how an account that was regularised is still reported as delinquent months later, which is the single most common complaint that reaches the Ombudsman against lenders.\n\n" +
+        "If you see something. A record open on an unattended screen, a spreadsheet of customer details in a chat, a request that feels wrong: raise it. Nobody has ever been penalised here for raising one of these and being wrong about it.\n\n" +
+        "Who to contact. Your Grievance Redressal Officer for anything a customer has asked, the Principal Officer for anything an authority has asked, and the Head of Customer Service for anything on this page."
+    },
+
     {
       id: "LG-001", title: "Receiving a Legal Notice or Court Process", cat: "legal", clearance: 1, scopes: ["legal", "ops", "service"],
       owner: "Head of Legal", updated: "2026-07-08", rev: "3.1", system: "Policy Repository",

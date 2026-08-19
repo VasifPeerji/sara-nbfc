@@ -109,6 +109,14 @@ H.section("Every restriction has a route");
 
 RESTRICTING.forEach((s) => {
   const restricted = Config.kb.filter((d) => (d.scopes || []).indexOf(s) >= 0);
+  /* A restricting scope with nothing behind it is worse than no scope at
+     all: it is named in the settings panel, it is held by real roles, and
+     it restricts nothing. `custpii` sat like that for a while, because the
+     check below returned early when there was no material and therefore
+     said nothing. Assert the material exists BEFORE asking whether there
+     is a route to it. */
+  H.ok(restricted.length > 0,
+       `${s} is a declared restriction with no document carrying it, so it restricts nothing`);
   if (!restricted.length) return;
   const open = Config.kb.filter((d) =>
     d.clearance === 1 &&
