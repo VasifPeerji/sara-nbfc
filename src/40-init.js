@@ -34,6 +34,10 @@
 
   function bindGlobal(){
     document.addEventListener("click", function(e){
+      /* The click that opened a floater is still on its way up to here.
+         Closing on it would shut the thing it just opened, which is what
+         made the download button look inert. */
+      if(floaterJustOpened()) return;
       if(e.target.closest && (e.target.closest(".menu") || e.target.closest(".pop"))) return;
       closeFloaters();
     });
@@ -100,6 +104,19 @@
     if(Panel.isSideOverlay()) document.getElementById("app").classList.add("side-off");
     if(Panel.isPanelOverlay()) Panel.close();
     Panel.syncOverlayScrim();
+    /* and again whenever the window changes, because the stylesheet's
+       breakpoints keep applying and the pane state has to keep up with
+       them. Coalesced into a frame: a drag-resize fires this by the
+       hundred and the work is a class toggle either way. */
+    Panel.syncBreakpoints();
+    let resizeFrame = 0;
+    window.addEventListener("resize", function(){
+      if(resizeFrame) return;
+      resizeFrame = requestAnimationFrame(function(){
+        resizeFrame = 0;
+        Panel.syncBreakpoints();
+      });
+    });
     Settings.applyModelChip();
 
     bindKeys();

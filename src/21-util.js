@@ -195,6 +195,33 @@ function closeFloaters(){
   $$(".convo-more.open").forEach(n => n.classList.remove("open"));
 }
 /* Position a floating layer inside the viewport near an anchor point. */
+/* A floater is almost always opened BY a click, and that click is still
+   travelling when the floater appears. It carries on up to the document
+   handler in 40-init.js, whose job is to close any open floater when you
+   click away from one, and that handler cannot tell "you clicked away"
+   from "you just opened this". So it closed the menu inside the same
+   event that created it, and the button read as doing nothing at all.
+
+   Four of the five openers happened to hide the problem by calling
+   stopPropagation on an event they were handed. The fifth, the download
+   button, is invoked as `Panel.download()` with no event to stop, so it
+   was broken in every build.
+
+   Stopping propagation at each call site is the wrong fix twice over: it
+   has to be remembered every time, and it cannot be done at all when the
+   floater is opened from a keyboard shortcut or the command palette. So
+   the flag is set here, where a floater is actually created, and read
+   once by that handler.
+
+   It clears on the next turn as well as on the next click, so a floater
+   opened without a click does not go on to swallow an unrelated one. */
+let FLOATER_FRESH = false;
+function floaterJustOpened(){
+  if(!FLOATER_FRESH) return false;
+  FLOATER_FRESH = false;
+  return true;
+}
+
 function placeFloater(node, x, y){
   document.body.appendChild(node);
   const r = node.getBoundingClientRect();
@@ -204,4 +231,6 @@ function placeFloater(node, x, y){
   if(top + r.height > window.innerHeight - pad) top = Math.max(pad, y - r.height);
   node.style.left = Math.max(pad, left) + "px";
   node.style.top  = Math.max(pad, top) + "px";
+  FLOATER_FRESH = true;
+  setTimeout(function(){ FLOATER_FRESH = false; }, 0);
 }
