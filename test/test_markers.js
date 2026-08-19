@@ -6,7 +6,7 @@
    Run:  node test/test_markers.js [edition]
 */
 const H = require("./harness");
-const edition = process.argv[2] || "base";
+const edition = process.argv[2] || "nbfc";
 H.loadEdition(edition);
 H.loadSrc();
 

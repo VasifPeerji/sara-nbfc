@@ -15,7 +15,7 @@ const H = require("./harness");
 const fs = require("fs");
 const path = require("path");
 
-const edition = process.argv[2] || "base";
+const edition = process.argv[2] || "nbfc";
 H.loadEdition(edition);
 H.loadSrc();
 
